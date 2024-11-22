@@ -3,4 +3,7 @@ project(asncpp)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(asncpp main.cpp)
+add_executable(asncpp main.cpp
+        asn1/base.h
+        types/integer.cpp
+        types/integer.h)
