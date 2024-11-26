@@ -2,6 +2,7 @@
 #include <vector>
 #include <numeric>
 #include "types/integer.h"
+#include "types/object_identifier.h"
 
 //TODO: Endianess check
 //TODO: Tag check
@@ -31,8 +32,8 @@ inline std::ostream &operator<<(std::ostream &os, asn1_tag tag) {
         case asn1_tag::Null:
             os << "Null";
             break;
-        case asn1_tag::ObjectIdentifier:
-            os << "ObjectIdentifier";
+        case asn1_tag::OBJECT_IDENTIFIER:
+            os << "OBJECT_IDENTIFIER";
             break;
         case asn1_tag::ObjectDescriptor:
             os << "ObjectDescriptor";
@@ -144,7 +145,144 @@ inline std::ostream &operator<<(std::ostream &os, asn1_tag tag) {
 //}
 
 
+
+//IEEE-754 binary64 format
+inline std::vector<uint8_t> mantissa_bits(double mantissa) {
+    // Умножаем мантиссу на 2^53 и отбрасываем дробную часть
+    auto bits = static_cast<uint64_t>(mantissa * (1ULL << 53));
+    std::vector<uint8_t> result(8, 0);// Массив для результата (53 бита (56))
+
+    for (int i = 7; i >= 0; --i) {
+        result[i] = static_cast<uint8_t>(bits & 0xFF); // Извлекаем младший байт
+        bits >>= 8;                                   // Сдвигаем число вправо
+    }
+
+    return result; // Возвращаем big-endian представление
+}
+
+
+std::vector<uint8_t> removeLeadingZeros(const std::vector<uint8_t> &bytes) {
+    size_t startIndex = 0;
+
+    // Найдём первый ненулевой байт
+    while (startIndex < bytes.size() && bytes[startIndex] == 0x00) {
+        startIndex++;
+    }
+
+    // Если всё число состоит из нулей, возвращаем один нулевой байт
+    if (startIndex == bytes.size()) {
+        return {0x00};
+    }
+
+    // Возвращаем массив без ведущих нулей
+    return std::vector<uint8_t>(bytes.begin() + startIndex, bytes.end());
+}
+
+std::vector<uint8_t> minimizeMantissa(const std::vector<uint8_t> &bytes) {
+    size_t startIndex = 0;
+    size_t endIndex = bytes.size();
+
+    // Удаляем ведущие нули
+    while (startIndex < bytes.size() && bytes[startIndex] == 0x00) {
+        startIndex++;
+    }
+
+    // Удаляем хвостовые нули
+    while (endIndex > startIndex && bytes[endIndex - 1] == 0x00) {
+        endIndex--;
+    }
+
+    // Возвращаем минимизированный массив
+    return std::vector<uint8_t>(bytes.begin() + startIndex, bytes.begin() + endIndex);
+}
+
+
+double decodeReal(const uint8_t *data, size_t length) {
+    if (length == 0) {
+        return 0.0; // Ноль представляется пустым содержимым
+    }
+
+    // Разбираем флаги
+    uint8_t flags = data[0];
+    bool isNegative = (flags & 0x20) != 0;
+    uint8_t baseFlag = (flags & 0xC0) >> 6;
+    uint8_t exponentLength = flags & 0x1F;
+
+    // Определяем основание
+    int base = 2; // Основание по умолчанию
+    if (baseFlag == 1) {
+        base = 8;
+    } else if (baseFlag == 2) {
+        base = 16;
+    }
+
+    // Извлекаем экспоненту
+    int exponent = 0;
+    size_t index = 1; // Индекс после флагов
+    for (size_t i = 0; i < exponentLength; ++i) {
+        exponent = (exponent << 8) | data[index++];
+    }
+
+    // Учёт знака экспоненты (если используется дополнение до двух)
+    if (exponent & (1 << ((exponentLength * 8) - 1))) {
+        exponent -= (1 << (exponentLength * 8));
+    }
+
+    // Извлекаем мантиссу
+    uint64_t mantissa = 0;
+    for (; index < length; ++index) {
+        mantissa = (mantissa << 8) | data[index];
+    }
+
+    // Восстанавливаем вещественное число
+    double result = static_cast<double>(mantissa) * std::pow(base, exponent);
+    if (isNegative) {
+        result = -result;
+    }
+
+    return result;
+}
+
 int main() {
+    std::vector<uint32_t> data = {1, 2, 840, 113549};
+    std::vector<uint8_t> result;
+
+    if (data.size() >= 2) {
+        result.push_back(40 * data[0] + data[1]);
+    }
+
+    // Кодируем остальные идентификаторы (c, d, ...)
+    for (size_t i = 2; i < data.size(); ++i) {
+        uint32_t value = data[i];
+        std::vector<uint8_t> temp;
+
+        // Кодируем value в base-128
+        do {
+            temp.insert(temp.begin(), static_cast<uint8_t>(value & 0x7F));
+            value >>= 7;
+        } while (value > 0);
+
+        // Устанавливаем MSB для всех байтов, кроме последнего
+        for (size_t j = 0; j < temp.size() - 1; ++j) {
+            temp[j] |= 0x80;
+        }
+
+        // Добавляем закодированное значение в результат
+        result.insert(result.end(), temp.begin(), temp.end());
+    }
+
+
+    for (const auto byte: result) {
+        std::cout << std::hex << static_cast<uint32_t>(byte) << ' ';
+    }
+
+    const uint8_t data1[] = {
+            0x06, 0x06, 0x2A ,0x86, 0x48, 0x86, 0xF7, 0x0D
+    };
+    object_identifier_t oid;
+    oid.decode(data1);
+    std::cout << oid.to_string() << std::endl;
+    return 0;
 //    const uint8_t buffer[] = {0x1F, 0x81, 0x2A, 0x82, 0x01, 0x2C}; // Длинный тег: 0x12A
 //    asn1_block block(buffer);
 //    std::cout << "Type: " << block.get_type() << std::endl;
