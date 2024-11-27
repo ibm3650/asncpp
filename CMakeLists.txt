@@ -8,4 +8,8 @@ add_executable(asncpp main.cpp
         types/integer.cpp
         types/integer.h
         types/boolean.h
-        types/object_identifier.h)
+        types/object_identifier.h
+        types/enumerated.h
+        types/relative_oid.h
+        types/octet_string.h
+        types/null.h)

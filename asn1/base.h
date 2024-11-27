@@ -9,19 +9,20 @@
 
 
 enum class asn1_tag : uint8_t {
-    Reserved = 0x00, //+
+    Reserved = 0x00,
     BOOLEAN = 0x01, //+
     INTEGER = 0x02, //+
     BitString = 0x03,
-    OCTET_STRING = 0x04,
-    Null = 0x05,
-    OBJECT_IDENTIFIER = 0x06,
+    OCTET_STRING = 0x04, //+ !CONSTRUCTED
+    Null = 0x05, //+
+    OBJECT_IDENTIFIER = 0x06, //+
     ObjectDescriptor = 0x07,
     External = 0x08,
     Real = 0x09,
-    Enumerated = 0x0A,
+    ENUMERATED = 0x0A, //+
     EmbeddedPDV = 0x0B,
     UTF8String = 0x0C,
+    RELATIVE_OID = 0x0D, //+
     Sequence = 0x10,
     Set = 0x11,
     NumericString = 0x12,

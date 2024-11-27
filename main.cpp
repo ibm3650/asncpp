@@ -1,8 +1,11 @@
 #include <iostream>
 #include <vector>
 #include <numeric>
+#include <iomanip>
 #include "types/integer.h"
 #include "types/object_identifier.h"
+#include "types/enumerated.h"
+#include "types/relative_oid.h"
 
 //TODO: Endianess check
 //TODO: Tag check
@@ -11,6 +14,8 @@
 //TODO: Add support for large numbers
 //DER encoding
 //https://www.itu.int/ITU-T/studygroups/com17/languages/X.690-0207.pdf
+
+
 
 inline std::ostream &operator<<(std::ostream &os, asn1_tag tag) {
     switch (tag) {
@@ -44,8 +49,8 @@ inline std::ostream &operator<<(std::ostream &os, asn1_tag tag) {
         case asn1_tag::Real:
             os << "Real";
             break;
-        case asn1_tag::Enumerated:
-            os << "Enumerated";
+        case asn1_tag::ENUMERATED:
+            os << "ENUMERATED";
             break;
         case asn1_tag::EmbeddedPDV:
             os << "EmbeddedPDV";
@@ -242,8 +247,70 @@ double decodeReal(const uint8_t *data, size_t length) {
 
     return result;
 }
+std::vector<uint8_t> encodeBase128(uint32_t value) {
+    std::vector<uint8_t> result;
+
+    do {
+        uint8_t byte = value & 0x7F; // Младшие 7 бит
+        value >>= 7;
+
+        if (!result.empty()) {
+            byte |= 0x80; // Устанавливаем старший бит для продолжения
+        }
+
+        result.insert(result.begin(), byte);
+    } while (value > 0);
+
+    return result;
+}
+
+std::vector<uint8_t> encodeRelativeOid(const std::vector<uint32_t>& values) {
+    std::vector<uint8_t> result;
+
+    // Добавляем тег
+    result.push_back(0x0D);
+
+    // Кодируем значения
+    std::vector<uint8_t> encodedValues;
+    for (uint32_t value : values) {
+        auto encoded = encodeBase128(value);
+        encodedValues.insert(encodedValues.end(), encoded.begin(), encoded.end());
+    }
+
+    // Добавляем длину
+    result.push_back(static_cast<uint8_t>(encodedValues.size()));
+
+    // Добавляем закодированные значения
+    result.insert(result.end(), encodedValues.begin(), encodedValues.end());
+
+    return result;
+}
 
 int main() {
+    std::vector<uint32_t> relativeOid = {123, 456};
+
+    auto encoded2 = encodeRelativeOid(relativeOid);
+
+    std::cout << "Encoded RELATIVE-OID: ";
+    for (uint8_t byte : encoded2) {
+        std::cout << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(byte) << " ";
+    }
+    std::cout << std::endl;
+    const uint8_t values[] = {0x0a ,0x02 ,0x01 ,0x00};
+    const uint8_t values1[] = {0x0D, 0x03, 0x7B, 0x83, 0x48};
+    relative_identifier_t relative_oid;
+    relative_oid.decode(values1);
+    std::cout << relative_oid.to_string() << std::endl;
+    enumerated_t enumerated;
+    enumerated.decode(values);
+    std::cout << static_cast<uintmax_t>(enumerated) << std::endl;
+    std::cout << enumerated.to_string() << std::endl;
+
+
+
+
+    const int mask = static_cast<int>(-1) << (8 * 2);
+    std::cout << std::hex << mask << std::endl;
     std::vector<uint32_t> data = {1, 2, 840, 113549};
     std::vector<uint8_t> result;
 
@@ -277,7 +344,7 @@ int main() {
     }
 
     const uint8_t data1[] = {
-            0x06, 0x06, 0x2A ,0x86, 0x48, 0x86, 0xF7, 0x0D
+            0x06, 0x06, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D
     };
     object_identifier_t oid;
     oid.decode(data1);

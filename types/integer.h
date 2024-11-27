@@ -34,8 +34,11 @@ public:
             this->_value = (this->_value << 8) | raw.get_data()[i];
         }
 
+
         // Проверяем знак
         if (raw.get_data()[0] & 0x80) { // Отрицательное число
+            //Для того, чтобы, 16-ти битное число, корректно отображалось в 32-х битном числе,
+            //При учете, что оно отрицательное, необходимо установить все биты в 1, кроме 16-ти младших
             const T mask = static_cast<T>(-1) << (8 * raw.get_length());
             this->_value |= mask;
         }
@@ -49,6 +52,7 @@ public:
         std::vector<uint8_t> output;
         T temp = this->_value;
 
+        //Число уже хранится в формате дополнения до двух, нет необходимости в дополнительном кодировании
         // Кодирование значения в big-endian формате
         do {
             output.insert(output.begin(), static_cast<uint8_t>(temp & 0xFF));

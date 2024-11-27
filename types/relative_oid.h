@@ -1,32 +1,28 @@
 //
-// Created by kandu on 26.11.2024.
+// Created by kandu on 27.11.2024.
 //
 
-#ifndef ASNCPP_OBJECT_IDENTIFIER_H
-#define ASNCPP_OBJECT_IDENTIFIER_H
+#ifndef ASNCPP_RELATIVE_OID_H
+#define ASNCPP_RELATIVE_OID_H
 
 #include <string>
 #include <stdexcept>
 #include "../asn1/base.h"
 
-class object_identifier_t
-        : public asn1_type<std::vector<uint32_t>, static_cast<uintmax_t>(asn1_tag::OBJECT_IDENTIFIER)> {
+class relative_identifier_t
+        : public asn1_type<std::vector<uint32_t>, static_cast<uintmax_t>(asn1_tag::RELATIVE_OID)> {
 public:
-    explicit object_identifier_t() = default;
+    explicit relative_identifier_t() = default;
 
-    explicit object_identifier_t(const std::vector<uint32_t> &data) {
+    explicit relative_identifier_t(const std::vector<uint32_t> &data) {
         this->_value = data;
     }
 
     [[nodiscard]] std::vector<uint8_t> encode() const override {
         std::vector<uint8_t> result;
 
-        if (_value.size() >= 2) {
-            result.push_back(40 * _value[0] + _value[1]);
-        }
-
         // Кодируем остальные идентификаторы (c, d, ...)
-        for (size_t i = 2; i < _value.size(); ++i) {
+        for (size_t i = 0; i < _value.size(); ++i) {
             uint32_t value = _value[i];
             std::vector<uint8_t> temp;
 
@@ -45,12 +41,12 @@ public:
             result.insert(result.end(), temp.begin(), temp.end());
         }
         result.insert(result.begin(), result.size());
-        result.insert(result.begin(), static_cast<uint8_t>(asn1_tag::OBJECT_IDENTIFIER));
+        result.insert(result.begin(), static_cast<uint8_t>(asn1_tag::RELATIVE_OID));
         return result;
     }
 
     [[nodiscard]] std::string to_string() const override {
-        std::string result = "OBJECT IDENTIFIER: ";
+        std::string result = "RELATIVE OID: ";
         for (size_t i = 0; i < _value.size(); ++i) {
             result += std::to_string(_value[i]);
             if (i != _value.size() - 1) {
@@ -64,14 +60,12 @@ public:
         const asn1_block raw = asn1_block(buffer);
 
         if (raw.get_length() < 1) {
-            throw std::runtime_error("Invalid length for OBJECT IDENTIFIER value");
+            throw std::runtime_error("Invalid length for RELATIVE OID value");
         }
 
         std::vector<uint32_t> result;
-        result.push_back(raw.get_data()[0] / 40);
-        result.push_back(raw.get_data()[0] % 40);
         uint32_t value = 0;
-        for (size_t i = 1; i < raw.get_length(); ++i) {
+        for (size_t i = 0; i < raw.get_length(); ++i) {
             if (raw.get_data()[i] & 0x80) {
                 value = (value << 7) | (raw.get_data()[i] & 0x7F);
             } else {
@@ -82,10 +76,10 @@ public:
         }
 
         if (result.size() < 2) {
-            throw std::runtime_error("Invalid OBJECT IDENTIFIER value");
+            throw std::runtime_error("Invalid RELATIVE OID value");
         }
         this->_value = result;
     }
 };
 
-#endif //ASNCPP_OBJECT_IDENTIFIER_H
+#endif //ASNCPP_RELATIVE_OID_H
