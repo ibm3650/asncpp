@@ -6,6 +6,7 @@
 #include "types/object_identifier.h"
 #include "types/enumerated.h"
 #include "types/relative_oid.h"
+#include "types/bit_string.h"
 
 //TODO: Endianess check
 //TODO: Tag check
@@ -28,8 +29,8 @@ inline std::ostream &operator<<(std::ostream &os, asn1_tag tag) {
         case asn1_tag::INTEGER:
             os << "INTEGER";
             break;
-        case asn1_tag::BitString:
-            os << "BitString";
+        case asn1_tag::BIT_STRING:
+            os << "BIT_STRING";
             break;
         case asn1_tag::OCTET_STRING:
             os << "OCTET_STRING";
@@ -40,8 +41,8 @@ inline std::ostream &operator<<(std::ostream &os, asn1_tag tag) {
         case asn1_tag::OBJECT_IDENTIFIER:
             os << "OBJECT_IDENTIFIER";
             break;
-        case asn1_tag::ObjectDescriptor:
-            os << "ObjectDescriptor";
+        case asn1_tag::OBJECT_DE:
+            os << "OBJECT_DE";
             break;
         case asn1_tag::External:
             os << "External";
@@ -286,7 +287,40 @@ std::vector<uint8_t> encodeRelativeOid(const std::vector<uint32_t>& values) {
     return result;
 }
 
+
+
+//
+//
+//class Parent {
+//public:
+//    virtual void say() { // Виртуальный метод
+//        std::cout << "Parent says hello!" << std::endl;
+//    }
+//};
+//
+//class Child : public Parent {
+//public:
+//    void say() override { // Переопределяем метод
+//        std::cout << "Child says hello!" << std::endl;
+//    }
+//};
+//
+//int main() {
+//    Parent* pParent = new Child();
+//
+//    // Вызов переопределённого метода через виртуальный механизм
+//    pParent->say(); // Вызовет Child::say
+//
+//    // Явный вызов Parent::say
+//    static_cast<Parent*>(pParent)->Parent::say();
+//
+//    delete pParent;
+//    return 0;
+//}
 int main() {
+    //const auto d = "\uD800\uDF48"
+    bit_string_t bit_string(8564743, 24);
+    std::cout << bit_string.to_string() << std::endl;
     std::vector<uint32_t> relativeOid = {123, 456};
 
     auto encoded2 = encodeRelativeOid(relativeOid);

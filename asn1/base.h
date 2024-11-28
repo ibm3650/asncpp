@@ -12,11 +12,11 @@ enum class asn1_tag : uint8_t {
     Reserved = 0x00,
     BOOLEAN = 0x01, //+
     INTEGER = 0x02, //+
-    BitString = 0x03,
-    OCTET_STRING = 0x04, //+ !CONSTRUCTED
+    BIT_STRING = 0x03, //+-
+    OCTET_STRING = 0x04, //+
     Null = 0x05, //+
     OBJECT_IDENTIFIER = 0x06, //+
-    ObjectDescriptor = 0x07,
+    OBJECT_DESCRIPTOR = 0x07, //+
     External = 0x08,
     Real = 0x09,
     ENUMERATED = 0x0A, //+
@@ -183,6 +183,7 @@ public:
 
 protected:
     T _value{};
+    std::vector<uint8_t> _buffer;
 };
 
 

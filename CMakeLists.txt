@@ -12,4 +12,6 @@ add_executable(asncpp main.cpp
         types/enumerated.h
         types/relative_oid.h
         types/octet_string.h
-        types/null.h)
+        types/null.h
+        types/bit_string.h
+        types/object_descriptor.h)
