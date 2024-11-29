@@ -56,8 +56,8 @@ inline std::ostream &operator<<(std::ostream &os, asn1_tag tag) {
         case asn1_tag::EmbeddedPDV:
             os << "EmbeddedPDV";
             break;
-        case asn1_tag::UTF8String:
-            os << "UTF8String";
+        case asn1_tag::UTF8_STRING:
+            os << "UTF8_STRING";
             break;
         case asn1_tag::Sequence:
             os << "Sequence";
@@ -65,11 +65,11 @@ inline std::ostream &operator<<(std::ostream &os, asn1_tag tag) {
         case asn1_tag::Set:
             os << "Set";
             break;
-        case asn1_tag::NumericString:
-            os << "NumericString";
+        case asn1_tag::NUMERIC_STRING:
+            os << "NUMERIC_STRING";
             break;
-        case asn1_tag::PrintableString:
-            os << "PrintableString";
+        case asn1_tag::PRINTABLE_STRING:
+            os << "PRINTABLE_STRING";
             break;
         case asn1_tag::T61String:
             os << "T61String";
@@ -97,7 +97,7 @@ inline std::ostream &operator<<(std::ostream &os, asn1_tag tag) {
             break;
         case asn1_tag::UniversalString:
             break;
-        case asn1_tag::BMPString:
+        case asn1_tag::BMP_STRING:
             break;
     }
     return os;
@@ -318,7 +318,7 @@ std::vector<uint8_t> encodeRelativeOid(const std::vector<uint32_t>& values) {
 //    return 0;
 //}
 int main() {
-    //const auto d = "\uD800\uDF48"
+    const auto d = u8"\uD800\uDF48"
     bit_string_t bit_string(8564743, 24);
     std::cout << bit_string.to_string() << std::endl;
     std::vector<uint32_t> relativeOid = {123, 456};

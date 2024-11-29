@@ -21,12 +21,12 @@ enum class asn1_tag : uint8_t {
     Real = 0x09,
     ENUMERATED = 0x0A, //+
     EmbeddedPDV = 0x0B,
-    UTF8String = 0x0C,
+    UTF8_STRING = 0x0C, //+
     RELATIVE_OID = 0x0D, //+
     Sequence = 0x10,
     Set = 0x11,
-    NumericString = 0x12,
-    PrintableString = 0x13,
+    NUMERIC_STRING = 0x12, //+
+    PRINTABLE_STRING = 0x13, //+
     T61String = 0x14,
     VideotexString = 0x15,
     IA5String = 0x16,
@@ -36,7 +36,7 @@ enum class asn1_tag : uint8_t {
     VisibleString = 0x1A,
     GeneralString = 0x1B,
     UniversalString = 0x1C,
-    BMPString = 0x1E
+    BMP_STRING = 0x1E //+
 };
 
 enum class asn1_class : uint8_t {
@@ -160,6 +160,8 @@ public:
     [[nodiscard]] virtual std::vector<uint8_t> encode() const = 0;
 
     [[nodiscard]] virtual std::string to_string() const = 0;
+
+
 //
 //    [[nodiscard]] virtual T get_value() const {
 //        return _value;
