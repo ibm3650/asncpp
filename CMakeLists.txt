@@ -18,4 +18,7 @@ add_executable(asncpp main.cpp
         types/utf_string.h
         types/numeric_string.h
         types/printable_string.h
-        types/bmp_string.h)
+        types/bmp_string.h
+        types/visible_string.h
+        types/ia5_string.h
+        types/universal_string.h)

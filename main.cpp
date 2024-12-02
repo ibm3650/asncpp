@@ -41,7 +41,7 @@ inline std::ostream &operator<<(std::ostream &os, asn1_tag tag) {
         case asn1_tag::OBJECT_IDENTIFIER:
             os << "OBJECT_IDENTIFIER";
             break;
-        case asn1_tag::OBJECT_DE:
+        case asn1_tag::OBJECT_DESCRIPTOR:
             os << "OBJECT_DE";
             break;
         case asn1_tag::External:
@@ -71,14 +71,14 @@ inline std::ostream &operator<<(std::ostream &os, asn1_tag tag) {
         case asn1_tag::PRINTABLE_STRING:
             os << "PRINTABLE_STRING";
             break;
-        case asn1_tag::T61String:
+        case asn1_tag::T61_STRING:
             os << "T61String";
             break;
-        case asn1_tag::VideotexString:
+        case asn1_tag::VIDEOTEX_STRING:
             os << "VideotexString";
             break;
-        case asn1_tag::IA5String:
-            os << "IA5String";
+        case asn1_tag::IA5_STRING:
+            os << "IA5_STRING";
             break;
         case asn1_tag::UTCTime:
             os << "UTCTime";
@@ -86,16 +86,16 @@ inline std::ostream &operator<<(std::ostream &os, asn1_tag tag) {
         case asn1_tag::GeneralizedTime:
             os << "GeneralizedTime";
             break;
-        case asn1_tag::GraphicString:
-            os << "GraphicString";
+        case asn1_tag::GRAPHIC_STRING:
+            os << "GRA";
             break;
-        case asn1_tag::VisibleString:
-            os << "VisibleString";
+        case asn1_tag::VISIBLE_STRING:
+            os << "VISIBLE_STRING";
             break;
-        case asn1_tag::GeneralString:
+        case asn1_tag::GENERAL_STRING:
             os << "GeneralString";
             break;
-        case asn1_tag::UniversalString:
+        case asn1_tag::UNIVERSAL_STRING:
             break;
         case asn1_tag::BMP_STRING:
             break;
@@ -248,6 +248,7 @@ double decodeReal(const uint8_t *data, size_t length) {
 
     return result;
 }
+
 std::vector<uint8_t> encodeBase128(uint32_t value) {
     std::vector<uint8_t> result;
 
@@ -265,7 +266,7 @@ std::vector<uint8_t> encodeBase128(uint32_t value) {
     return result;
 }
 
-std::vector<uint8_t> encodeRelativeOid(const std::vector<uint32_t>& values) {
+std::vector<uint8_t> encodeRelativeOid(const std::vector<uint32_t> &values) {
     std::vector<uint8_t> result;
 
     // Добавляем тег
@@ -273,7 +274,7 @@ std::vector<uint8_t> encodeRelativeOid(const std::vector<uint32_t>& values) {
 
     // Кодируем значения
     std::vector<uint8_t> encodedValues;
-    for (uint32_t value : values) {
+    for (uint32_t value: values) {
         auto encoded = encodeBase128(value);
         encodedValues.insert(encodedValues.end(), encoded.begin(), encoded.end());
     }
@@ -286,7 +287,6 @@ std::vector<uint8_t> encodeRelativeOid(const std::vector<uint32_t>& values) {
 
     return result;
 }
-
 
 
 //
@@ -317,8 +317,54 @@ std::vector<uint8_t> encodeRelativeOid(const std::vector<uint32_t>& values) {
 //    delete pParent;
 //    return 0;
 //}
+
+std::string generalized(std::tm datetime, int8_t timezone = 0){
+    constexpr size_t buffer_size = std::size("YYYYMMDDHHMMSS.000+HHMM");
+    char buffer[buffer_size];
+    std::strftime(buffer,
+                  buffer_size,
+                  "%Y%m%d%H%M%S.000",
+                  &datetime);
+    if (timezone == 0) {
+        return std::string(buffer) + "Z";
+    }
+
+    sprintf(buffer + 15, "%+03d00", timezone);
+    return std::string(buffer);
+}
+
 int main() {
-    const auto d = u8"\uD800\uDF48"
+    // Example of the very popular RFC 3339 format UTC time
+    std::time_t time = std::time({});
+    std::timespec ts;
+    std::timespec_get(&ts, TIME_UTC);
+    char timeString[std::size("yyyy-mm-ddThh:mm:ssZ")+ 100];
+    std::strftime(std::data(timeString),
+                  std::size(timeString),
+                  "%Y %m %d %H %M %S",
+                  std::gmtime(&ts.tv_sec));
+    std::cout << generalized(*std::gmtime(&ts.tv_sec)) << '\n'
+            << "Raw timespec.tv_nsec: " << (ts.tv_nsec % 1000000) / 1000 << '\n';
+
+
+    struct tm tt = {0};
+    double seconds;
+    if (sscanf(generalized(*std::gmtime(&ts.tv_sec)).c_str(), "%04d%02d%02d%02d%02d%lfZ",
+               &tt.tm_year, &tt.tm_mon, &tt.tm_mday,
+               &tt.tm_hour, &tt.tm_min, &seconds) != 6)
+    tt.tm_sec   = (int) seconds;
+    tt.tm_mon  -= 1;
+    tt.tm_year -= 1900;
+    tt.tm_isdst =-1;
+    const auto ff = mktime(&tt);
+    std::strftime(std::data(timeString),
+                  std::size(timeString),
+                  "%Y %m %d %H %M %S",
+                  std::gmtime(&ff));
+    std::cout << timeString << '\n'
+              << "Raw timespec.tv_nsec: " << (ts.tv_nsec % 1000000) / 1000 << '\n';
+;
+//    const auto d = u8"\uD800\uDF48"
     bit_string_t bit_string(8564743, 24);
     std::cout << bit_string.to_string() << std::endl;
     std::vector<uint32_t> relativeOid = {123, 456};
@@ -326,11 +372,11 @@ int main() {
     auto encoded2 = encodeRelativeOid(relativeOid);
 
     std::cout << "Encoded RELATIVE-OID: ";
-    for (uint8_t byte : encoded2) {
+    for (uint8_t byte: encoded2) {
         std::cout << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(byte) << " ";
     }
     std::cout << std::endl;
-    const uint8_t values[] = {0x0a ,0x02 ,0x01 ,0x00};
+    const uint8_t values[] = {0x0a, 0x02, 0x01, 0x00};
     const uint8_t values1[] = {0x0D, 0x03, 0x7B, 0x83, 0x48};
     relative_identifier_t relative_oid;
     relative_oid.decode(values1);
@@ -339,8 +385,6 @@ int main() {
     enumerated.decode(values);
     std::cout << static_cast<uintmax_t>(enumerated) << std::endl;
     std::cout << enumerated.to_string() << std::endl;
-
-
 
 
     const int mask = static_cast<int>(-1) << (8 * 2);

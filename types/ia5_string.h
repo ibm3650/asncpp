@@ -1,26 +1,23 @@
 //
-// Created by kandu on 29.11.2024.
+// Created by kandu on 02.12.2024.
 //
 
-#ifndef ASNCPP_PRINTABLE_STRING_H
-#define ASNCPP_PRINTABLE_STRING_H
-
+#ifndef ASNCPP_IA5_STRING_H
+#define ASNCPP_IA5_STRING_H
 #include "../asn1/base.h"
 #include <stdexcept>
 #include <string>
 #include <string_view>
 
 
-class printable_string_t : public asn1_type<std::string, static_cast<uintmax_t>(asn1_tag::PRINTABLE_STRING)> {
+class ia5_string_t : public asn1_type<std::string, static_cast<uintmax_t>(asn1_tag::IA5_STRING)> {
 public:
-    printable_string_t() = default;
+    ia5_string_t() = default;
 
-    printable_string_t(std::string_view data) { // NOLINT(*-explicit-constructor, *-explicit-conversions)
-        using namespace std::string_view_literals;
-        const auto allowed_specs = " '()+,-./:=?"sv;
+    ia5_string_t(std::string_view data) { // NOLINT(*-explicit-constructor, *-explicit-conversions)
         for (const char symbol: data) {
-            if (!std::isalnum(symbol) && !allowed_specs.contains(symbol)) {
-                throw std::invalid_argument("Invalid character in PRINTABLE_STRING");
+            if (static_cast<uint8_t>(symbol) > 0x7F) {
+                throw std::invalid_argument("Invalid character in VISIBLE_STRING");
             }
         }
         this->_value = data;
@@ -40,8 +37,7 @@ public:
     }
 
     [[nodiscard]] std::string to_string() const final {
-        return "Printable String: " + this->_value;
+        return "IA5 String: " + this->_value;
     }
 };
-
-#endif //ASNCPP_PRINTABLE_STRING_H
+#endif //ASNCPP_IA5_STRING_H
