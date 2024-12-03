@@ -4,7 +4,7 @@
 
 #ifndef ASNCPP_VISIBLE_STRING_H
 #define ASNCPP_VISIBLE_STRING_H
-#include "../asn1/base.h"
+#include "../include/asn_base.h"
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -24,7 +24,7 @@ public:
     }
 
     void decode(const uint8_t *buffer) final {
-        const asn1_block raw = asn1_block(buffer);
+        const asn1_base raw = asn1_base({buffer, 0xFFFFFFFF});
         this->_value.insert_range(this->_value.begin(), raw.get_data());
     }
 

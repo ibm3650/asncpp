@@ -6,7 +6,7 @@
 #define ASNCPP_BOOLEAN_H
 
 #include <stdexcept>
-#include "../asn1/base.h"
+#include "../include/asn_base.h"
 
 using namespace std::string_literals;
 
@@ -17,7 +17,7 @@ public:
     }
 
     void decode(const uint8_t *buffer) final {
-        const asn1_block raw = asn1_block(buffer);
+        const asn1_base raw = asn1_base({buffer, 0xFFFFFFFF});
 
         if (raw.get_length() != 1) {
             throw std::runtime_error("Invalid length for BOOLEAN value");

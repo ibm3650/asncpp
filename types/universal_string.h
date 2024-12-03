@@ -4,7 +4,7 @@
 
 #ifndef ASNCPP_UNIVERSAL_STRING_H
 #define ASNCPP_UNIVERSAL_STRING_H
-#include "../asn1/base.h"
+#include "../include/asn_base.h"
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -19,7 +19,7 @@ public:
     }
 
     void decode(const uint8_t *buffer) final {
-        const asn1_block raw = asn1_block(buffer);
+        const asn1_base raw = asn1_base({buffer, 0xFFFFFFFF});
         for (size_t i = 0; i < raw.get_data().size(); i += 4) {
             const char32_t symbol = static_cast<char32_t>(raw.get_data()[i + 3]) |
                                     (static_cast<char32_t>(raw.get_data()[i + 2]) << 8) |

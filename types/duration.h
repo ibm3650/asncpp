@@ -5,7 +5,7 @@
 #ifndef ASNCPP_DURATION_H
 #define ASNCPP_DURATION_H
 
-#include "../asn1/base.h"
+#include "../include/asn_base.h"
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -30,7 +30,7 @@ public:
 
     //TODO: Use std::chrono::parse
     void decode(const uint8_t *buffer) final {
-        const asn1_block raw = asn1_block(buffer);
+        const asn1_base raw = asn1_base({buffer, 0xFFFFFFFF});
         const std::string iso8601{raw.get_data().data(), raw.get_data().data() + raw.get_length()};
         std::regex iso8601Regex(
                 R"(^P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d*)?)S)?)?$)"

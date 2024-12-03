@@ -6,7 +6,7 @@
 #define ASNCPP_OCTET_STRING_H
 #include <string>
 #include <stdexcept>
-#include "../asn1/base.h"
+#include "../include/asn_base.h"
 
 class octet_string_t : public asn1_type<std::vector<uint8_t>, static_cast<uintmax_t>(asn1_tag::OCTET_STRING)> {
 public:
@@ -16,7 +16,7 @@ public:
     }
 
     void decode(const uint8_t *buffer) final {
-        const asn1_block raw = asn1_block(buffer);
+        const asn1_base raw = asn1_base({buffer, 0xFFFFFFFF});
 
         this->_value.clear();
         this->_value.insert(this->_value.end(), raw.get_data(), raw.get_data() + raw.get_length());

@@ -6,7 +6,7 @@
 #define ASNCPP_UTF_STRING_H
 #include <string>
 #include <stdexcept>
-#include "../asn1/base.h"
+#include "../include/asn_base.h"
 
 class utf8_string_t : public asn1_type<std::vector<uint8_t >, static_cast<uintmax_t>(asn1_tag::UTF8_STRING)> {
 public:
@@ -40,7 +40,7 @@ public:
         // this->_value = data;
     }
     void decode(const uint8_t *buffer) final {
-        const asn1_block raw = asn1_block(buffer);
+        const asn1_base raw = asn1_base({buffer, 0xFFFFFFFF});
         //TODO: Добавить обработку ошибок
         //TODO: Обработка UTF-8
         this->_value.clear();

@@ -6,7 +6,7 @@
 #define ASNCPP_OBJECT_DESCRIPTOR_H
 #include <string>
 #include <stdexcept>
-#include "../asn1/base.h"
+#include "../include/asn_base.h"
 
 class object_descriptor_t : public asn1_type<std::string, static_cast<uintmax_t>(asn1_tag::OBJECT_DESCRIPTOR)> {
 public:
@@ -17,7 +17,7 @@ public:
     }
 
     void decode(const uint8_t *buffer) final {
-        const asn1_block raw = asn1_block(buffer);
+        const asn1_base raw = asn1_base({buffer, 0xFFFFFFFF});
 
         this->_value.clear();
         this->_value.insert(this->_value.end(), raw.get_data().begin(), raw.get_data().end());

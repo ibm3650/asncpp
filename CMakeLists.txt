@@ -4,7 +4,7 @@ project(asncpp)
 set(CMAKE_CXX_STANDARD 23)
 
 add_executable(asncpp main.cpp
-        asn1/base.h
+        include/asn_base.h
         types/integer.cpp
         types/integer.h
         types/boolean.h

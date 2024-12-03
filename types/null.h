@@ -7,14 +7,14 @@
 #define ASNCPP_NULL_H
 #include <string>
 #include <stdexcept>
-#include "../asn1/base.h"
+#include "../include/asn_base.h"
 
 class null_t : public asn1_type<std::nullptr_t, static_cast<uintmax_t>(asn1_tag::Null)> {
 public:
     null_t() = default;
 
     void decode(const uint8_t *buffer) final {
-        const asn1_block raw = asn1_block(buffer);
+        const asn1_base raw = asn1_base({buffer, 0xFFFFFFFF});
 
         if (raw.get_length() != 0) {
             throw std::runtime_error("Invalid NULL value");

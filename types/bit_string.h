@@ -8,7 +8,7 @@
 #include <string>
 #include <stdexcept>
 #include <bitset>
-#include "../asn1/base.h"
+#include "../include/asn_base.h"
 
 class bit_string_t : public asn1_type<std::vector<uint8_t>, static_cast<uintmax_t>(asn1_tag::BIT_STRING)> {
 public:
@@ -76,7 +76,7 @@ public:
     }
 
     void decode(const uint8_t *buffer) final {
-//        const asn1_block raw = asn1_block(buffer);
+//        const asn1_base raw = asn1_base({buffer, 0xFFFFFFFF});
 //
 //        if (raw.get_length() < 1) {
 //            throw std::runtime_error("Invalid length for BIT STRING value");
