@@ -25,18 +25,22 @@ enum class asn1_tag : uint8_t {
     RELATIVE_OID = 0x0D, //+
     Sequence = 0x10,
     Set = 0x11,
-    NUMERIC_STRING [[deprecated]]= 0x12, //+
+    NUMERIC_STRING [[deprecated]] = 0x12, //+
     PRINTABLE_STRING = 0x13, //+
     T61_STRING [[deprecated]] = 0x14, //+
     VIDEOTEX_STRING [[deprecated]] = 0x15, //+
     IA5_STRING = 0x16, //+
-    UTCTime = 0x17,
-    GeneralizedTime = 0x18,
+    UTC_TIME = 0x17, //+
+    GENERALIZED_TIME = 0x18, //+
     GRAPHIC_STRING [[deprecated]] = 0x19, //+
     VISIBLE_STRING [[deprecated]] = 0x1A, //+
     GENERAL_STRING [[deprecated]] = 0x1B, //+
-    UNIVERSAL_STRING = 0x1C,
-    BMP_STRING = 0x1E //+
+    UNIVERSAL_STRING = 0x1C, //+
+    BMP_STRING = 0x1E, //+
+    DATE = 0x1F, //+
+    TIME_OF_DAY = 0x20, //+
+    DATE_TIME = 0x21, //+
+    DURATION = 0x22, //+
 };
 
 enum class asn1_class : uint8_t {

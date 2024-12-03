@@ -2,6 +2,7 @@
 #include <vector>
 #include <numeric>
 #include <iomanip>
+#include <sstream>
 #include "types/integer.h"
 #include "types/object_identifier.h"
 #include "types/enumerated.h"
@@ -80,11 +81,11 @@ inline std::ostream &operator<<(std::ostream &os, asn1_tag tag) {
         case asn1_tag::IA5_STRING:
             os << "IA5_STRING";
             break;
-        case asn1_tag::UTCTime:
-            os << "UTCTime";
+        case asn1_tag::UTC_TIME:
+            os << "UTC_TIME";
             break;
-        case asn1_tag::GeneralizedTime:
-            os << "GeneralizedTime";
+        case asn1_tag::GENERALIZED_TIME:
+            os << "GENERALIZED_TIME";
             break;
         case asn1_tag::GRAPHIC_STRING:
             os << "GRA";
@@ -330,24 +331,46 @@ std::string generalized(std::tm datetime, int8_t timezone = 0){
     }
 
     sprintf(buffer + 15, "%+03d00", timezone);
-    return std::string(buffer);
+    return {buffer};
 }
 
 int main() {
     // Example of the very popular RFC 3339 format UTC time
+    struct tm tt = {0};
+    const std::string rfc3339 = "20241203105321.000-1100";
+//    const std::string rfc3339 = "20241203105321";
+//    const std::string rfc3339 = "20241203105321.000Z";
+    std::istringstream ss(rfc3339);
+    //std::istringstream ss(raw.get_data().data());
+
+    // Парсим дату-время в формате ISO 8601 (без проверки часового пояса)
+    ss >> std::get_time(&tt, "%Y%m%d%H%M%S");
+    if (ss.fail()) {
+        throw std::invalid_argument("Invalid ISO 8601 format: " + rfc3339);
+    }
+    std::string str;
+    ss >> str;
+    str = str.substr(str.length() - 5, 3);
+    std::cout << "Stream" << str << '\n';
+    int res{};
+    res = std::stoi(str);
+//    int timezone = 0;
+//    if (rfc3339.size() > 15) {
+//        ss >> timezone;
+//    }
     std::time_t time = std::time({});
-    std::timespec ts;
+    std::timespec ts{};
     std::timespec_get(&ts, TIME_UTC);
     char timeString[std::size("yyyy-mm-ddThh:mm:ssZ")+ 100];
     std::strftime(std::data(timeString),
                   std::size(timeString),
-                  "%Y %m %d %H %M %S",
+                  "%y %m %d %H %M %S Z",
                   std::gmtime(&ts.tv_sec));
-    std::cout << generalized(*std::gmtime(&ts.tv_sec)) << '\n'
+    std::cout << timeString << '\n'
             << "Raw timespec.tv_nsec: " << (ts.tv_nsec % 1000000) / 1000 << '\n';
 
 
-    struct tm tt = {0};
+
     double seconds;
     if (sscanf(generalized(*std::gmtime(&ts.tv_sec)).c_str(), "%04d%02d%02d%02d%02d%lfZ",
                &tt.tm_year, &tt.tm_mon, &tt.tm_mday,

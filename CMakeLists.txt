@@ -21,4 +21,10 @@ add_executable(asncpp main.cpp
         types/bmp_string.h
         types/visible_string.h
         types/ia5_string.h
-        types/universal_string.h)
+        types/universal_string.h
+        types/generalized_time.h
+        types/utc_time.h
+        types/date.h
+        types/time_of_day.h
+        types/date_time.h
+        types/duration.h)
