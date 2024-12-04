@@ -7,7 +7,7 @@
 
 #include <string>
 #include <stdexcept>
-#include "../include/asn_base.h"
+#include "asncpp/asn_base.h"
 using namespace std::string_literals;
 //
 //class enumerated_t : public asn1_type<uintmax_t, static_cast<uintmax_t>(asn1_tag::ENUMERATED)> {

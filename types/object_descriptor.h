@@ -6,7 +6,7 @@
 #define ASNCPP_OBJECT_DESCRIPTOR_H
 #include <string>
 #include <stdexcept>
-#include "../include/asn_base.h"
+#include "asncpp/asn_base.h"
 
 class object_descriptor_t : public asn1_type<std::string, static_cast<uintmax_t>(asn1_tag::OBJECT_DESCRIPTOR)> {
 public:

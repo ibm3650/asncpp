@@ -7,7 +7,7 @@
 
 #include <string>
 #include <stdexcept>
-#include "../include/asn_base.h"
+#include "asncpp/asn_base.h"
 
 class numeric_string_t : public asn1_type<std::string, static_cast<uintmax_t>(asn1_tag::NUMERIC_STRING)> {
 public:

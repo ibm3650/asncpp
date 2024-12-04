@@ -10,6 +10,7 @@
 #include <stdexcept>
 #include <variant>
 #include <iterator>
+#include <memory>
 
 /**
  * @enum asn1_tag
@@ -69,13 +70,49 @@ enum class asn1_class : uint8_t {
     PRIVATE = 0x03             /**< Private class: used for application-specific purposes. */
 };
 
-template<typename T, uintmax_t U>
-class asn1_base {
+
+
+
+//class asn1_type {
+//public:
+//    virtual ~asn1_type() = default;
+//
+//    virtual void decode(std::span<const uint8_t> data){
+//        size_t offset = 0;
+//        if (data.size_bytes() < 2) {
+//            throw std::invalid_argument("Invalid ASN.1 data");
+//        }
+//
+//        this->_cls = extract_class(data[0]);
+//        this->_constructed = extract_is_constructed(data[0]);
+//        const auto type_decoded = extract_type(data);
+//        data = data.subspan(type_decoded.second);
+//        const auto length = extract_length(data);
+//        data = data.subspan(length.second);
+//        this->_type = type_decoded.first;
+//        this->_length = length.first;
+//        const auto it = data.begin();
+//        _data = std::vector<uint8_t>(it, it + static_cast<std::ptrdiff_t>(length.first));
+//    }
+//
+//    virtual std::vector<uint8_t> encode() = 0;
+//
+//};
+
+
+
+
+
+
+class asn1_base{
 public:
     using tag_t = std::variant<asn1_tag, uintmax_t>;
     using dynamic_data_t = std::vector<uint8_t>;
+    //[[maybe_unused]] static constexpr uintmax_t type = U;
+ //   using value_t = T;
 
     asn1_base() = default;
+
     asn1_base(std::span<const uint8_t> data) { // NOLINT(*-explicit-constructor)
         decode(data);
     }
@@ -100,7 +137,14 @@ public:
         return _data;
     }
 
+    [[nodiscard]] virtual std::string to_string() const {
+        return "ASN.1 Base";
+    }
 
+  //  template<typename T1, uintmax_t U1>
+  friend std::vector<uint8_t> serialize(asn1_base *block);
+   friend std::unique_ptr<asn1_base> deserialize(std::span<const uint8_t> data);
+  // friend std::vector<uint8_t> serialize(asn1_type *block);
 protected:
     virtual void decode(std::span<const uint8_t> data){
         size_t offset = 0;
@@ -110,17 +154,17 @@ protected:
 
         this->_cls = extract_class(data[0]);
         this->_constructed = extract_is_constructed(data[0]);
-        const auto type = extract_type(data);
-        data = data.subspan(type.second);
+        const auto type_decoded = extract_type(data);
+        data = data.subspan(type_decoded.second);
         const auto length = extract_length(data);
         data = data.subspan(length.second);
-        this->_type = type.first;
+        this->_type = type_decoded.first;
         this->_length = length.first;
         const auto it = data.begin();
         _data = std::vector<uint8_t>(it, it + static_cast<std::ptrdiff_t>(length.first));
     }
 
-    [[nodiscard]] virtual dynamic_data_t encode() const{
+    [[nodiscard]] virtual std::vector<uint8_t> encode(){
         dynamic_data_t output = _data;
         output.insert_range(output.begin(), asn1_base::encode_length(_data.size()));
         //TODO: Encode long tags
@@ -128,46 +172,40 @@ protected:
         return output;
     }
 
-
-    virtual std::string to_string() const {
-        return "ASN.1 Base";
-    }
-
-
-    std::vector<uint8_t> _data;
-    T _decoded;
+    dynamic_data_t _data;
+    tag_t _type;
+    //value_t _decoded;
 private:
     bool _constructed{};
-    tag_t _type;
-    asn1_class _cls;
+
+    asn1_class _cls{};
     size_t _length{};
 
 
-
     [[nodiscard]] static std::pair<tag_t, size_t> extract_type(std::span<const uint8_t> buffer) {
-        const uint8_t tag = buffer[0] & 0x1FU;
-        if (tag != 0x1FU) {
-            return std::make_pair(static_cast<asn1_tag>(tag), 1ULL);
+        const uint8_t tag_decoded = buffer[0] & 0x1FU;
+        if (tag_decoded != 0x1FU) {
+            return std::make_pair(static_cast<asn1_tag>(tag_decoded), 1ULL);
         }
         auto it = std::next(buffer.begin());
-        uintmax_t type{0};
+        uintmax_t type_decoded{0};
         const auto push_bits = [&](uint8_t byte) {
             if (it - buffer.begin() - 1 > sizeof(uintmax_t)) {
                 throw std::runtime_error("Tag is too long");
             }
-            type = (type << 7U) | (byte & 0x7FU);
+            type_decoded = (type_decoded << 7U) | (byte & 0x7FU);
         };
         while (*it & 0x80U) {
             push_bits(*it);
             ++it;
         }
         push_bits(*it);
-        return std::make_pair(type, it - buffer.begin());
+        return std::make_pair(type_decoded, it - buffer.begin());
     }
 
     [[nodiscard]] static std::vector<uint8_t> encode_length(size_t length) {
         if (length <= 127) {
-            return {1, static_cast<uint8_t>(length)};
+            return {static_cast<uint8_t>(length)};
         }
         std::vector<uint8_t> output;
         output.reserve(sizeof(size_t));
@@ -203,47 +241,8 @@ private:
         return static_cast<asn1_class>(tag & 0xC0U);
     }
 };
+std::unique_ptr<asn1_base> deserialize(std::span<const uint8_t> data);
 
-template<typename T, uintmax_t U>
-class asn1_type {
-public:
-    static constexpr uintmax_t tag = U;
-    using value_type = T;
-
-    virtual ~asn1_type() = default;
-
-    virtual void decode(const uint8_t *buffer) = 0;
-
-    [[nodiscard]] virtual std::vector<uint8_t> encode() const = 0;
-
-    [[nodiscard]] virtual std::string to_string() const = 0;
-
-
-//
-//    [[nodiscard]] virtual T get_value() const {
-//        return _value;
-//    }
-//
-//    [[nodiscard]] virtual operator T() const {
-//        return get_value();
-//    }
-//
-//    size_t children_count() const {
-//        return 0;
-//    }
-//
-//    [[nodiscard]] virtual asn1_type *get_child(size_t index) {
-//        return nullptr;
-//    }
-//
-//    [[nodiscard]] virtual const asn1_type *get_child(size_t index) const {
-//        return nullptr;
-//    }
-
-protected:
-    T _value{};
-    std::vector<uint8_t> _buffer;
-};
 
 
 #endif //ASNCPP_ASN_BASE_H

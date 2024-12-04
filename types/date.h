@@ -5,7 +5,7 @@
 #ifndef ASNCPP_DATE_H
 #define ASNCPP_DATE_H
 
-#include "../include/asn_base.h"
+#include "asncpp/asn_base.h"
 #include <stdexcept>
 #include <string>
 #include <string_view>

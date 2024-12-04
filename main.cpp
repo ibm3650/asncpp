@@ -319,7 +319,7 @@ std::vector<uint8_t> encodeRelativeOid(const std::vector<uint32_t> &values) {
 //    return 0;
 //}
 
-std::string generalized(std::tm datetime, int8_t timezone = 0){
+std::string generalized(std::tm datetime, int8_t timezone = 0) {
     constexpr size_t buffer_size = std::size("YYYYMMDDHHMMSS.000+HHMM");
     char buffer[buffer_size];
     std::strftime(buffer,
@@ -337,12 +337,164 @@ std::string generalized(std::tm datetime, int8_t timezone = 0){
 //std::vector<uint8_t> serialize(){
 //
 //}
-int main() {
+
+//template<typename T, uintmax_t U>
+//std::vector<uint8_t> serialize(const asn1_base<T,U> *block){
+//    block->encode();
+//    return static_cast<asn1_base<T,U>*>(block)->asn1_base<T,U>::encode();
+//}
+
+//template<typename T1, uintmax_t U1>
+//std::vector<uint8_t> serialize(asn1_base<T1, U1> *block) {
+//    (void)block->encode();
+//    return static_cast<asn1_base<T1, U1> *>(block)->asn1_base<T1, U1>::encode();
+//}
+
+std::vector<uint8_t> serialize(asn1_base *block) {
+    (void) block->encode();
+    return static_cast<asn1_base *>(block)->asn1_base::encode();
+}
+
+
+std::unique_ptr<asn1_base> deserialize(std::span<const uint8_t> data) {
+    if (data.empty()) {
+        throw std::invalid_argument("Invalid ASN.1 data");
+    }
+    const auto type = asn1_base::extract_type(data).first;
+    if (!std::get_if<asn1_tag>(&type)) {
+        return nullptr;
+    }
+    std::unique_ptr<asn1_base> ptr;
+    switch (*std::get_if<asn1_tag>(&type)) {
+
+        case asn1_tag::Reserved:
+            break;
+        case asn1_tag::BOOLEAN:
+            break;
+        case asn1_tag::INTEGER:
+            ptr = std::make_unique<integer_t<>>();
+            break;
+        case asn1_tag::BIT_STRING:
+            break;
+        case asn1_tag::OCTET_STRING:
+            break;
+        case asn1_tag::Null:
+            break;
+        case asn1_tag::OBJECT_IDENTIFIER:
+            break;
+        case asn1_tag::OBJECT_DESCRIPTOR:
+            break;
+        case asn1_tag::EXTERNAL:
+            break;
+        case asn1_tag::REAL:
+            break;
+        case asn1_tag::ENUMERATED:
+            break;
+        case asn1_tag::EMBEDDED_PDV:
+            break;
+        case asn1_tag::UTF8_STRING:
+            break;
+        case asn1_tag::RELATIVE_OID:
+            break;
+        case asn1_tag::SEQUENCE:
+            break;
+        case asn1_tag::SET:
+            break;
+        case asn1_tag::NUMERIC_STRING:
+            break;
+        case asn1_tag::PRINTABLE_STRING:
+            break;
+        case asn1_tag::T61_STRING:
+            break;
+        case asn1_tag::VIDEOTEX_STRING:
+            break;
+        case asn1_tag::IA5_STRING:
+            break;
+        case asn1_tag::UTC_TIME:
+            break;
+        case asn1_tag::GENERALIZED_TIME:
+            break;
+        case asn1_tag::GRAPHIC_STRING:
+            break;
+        case asn1_tag::VISIBLE_STRING:
+            break;
+        case asn1_tag::GENERAL_STRING:
+            break;
+        case asn1_tag::UNIVERSAL_STRING:
+            break;
+        case asn1_tag::BMP_STRING:
+            break;
+        case asn1_tag::DATE:
+            break;
+        case asn1_tag::TIME_OF_DAY:
+            break;
+        case asn1_tag::DATE_TIME:
+            break;
+        case asn1_tag::DURATION:
+            break;
+    }
+    (void)static_cast<asn1_base*>(ptr.get())->asn1_base::decode(data);
+    ptr->decode(data);
+    return ptr;
+}
+//#include <variant>
+//auto deserialize(std::span<const uint8_t> data) {
+//    if (data.empty()) {
+//        throw std::invalid_argument("Invalid ASN.1 data");
+//    }
+//    const auto type = asn1_base<char, 0>::extract_type(data).first;
+//    if(!std::get_if<asn1_tag>(&type)){
+//        return std::variant{asn1_base<char, 0>::extract_type(data)};
+//    }
+//    switch (*std::get_if<asn1_tag>(&type)) {
+//        case asn1_tag::INTEGER: {
+//            integer_t integer;
+//            integer.decode(data.subspan(asn1_base<char, 0>::extract_type(data).second));
+//            return std::variant{integer};
+//        }
+////        case asn1_tag::OBJECT_IDENTIFIER: {
+////            object_identifier_t oid;
+////            oid.decode(data);
+////            return oid;
+////        }
+////        case asn1_tag::ENUMERATED: {
+////            enumerated_t enumerated;
+////            enumerated.decode(data);
+////            return enumerated;
+////        }
+////        case asn1_tag::RELATIVE_OID: {
+////            relative_identifier_t relative_oid;
+////            relative_oid.decode(data);
+////            return relative_oid;
+////        }
+////        case asn1_tag::BIT_STRING: {
+////            bit_string_t bit_string;
+////            bit_string.decode(data);
+////            return bit_string;
+////        }
+//        default:
+//            throw std::invalid_argument("Unsupported ASN.1 type");
+//    }
+//    return std::variant{0};
+//}
+
+
+int main111() {
     integer_t inr(6564564);
-    const auto fff = inr.encode();
+    // serialize(&inr);
+    //using Type = typename std::remove_reference_t<decltype(inr)>::value_t;
+    //using Type1 = typename inr::type;
+    // asn1_base<Type, inr.type> *base = &inr;
+    // base->encode();
+    const auto fff = serialize(&inr);
     for (uint8_t byte: fff) {
         std::cout << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(byte) << " ";
-    }return 0;
+    }
+    const auto fffffd = deserialize(fff);
+    std::cout << fffffd->to_string() << std::endl;
+    //const auto fff = inr.encode();
+
+    return 0;
 //    // Example of the very popular RFC 3339 format UTC time
 //    struct tm tt = {0};
 //    const std::string rfc3339 = "20241203105321.000-1100";

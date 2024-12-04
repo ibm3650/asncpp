@@ -6,7 +6,7 @@
 #define ASNCPP_OCTET_STRING_H
 #include <string>
 #include <stdexcept>
-#include "../include/asn_base.h"
+#include "asncpp/asn_base.h"
 
 class octet_string_t : public asn1_type<std::vector<uint8_t>, static_cast<uintmax_t>(asn1_tag::OCTET_STRING)> {
 public:

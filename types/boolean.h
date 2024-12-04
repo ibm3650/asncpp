@@ -6,7 +6,7 @@
 #define ASNCPP_BOOLEAN_H
 
 #include <stdexcept>
-#include "../include/asn_base.h"
+#include "asncpp/asn_base.h"
 
 using namespace std::string_literals;
 

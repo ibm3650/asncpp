@@ -7,7 +7,7 @@
 
 #include <string>
 #include <stdexcept>
-#include "../include/asn_base.h"
+#include "asncpp/asn_base.h"
 //
 //class object_identifier_t
 //        : public asn1_type<std::vector<uint32_t>, static_cast<uintmax_t>(asn1_tag::OBJECT_IDENTIFIER)> {
