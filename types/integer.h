@@ -18,7 +18,7 @@
  * @tparam T Тип данных для хранения значения INTEGER (например, intmax_t).
  */
 template<std::integral T>
-class integer_base : public asn1_base {
+class integer_base: public asn1_base {
 public:
     using value_t = T;
 
@@ -50,7 +50,7 @@ public:
      * @brief Получить декодированное значение INTEGER.
      * @return Ссылка на декодированное значение.
      */
-    [[maybe_unused]] value_t& get_value() const noexcept {
+    [[maybe_unused]] auto get_value() const noexcept -> value_t& {
         return this->_decoded;
     }
 
@@ -58,7 +58,7 @@ public:
      * @brief Кодирование INTEGER в DER.
      * @return Вектор байтов, представляющий закодированное значение.
      */
-    std::vector<uint8_t> encode() final {
+    auto encode() -> std::vector<uint8_t> final  {
         /*Число уже хранится в формате дополнения до двух, нет необходимости в дополнительном кодировании
          * Кодирование значения в big-endian формате
          * */
@@ -84,7 +84,7 @@ public:
      * @return Строка, представляющая значение INTEGER.
      */
 
-    [[nodiscard]] std::string to_string() const final {
+    [[nodiscard]] auto to_string() const -> std::string final {
         return "INTEGER: " + std::to_string(this->_decoded);
     }
 
@@ -108,7 +108,7 @@ public:
         /* Проверяем знак. Не делаем второе дополнение, если длинна значения равна размеру типа
          * Потому как при сдвиге влево на равное размеру число бит или большее, происходит UB
          * */
-        if ((this->_data[0] & 0x80) && length != sizeof(T)) { // Отрицательное число
+        if ((this->_data[0] & 0x80U) && length != sizeof(T)) { // Отрицательное число
             /* Для того чтобы 16-ти битное число, корректно отображалось в 32-х битном типе,
              * При учете, что оно отрицательное, необходимо установить все биты в 1, кроме 16-ти младших
              * */

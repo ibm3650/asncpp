@@ -100,6 +100,8 @@ inline std::ostream &operator<<(std::ostream &os, asn1_tag tag) {
             break;
         case asn1_tag::BMP_STRING:
             break;
+        default:
+            break;
     }
     return os;
 }
