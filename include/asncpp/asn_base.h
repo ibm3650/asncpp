@@ -143,7 +143,21 @@ public:
 
   //  template<typename T1, uintmax_t U1>
   friend std::vector<uint8_t> serialize(asn1_base *block);
-   friend std::unique_ptr<asn1_base> deserialize(std::span<const uint8_t> data);
+   friend std::unique_ptr<asn1_base> deserialize_v(std::span<const uint8_t> data);
+    template<typename T>
+    friend std::unique_ptr<T> deserialize(std::span<const uint8_t> data){
+        if (data.empty()) {
+            throw std::invalid_argument("Invalid ASN.1 data");
+        }
+        const auto type = asn1_base::extract_type(data).first;
+        if (!std::get_if<asn1_tag>(&type)) {
+            return nullptr;
+        }
+        std::unique_ptr ptr = std::make_unique<T>();
+        (void)static_cast<asn1_base*>(ptr.get())->asn1_base::decode(data);
+        ptr->decode(data);
+        return ptr;
+    }
   // friend std::vector<uint8_t> serialize(asn1_type *block);
 protected:
     virtual void decode(std::span<const uint8_t> data){
@@ -241,8 +255,9 @@ private:
         return static_cast<asn1_class>(tag & 0xC0U);
     }
 };
-std::unique_ptr<asn1_base> deserialize(std::span<const uint8_t> data);
-
+std::unique_ptr<asn1_base> deserialize_v(std::span<const uint8_t> data);
+template<typename T>
+std::unique_ptr<T> deserialize(std::span<const uint8_t> data);
 
 
 #endif //ASNCPP_ASN_BASE_H

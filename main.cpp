@@ -356,7 +356,9 @@ std::vector<uint8_t> serialize(asn1_base *block) {
 }
 
 
-std::unique_ptr<asn1_base> deserialize(std::span<const uint8_t> data) {
+
+
+std::unique_ptr<asn1_base> deserialize_v(std::span<const uint8_t> data) {
     if (data.empty()) {
         throw std::invalid_argument("Invalid ASN.1 data");
     }
@@ -372,7 +374,7 @@ std::unique_ptr<asn1_base> deserialize(std::span<const uint8_t> data) {
         case asn1_tag::BOOLEAN:
             break;
         case asn1_tag::INTEGER:
-            ptr = std::make_unique<integer_t<>>();
+            ptr = std::make_unique<integer_t>();
             break;
         case asn1_tag::BIT_STRING:
             break;
@@ -438,7 +440,7 @@ std::unique_ptr<asn1_base> deserialize(std::span<const uint8_t> data) {
     return ptr;
 }
 //#include <variant>
-//auto deserialize(std::span<const uint8_t> data) {
+//auto deserialize_v(std::span<const uint8_t> data) {
 //    if (data.empty()) {
 //        throw std::invalid_argument("Invalid ASN.1 data");
 //    }
@@ -448,7 +450,7 @@ std::unique_ptr<asn1_base> deserialize(std::span<const uint8_t> data) {
 //    }
 //    switch (*std::get_if<asn1_tag>(&type)) {
 //        case asn1_tag::INTEGER: {
-//            integer_t integer;
+//            integer_base integer;
 //            integer.decode(data.subspan(asn1_base<char, 0>::extract_type(data).second));
 //            return std::variant{integer};
 //        }
@@ -480,7 +482,7 @@ std::unique_ptr<asn1_base> deserialize(std::span<const uint8_t> data) {
 
 
 int main111() {
-    integer_t inr(6564564);
+    integer_base inr(6564564);
     // serialize(&inr);
     //using Type = typename std::remove_reference_t<decltype(inr)>::value_t;
     //using Type1 = typename inr::type;
@@ -490,7 +492,7 @@ int main111() {
     for (uint8_t byte: fff) {
         std::cout << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(byte) << " ";
     }
-    const auto fffffd = deserialize(fff);
+    const auto fffffd = deserialize_v(fff);
     std::cout << fffffd->to_string() << std::endl;
     //const auto fff = inr.encode();
 
@@ -629,11 +631,11 @@ int main111() {
 //            0x04,
 //            0xF8, 0xA4, 0x32, 0xEB
 //    };//-123456789
-////    integer_t integer;
+////    integer_base integer;
 ////    integer.decode(largeIntegerData);
 ////    auto value = static_cast<intmax_t>(integer);
 ////    std::cout << value << std::endl;
-////    integer_t i(5);
+////    integer_base i(5);
 ////    const auto tl =  asn1_base::encode_length(30);
 ////    std::cout << "Length: " << asn1_base::extract_length(tl.data()).first << std::endl;
 ////    return 0;
@@ -655,9 +657,9 @@ int main111() {
 //                                 9223372036854775807, -9223372036854775807,
 //                                 9223372036854775808, -9223372036854775808};
 //    for (const auto &num: test_nums) {
-//        integer_t integer(num);
+//        integer_base integer(num);
 //        const auto encoded = integer.encode();
-//        integer_t decoded(int64_t{0});
+//        integer_base decoded(int64_t{0});
 //        decoded.decode(encoded.data());
 //        const auto decoded_num = static_cast<int64_t>(decoded);
 //        std::cout << "Original: " << num << ' ' << decoded.to_string() << std::endl;
