@@ -11,7 +11,7 @@
 #include <string>
 #include "asncpp/asn_base.h"
 
-
+//TODO: Добавить поддержку чисел, размер  которых превышает размер типа T
 /**
  * @class integer_base
  * @brief ASN.1 INTEGER тип с поддержкой кодирования и декодирования.

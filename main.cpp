@@ -385,6 +385,7 @@ std::unique_ptr<asn1_base> deserialize_v(std::span<const uint8_t> data) {
         case asn1_tag::Null:
             break;
         case asn1_tag::OBJECT_IDENTIFIER:
+            ptr = std::make_unique<object_identifier_t>();
             break;
         case asn1_tag::OBJECT_DESCRIPTOR:
             break;

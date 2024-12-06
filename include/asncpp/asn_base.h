@@ -132,7 +132,7 @@ protected:
     virtual void decode(std::span<const uint8_t> data) {
         size_t offset = 0;
         if (data.size_bytes() < 2) {
-            throw std::invalid_argument("Invalid ASN.1 data");
+            throw std::invalid_argument("Invalid ASN.1 data. Length is too short");
         }
 
         this->_cls = extract_class(data[0]);
@@ -144,6 +144,9 @@ protected:
         this->_type = type_decoded.first;
         this->_length = length.first;
         const auto it = data.begin();
+        if (it + length.first > data.end()) {
+            throw std::invalid_argument("Invalid ASN.1 data. Length exceeds buffer size");
+        }
         _data = std::vector<uint8_t>(it, it + static_cast<std::ptrdiff_t>(length.first));
     }
 
@@ -164,7 +167,7 @@ private:
     asn1_class _cls{};
     size_t _length{};
 
-
+    //TODO: Проверка длинны массива
     [[nodiscard]] static std::pair<tag_t, size_t> extract_type(std::span<const uint8_t> buffer) {
         const uint8_t tag_decoded = buffer[0] & 0x1FU;
         if (tag_decoded != 0x1FU) {
@@ -200,6 +203,8 @@ private:
         return output;
     }
 
+    //TODO: Implement long tag encoding
+    //TODO: Проверка длинны массива
     [[nodiscard]] static std::pair<size_t, size_t> extract_length(std::span<const uint8_t> buffer) {
         if (!(buffer[0] & 0x80U)) {
             return std::make_pair(buffer[0], 1ULL);

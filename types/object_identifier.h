@@ -5,87 +5,141 @@
 #ifndef ASNCPP_OBJECT_IDENTIFIER_H
 #define ASNCPP_OBJECT_IDENTIFIER_H
 
+#include <vector>
 #include <string>
 #include <stdexcept>
+#include <span>
+#include <sstream>
+#include <ranges>
 #include "asncpp/asn_base.h"
-//
-//class object_identifier_t
-//        : public asn1_type<std::vector<uint32_t>, static_cast<uintmax_t>(asn1_tag::OBJECT_IDENTIFIER)> {
-//public:
-//    explicit object_identifier_t() = default;
-//
-//    explicit object_identifier_t(const std::vector<uint32_t> &data) {
-//        this->_value = data;
-//    }
-//
-//    [[nodiscard]] std::vector<uint8_t> encode() const override {
-//        std::vector<uint8_t> result;
-//
-//        if (_value.size() >= 2) {
-//            result.push_back(40 * _value[0] + _value[1]);
-//        }
-//
-//        // Кодируем остальные идентификаторы (c, d, ...)
-//        for (size_t i = 2; i < _value.size(); ++i) {
-//            uint32_t value = _value[i];
-//            std::vector<uint8_t> temp;
-//
-//            // Кодируем value в base-128
-//            do {
-//                temp.insert(temp.begin(), static_cast<uint8_t>(value & 0x7F));
-//                value >>= 7;
-//            } while (value > 0);
-//
-//            // Устанавливаем MSB для всех байтов, кроме последнего
-//            for (size_t j = 0; j < temp.size() - 1; ++j) {
-//                temp[j] |= 0x80;
-//            }
-//
-//            // Добавляем закодированное значение в результат
-//            result.insert(result.end(), temp.begin(), temp.end());
-//        }
-//        result.insert(result.begin(), result.size());
-//        result.insert(result.begin(), static_cast<uint8_t>(asn1_tag::OBJECT_IDENTIFIER));
-//        return result;
-//    }
-//
-//    [[nodiscard]] std::string to_string() const override {
-//        std::string result = "OBJECT IDENTIFIER: ";
-//        for (size_t i = 0; i < _value.size(); ++i) {
-//            result += std::to_string(_value[i]);
-//            if (i != _value.size() - 1) {
-//                result += ".";
-//            }
-//        }
-//        return result;
-//    }
-//
-//    void decode(const uint8_t *buffer) override {
-//        const asn1_base raw = asn1_base({buffer, 0xFFFFFFFF});
-//
-//        if (raw.get_length() < 1) {
-//            throw std::runtime_error("Invalid length for OBJECT IDENTIFIER value");
-//        }
-//
-//        std::vector<uint32_t> result;
-//        result.push_back(raw.get_data()[0] / 40);
-//        result.push_back(raw.get_data()[0] % 40);
-//        uint32_t value = 0;
-//        for (size_t i = 1; i < raw.get_length(); ++i) {
-//            if (raw.get_data()[i] & 0x80) {
-//                value = (value << 7) | (raw.get_data()[i] & 0x7F);
-//            } else {
-//                value = (value << 7) | raw.get_data()[i];
-//                result.push_back(value);
-//                value = 0;
-//            }
-//        }
-//
-//        if (result.size() < 2) {
-//            throw std::runtime_error("Invalid OBJECT IDENTIFIER value");
-//        }
-//        this->_value = result;
-//    }
-//};
+
+//TODO: Implement long sid encoding
+//TODO: Инициализация строкой
+//TODO: Ошибка, если при декодировании bse128 не хватает байтов
+//TODO: Проверка на длину массива
+//TODO: Оптимизация кода
+/**
+ * @class object_identifier_t
+ * @brief Реализация ASN.1 OBJECT IDENTIFIER с поддержкой кодирования и декодирования.
+ */
+class object_identifier_t : public asn1_base {
+public:
+    using sid_t = uint32_t;
+
+    /**
+     * @brief Конструктор по умолчанию.
+     */
+    object_identifier_t() {
+        _type = asn1_tag::OBJECT_IDENTIFIER;
+    }
+
+    /**
+     * @brief Конструктор с инициализацией значением.
+     * @param data Последовательность идентификаторов.
+     */
+    object_identifier_t(std::span<const sid_t> data) {
+        _type = asn1_tag::OBJECT_IDENTIFIER;
+        _value.assign(data.begin(), data.end());
+    }
+
+    /**
+     * @brief Получение строки, представляющей OBJECT IDENTIFIER.
+     * @return Строковое представление.
+     */
+    [[nodiscard]] auto to_string() const -> std::string final {
+        std::ostringstream oss;
+        oss << "OBJECT IDENTIFIER: ";
+        for (size_t i = 0; i < _value.size(); ++i) {
+            oss << _value[i];
+            if (i != _value.size() - 1) {
+                oss << ".";
+            }
+        }
+        return oss.str();
+    }
+
+    /**
+     * @brief Получение значения OBJECT IDENTIFIER.
+     * @return Значения идентификаторов.
+     */
+    [[nodiscard]] auto get_value() const -> std::vector<sid_t> {
+        return _value;
+    }
+
+protected:
+    /**
+     * @brief Кодирование OBJECT IDENTIFIER в DER.
+     * @return Вектор байтов, представляющий закодированное значение.
+     */
+    [[nodiscard]] auto encode() -> std::vector<uint8_t> final {
+        auto to_b128 = [](sid_t value) -> std::vector<uint8_t> {
+            std::vector<uint8_t> result;
+            do {
+                result.insert(result.begin(), static_cast<uint8_t>(value & 0x7F));
+                value >>= 7U;
+            } while (value > 0);
+
+            for (size_t j = 0; j < result.size() - 1; ++j) {
+                result[j] |= 0x80U;
+            }
+            return result;
+        };
+
+        if (_value.size() < 2) {
+            throw std::runtime_error("OID must have at least two SIDs");
+        }
+        if (_value[0] > 2) {
+            throw std::runtime_error("First SID must be in range [0, 2]");
+        }
+        if (_value[0] != 2 && _value[1] > 39) {
+            throw std::runtime_error("Second SID must be in range [0, 39]");
+        }
+
+        this->_data = to_b128(40U * _value[0] + _value[1]);
+        for (const auto &sid: _value | std::views::drop(2)) {
+            const auto encoded_sid = to_b128(sid);
+            this->_data.insert(this->_data.end(), encoded_sid.begin(), encoded_sid.end());
+        }
+
+        return this->_data;
+    }
+
+    /**
+     * @brief Декодирование OBJECT IDENTIFIER из DER.
+     * @param data Байтовый диапазон.
+     */
+    void decode(std::span<const uint8_t> data) final {
+        if (this->_data.empty()) {
+            throw std::runtime_error("OID must have at least one byte");
+        }
+
+        auto from_b128 = [&](auto &iter) -> sid_t {
+            sid_t result = 0;
+            while (iter != this->_data.end()) {
+                result = (result << 7U) | (*iter & 0x7FU);
+                if (!(*iter++ & 0x80U)) {
+                    break;
+                }
+            }
+            return result;
+        };
+
+        auto it = this->_data.begin();
+        const sid_t first_sid = from_b128(it);
+
+        if (first_sid > 80) {
+            _value = {2, first_sid - 80};
+        } else {
+            _value = {first_sid / 40, first_sid % 40};
+        }
+
+        while (it < this->_data.end()) {
+            _value.push_back(from_b128(it));
+        }
+    }
+
+private:
+    std::vector<sid_t> _value; ///< Хранение идентификаторов.
+};
 
 #endif //ASNCPP_OBJECT_IDENTIFIER_H
