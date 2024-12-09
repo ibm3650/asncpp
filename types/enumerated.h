@@ -4,11 +4,33 @@
 
 #ifndef ASNCPP_ENUMERATED_H
 #define ASNCPP_ENUMERATED_H
-
-#include <string>
+#include <cstdint>
 #include <stdexcept>
+#include <string>
 #include "asncpp/asn_base.h"
-using namespace std::string_literals;
+#include "integer.h"
+
+
+// class enumerated_t : public integer_base<intmax_t> {
+// public:
+//     enumerated_t() {
+//         _type = asn1_tag::ENUMERATED;
+//     }
+//
+//     explicit enumerated_t(intmax_t val) : integer_base<intmax_t>(val) {
+//         _type = asn1_tag::ENUMERATED;
+//     }
+//
+//     to_string() const override {
+//         return "ENUMERATED: " + std::to_string(this->_decoded);
+//     }
+//
+// };
+
+// #include <string>
+// #include <stdexcept>
+// #include "asncpp/asn_base.h"
+// using namespace std::string_literals;
 //
 //class enumerated_t : public asn1_type<uintmax_t, static_cast<uintmax_t>(asn1_tag::ENUMERATED)> {
 //    public:

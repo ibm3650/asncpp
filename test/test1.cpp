@@ -47,9 +47,10 @@ TEST(ASN1BaseTest, SerializeIntegerMultipleCases) {
 }
 
 TEST(ASN1BaseTest, OverflowType) {
-    integer_base<int32_t> obj;
+    //integer_t obj;
+    using integer_inv = integer_base<uint32_t, asn1_tag::INTEGER>;
     EXPECT_ANY_THROW(
-            deserialize<integer_base<int32_t >>(
+            deserialize<integer_inv >(
                     (integer_test_cases.end() - 1)->first //is too long, require 64 bits. But we have only 32
             )
     );

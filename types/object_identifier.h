@@ -5,6 +5,7 @@
 #ifndef ASNCPP_OBJECT_IDENTIFIER_H
 #define ASNCPP_OBJECT_IDENTIFIER_H
 
+#include <algorithm>
 #include <vector>
 #include <string>
 #include <stdexcept>
@@ -19,26 +20,27 @@
 //TODO: Проверка на длину массива
 //TODO: Оптимизация кода
 /**
- * @class object_identifier_t
+ * @class object_identifier_base
  * @brief Реализация ASN.1 OBJECT IDENTIFIER с поддержкой кодирования и декодирования.
  */
-class object_identifier_t : public asn1_base {
+template<bool relative, asn1_tag type>
+class object_identifier_base : public asn1_base {
 public:
     using sid_t = uint32_t;
 
     /**
      * @brief Конструктор по умолчанию.
      */
-    object_identifier_t() {
-        _type = asn1_tag::OBJECT_IDENTIFIER;
+    object_identifier_base() {
+        _type = type;
     }
 
     /**
      * @brief Конструктор с инициализацией значением.
      * @param data Последовательность идентификаторов.
      */
-    object_identifier_t(std::span<const sid_t> data) {
-        _type = asn1_tag::OBJECT_IDENTIFIER;
+    object_identifier_base(std::span<const sid_t> data) {
+        _type = type;
         _value.assign(data.begin(), data.end());
     }
 
@@ -75,30 +77,37 @@ protected:
         auto to_b128 = [](sid_t value) -> std::vector<uint8_t> {
             std::vector<uint8_t> result;
             do {
-                result.insert(result.begin(), static_cast<uint8_t>(value & 0x7F));
+                result.insert(result.begin(), static_cast<uint8_t>(value & 0x7FU));
                 value >>= 7U;
             } while (value > 0);
 
-            for (size_t j = 0; j < result.size() - 1; ++j) {
-                result[j] |= 0x80U;
-            }
+            std::transform(result.begin(),
+                           std::prev(result.end()),
+                           result.begin(),
+                           [](const uint8_t byte) {
+                               return byte | 0x80U;
+                           });
             return result;
         };
+        if constexpr (relative) {
+            if (_value.empty()) {
+                throw std::runtime_error("Relative OID must have at least one SID");
+            }
+        } else {
+            if (_value.size() < 2) {
+                throw std::runtime_error("OID must have at least two SIDs");
+            }
+            if (_value[0] > 2) {
+                throw std::runtime_error("First SID must be in range [0, 2]");
+            }
+            if (_value[0] != 2 && _value[1] > 39) {
+                throw std::runtime_error("Second SID must be in range [0, 39]");
+            }
 
-        if (_value.size() < 2) {
-            throw std::runtime_error("OID must have at least two SIDs");
+            this->_data = to_b128((40U * _value[0]) + _value[1]);
         }
-        if (_value[0] > 2) {
-            throw std::runtime_error("First SID must be in range [0, 2]");
-        }
-        if (_value[0] != 2 && _value[1] > 39) {
-            throw std::runtime_error("Second SID must be in range [0, 39]");
-        }
-
-        this->_data = to_b128(40U * _value[0] + _value[1]);
         for (const auto &sid: _value | std::views::drop(2)) {
-            const auto encoded_sid = to_b128(sid);
-            this->_data.insert(this->_data.end(), encoded_sid.begin(), encoded_sid.end());
+            this->_data.append_range(to_b128(sid));
         }
 
         return this->_data;
@@ -108,7 +117,7 @@ protected:
      * @brief Декодирование OBJECT IDENTIFIER из DER.
      * @param data Байтовый диапазон.
      */
-    void decode(std::span<const uint8_t> data) final {
+    void decode(std::span<const uint8_t> /*data*/) final {
         if (this->_data.empty()) {
             throw std::runtime_error("OID must have at least one byte");
         }
@@ -125,14 +134,15 @@ protected:
         };
 
         auto it = this->_data.begin();
-        const sid_t first_sid = from_b128(it);
+        if constexpr (!relative) {
+            const sid_t first_sid = from_b128(it);
 
-        if (first_sid > 80) {
-            _value = {2, first_sid - 80};
-        } else {
-            _value = {first_sid / 40, first_sid % 40};
+            if (first_sid > 80) {
+                _value = {2, first_sid - 80};
+            } else {
+                _value = {first_sid / 40, first_sid % 40};
+            }
         }
-
         while (it < this->_data.end()) {
             _value.push_back(from_b128(it));
         }
@@ -142,4 +152,8 @@ private:
     std::vector<sid_t> _value; ///< Хранение идентификаторов.
 };
 
+//TODO: кадый алиас вынести в отдельнй заголовочный файл
+//FIXME: сделать чтобы вывод to_string был уникальным для каждого типа
+using object_identifier_t = object_identifier_base<false, asn1_tag::OBJECT_IDENTIFIER>;
+using relative_oid_t = object_identifier_base<true, asn1_tag::RELATIVE_OID>;
 #endif //ASNCPP_OBJECT_IDENTIFIER_H

@@ -394,12 +394,14 @@ std::unique_ptr<asn1_base> deserialize_v(std::span<const uint8_t> data) {
         case asn1_tag::REAL:
             break;
         case asn1_tag::ENUMERATED:
+            ptr = std::make_unique<enumerated_t>();
             break;
         case asn1_tag::EMBEDDED_PDV:
             break;
         case asn1_tag::UTF8_STRING:
             break;
         case asn1_tag::RELATIVE_OID:
+            ptr = std::make_unique<relative_oid_t>();
             break;
         case asn1_tag::SEQUENCE:
             break;
@@ -485,18 +487,18 @@ std::unique_ptr<asn1_base> deserialize_v(std::span<const uint8_t> data) {
 
 
 int main111() {
-    integer_base inr(6564564);
+   // integer_base inr(6564564);
     // serialize(&inr);
     //using Type = typename std::remove_reference_t<decltype(inr)>::value_t;
     //using Type1 = typename inr::type;
     // asn1_base<Type, inr.type> *base = &inr;
     // base->encode();
-    const auto fff = serialize(&inr);
-    for (uint8_t byte: fff) {
-        std::cout << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(byte) << " ";
-    }
-    const auto fffffd = deserialize_v(fff);
-    std::cout << fffffd->to_string() << std::endl;
+  //  const auto fff = serialize(&inr);
+ //   for (uint8_t byte: fff) {
+  //      std::cout << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(byte) << " ";
+//    }
+//    const auto fffffd = deserialize_v(fff);
+ //   std::cout << fffffd->to_string() << std::endl;
     //const auto fff = inr.encode();
 
     return 0;

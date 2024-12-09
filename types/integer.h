@@ -17,7 +17,7 @@
  * @brief ASN.1 INTEGER тип с поддержкой кодирования и декодирования.
  * @tparam T Тип данных для хранения значения INTEGER (например, intmax_t).
  */
-template<std::integral T>
+template<std::integral T , asn1_tag type>
 class integer_base: public asn1_base {
 public:
     using value_t = T;
@@ -26,7 +26,7 @@ public:
      * @brief Конструктор по умолчанию.
      */
     integer_base() noexcept {
-        _type = asn1_tag::INTEGER;
+        _type = type;
     };
 
 
@@ -35,7 +35,7 @@ public:
      * @param val Значение для инициализации INTEGER.
      */
     explicit integer_base(T val) noexcept: _decoded{val} {
-        _type = asn1_tag::INTEGER;
+        _type = type;
     }
 
     /**
@@ -120,7 +120,9 @@ public:
 private:
     T _decoded{}; ///< Хранит декодированное значение INTEGER.
 };
-
-using integer_t = integer_base<intmax_t>;
+//TODO: кадый алиас вынести в отдельнй заголовочный файл
+//FIXME: сделать чтобы вывод to_string был уникальным для каждого типа
+using integer_t = integer_base<intmax_t, asn1_tag::INTEGER>;
+using enumerated_t = integer_base<intmax_t, asn1_tag::ENUMERATED>;
 
 #endif //ASNCPP_INTEGER_H
