@@ -3,7 +3,7 @@
 //
 #include <gtest/gtest.h>
 #include "asncpp/asn_base.h"
-#include "integer.h"
+#include "asncpp/integer.h"
 
 std::vector<std::pair<std::vector<uint8_t>, int64_t>> integer_test_cases = {
         // Положительные числа

@@ -1,4 +1,7 @@
 cmake_minimum_required(VERSION 3.30)
+if (MSVC)
+    add_compile_options(/utf-8)
+endif()
 project(asncpp)
 
 set(CMAKE_CXX_STANDARD 23)
@@ -7,8 +10,6 @@ add_library(
         asncpp
         main.cpp
 )
-#add_library(libnumerixpp::libnumerixpp ALIAS libnumerixpp_libnumerixpp)
-
 
 
 
@@ -25,7 +26,7 @@ target_include_directories(asncpp
 #add_executable(asncpp main.cpp
         #        include/asn_base.h
         #        types/integer.cpp
-        #        types/integer.h
+        #        types/integer_base.h
         #        types/boolean.h
         #        types/object_identifier.h
         #        types/enumerated.h
@@ -50,5 +51,6 @@ target_include_directories(asncpp
 #)
 #if(BUILD_TESTS)
 add_subdirectory(test)
+
 #endif()
 

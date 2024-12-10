@@ -18,7 +18,7 @@
  * @tparam T Тип данных для хранения значения INTEGER (например, intmax_t).
  */
 template<std::integral T , asn1_tag type>
-class integer_base: public asn1_base {
+class integer_base : public asn1_base {
 public:
     using value_t = T;
 
@@ -42,7 +42,8 @@ public:
      * @brief Явное преобразование к типу T.
      * @return Декодированное значение.
      */
-    [[nodiscard]] operator T() const noexcept { // NOLINT(*-explicit-constructor)
+    [[nodiscard]] operator T() const noexcept {
+        // NOLINT(*-explicit-constructor)
         return this->_decoded;
     }
 
@@ -50,7 +51,7 @@ public:
      * @brief Получить декодированное значение INTEGER.
      * @return Ссылка на декодированное значение.
      */
-    [[maybe_unused]] auto get_value() const noexcept -> value_t& {
+    [[maybe_unused]] auto get_value() const noexcept -> value_t & {
         return this->_decoded;
     }
 
@@ -58,7 +59,8 @@ public:
      * @brief Кодирование INTEGER в DER.
      * @return Вектор байтов, представляющий закодированное значение.
      */
-    auto encode() -> std::vector<uint8_t> final  {
+
+    [[nodiscard]] auto encode() -> std::vector<uint8_t> final {
         /*Число уже хранится в формате дополнения до двух, нет необходимости в дополнительном кодировании
          * Кодирование значения в big-endian формате
          * */
@@ -93,7 +95,7 @@ public:
      * @param data Байтовый диапазон, представляющий закодированное значение.
      * @throws std::runtime_error Если значение слишком велико для типа T.
      */
-    void decode(std::span<const uint8_t> /*data*/) final {
+    void decode(std::span<const uint8_t>  /*data*/) final {
         if (this->_data.size() > sizeof(T)) {
             throw std::runtime_error("Integer value is too large");
         }
@@ -108,7 +110,8 @@ public:
         /* Проверяем знак. Не делаем второе дополнение, если длинна значения равна размеру типа
          * Потому как при сдвиге влево на равное размеру число бит или большее, происходит UB
          * */
-        if ((this->_data[0] & 0x80U) && length != sizeof(T)) { // Отрицательное число
+        if ((this->_data[0] & 0x80U) && length != sizeof(T)) {
+            // Отрицательное число
             /* Для того чтобы 16-ти битное число, корректно отображалось в 32-х битном типе,
              * При учете, что оно отрицательное, необходимо установить все биты в 1, кроме 16-ти младших
              * */
@@ -120,9 +123,5 @@ public:
 private:
     T _decoded{}; ///< Хранит декодированное значение INTEGER.
 };
-//TODO: кадый алиас вынести в отдельнй заголовочный файл
-//FIXME: сделать чтобы вывод to_string был уникальным для каждого типа
-using integer_t = integer_base<intmax_t, asn1_tag::INTEGER>;
-using enumerated_t = integer_base<intmax_t, asn1_tag::ENUMERATED>;
 
 #endif //ASNCPP_INTEGER_H
