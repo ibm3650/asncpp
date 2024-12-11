@@ -433,10 +433,12 @@ std::unique_ptr<asn1_base> deserialize_v(std::span<const uint8_t> data) {
         case asn1_tag::BMP_STRING:
             break;
         case asn1_tag::DATE:
+            ptr = std::make_unique<date_t>();
             break;
         case asn1_tag::TIME_OF_DAY:
             break;
         case asn1_tag::DATE_TIME:
+
             break;
         case asn1_tag::DURATION:
             break;

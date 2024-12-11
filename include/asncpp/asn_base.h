@@ -5,6 +5,7 @@
 #ifndef ASNCPP_ASN_BASE_H
 #define ASNCPP_ASN_BASE_H
 
+#include <algorithm>
 #include <vector>
 #include <span>
 #include <stdexcept>
@@ -154,7 +155,8 @@ protected:
         dynamic_data_t output = _data;
         output.insert_range(output.begin(), asn1_base::encode_length(_data.size()));
         //TODO: Encode long tags
-        output.insert(output.begin(), static_cast<uint8_t>(std::get<asn1_tag>(_type)));
+        output.insert_range(output.begin(),encode_type());
+       // output.insert(output.begin(), static_cast<uint8_t>(std::get<asn1_tag>(_type)));
         return output;
     }
 
@@ -170,7 +172,7 @@ private:
     //TODO: Проверка длинны массива
     [[nodiscard]] static std::pair<tag_t, size_t> extract_type(std::span<const uint8_t> buffer) {
         const uint8_t tag_decoded = buffer[0] & 0x1FU;
-        if (tag_decoded != 0x1FU) {
+        if (tag_decoded < 0x1FU) {
             return std::make_pair(static_cast<asn1_tag>(tag_decoded), 1ULL);
         }
         auto it = std::next(buffer.begin());
@@ -186,6 +188,10 @@ private:
             ++it;
         }
         push_bits(*it);
+        ++it;
+        if (type_decoded <= 0x22U) {
+            return std::make_pair(static_cast<asn1_tag>(type_decoded), it - buffer.begin());
+        }
         return std::make_pair(type_decoded, it - buffer.begin());
     }
 
@@ -200,6 +206,59 @@ private:
             length >>= 8U;
         }
         output.emplace(output.begin(), static_cast<uint8_t>(output.size() | 0x80U));
+        return output;
+    }
+
+    [[nodiscard]]std::vector<uint8_t> encode_type() {
+        std::vector<uint8_t> output;
+        uintmax_t raw_type{};
+
+        if (std::get_if<asn1_tag>(&_type)) {
+            raw_type = static_cast<uintmax_t>(std::get<asn1_tag>(_type));
+        } else {
+            raw_type = std::get<uintmax_t>(_type);
+        }
+        if (raw_type < 0x1FU) {
+            return{static_cast<unsigned char>(static_cast<uint8_t>(get_cls()) << 6U |
+                                              static_cast<uint8_t>(is_constructed()) << 5U |
+                                              static_cast<uint8_t>(raw_type))};
+            //output.push_back(static_cast<uint8_t>(raw_type))};
+            //return output;
+        }
+
+
+            std::vector<uint8_t> result;
+        result.push_back(static_cast<unsigned char>(static_cast<uint8_t>(get_cls()) << 6U |
+                                              static_cast<uint8_t>(is_constructed()) << 5U |
+                                              static_cast<uint8_t>(0x1FU)));
+            do {
+                result.push_back( static_cast<uint8_t>(raw_type & 0x7FU));
+                raw_type >>= 7U;
+            } while (raw_type > 0);
+
+            std::transform(std::next(result.begin()),
+                          std::prev(result.end()),
+                           std::next(result.begin()),
+                           [](const uint8_t byte) {
+                               return byte | 0x80U;
+                           });
+            return result;
+
+        // if (std::holds_alternative<asn1_tag>(this->_type)) {
+        //     output.push_back(static_cast<uint8_t>(std::get<asn1_tag>(_type)));
+        //     return output;
+        // }
+        // output.push_back(_cls | _constructed);
+        // if (length <= 127) {
+        //     return {static_cast<uint8_t>(length)};
+        // }
+        // std::vector<uint8_t> output;
+        // output.reserve(sizeof(size_t));
+        // while (length > 0) {
+        //     output.emplace(output.begin(), static_cast<uint8_t>(length & 0xFFU));
+        //     length >>= 8U;
+        // }
+        // output.emplace(output.begin(), static_cast<uint8_t>(output.size() | 0x80U));
         return output;
     }
 
@@ -222,11 +281,11 @@ private:
     }
 
     [[nodiscard]] static inline bool extract_is_constructed(const uint8_t tag) noexcept {
-        return (tag & 0x20U);
+        return (tag & 0x20U) >> 5U;
     }
 
     [[nodiscard]] static inline asn1_class extract_class(const uint8_t tag) noexcept {
-        return static_cast<asn1_class>(tag & 0xC0U);
+        return static_cast<asn1_class>((tag & 0xC0U) >> 6U);
     }
 };
 
