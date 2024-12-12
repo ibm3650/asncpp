@@ -1,9 +1,55 @@
 //
 // Created by kandu on 11.12.2024.
 //
+
 #include <array>
 #include <gtest/gtest.h>
-#include "asncpp/iso8601_base.h"
+#include "asncpp/visible_string.h"
+
+
+std::vector<std::pair<std::vector<uint8_t>, std::string>> test_data = {
+    // Корректные данные
+    // {
+    //     {0x1C, 0x08, 0x00, 0x61, 0x00, 0x62, 0x00, 0x63, 0x00, 0x64}, // Полный пакет: UniversalString "abcd"
+    //     {0x00, 0x61, 0x00, 0x62, 0x00, 0x63, 0x00, 0x64}              // Только значение: "abcd" std::u32string original = U"Test: ☀️🌙🌟";
+    // },
+    // {
+    //         {0x1E, 0x06, 0x00, 0x41, 0x00, 0x42, 0x00, 0x43},             // Полный пакет: BMPString "ABC"
+    //         {0x00, 0x41, 0x00, 0x42, 0x00, 0x43}                          // Только значение: "ABC"
+    // },
+    {
+            {0x1A, 0x05, 0x48, 0x65, 0x6C, 0x6C, 0x6F},                  // Полный пакет: PrintableString "Hello"
+            "Hello"                               // Только значение: "Hello"
+    },
+
+    // Некорректные данные
+    // {
+    //         {0x1C, 0x04, 0x61, 0x00, 0x62, 0x00},                        // Полный пакет: Ошибка - длина неверна
+    //         {0x61, 0x00, 0x62, 0x00}                                     // Только значение: "a\0b\0"
+    // },
+    // {
+    //         {0x1E, 0x08, 0x00, 0x41, 0x00, 0x42, 0x43},                  // Полный пакет: Ошибка - неверная структура
+    //         {0x00, 0x41, 0x00, 0x42, 0x43}                               // Только значение: "A\0BC" (некорректный BMPString)
+    // },
+  //  {
+            // {0x1A, 0x06, 0x48, 0x65, 0x6C, 0x6C, 0x6F},                  // Полный пакет: Ошибка - длина указана неверно
+            // "Hello"                               // Только значение: "Hello"
+ //   }
+};
+
+TEST(visible_string_test, encode) {
+    for (const auto &[encoded_expected, expected]: test_data) {
+        visible_string_t obj(expected);
+        const auto encoded = serialize(&obj);
+        EXPECT_EQ(encoded, encoded_expected);
+    }
+    // const char data[] = {0x1F, 0x1F, 0x08, '2', '0', '2', '2', '1', '2', '2', '5'};
+    // visible_string_t const date_obj(data);
+    // const char32_t data1[] = {0x1F, 0x1F, 0x08, '2', '0', '2', '2', '1', '2', '2', '5'};
+    // //universal_string_t date_o7bj(data1);
+}
+
+
 // std::vector<std::tuple<std::tm, std::vector<uint8_t>, std::string> > date_time_tests = {
 //     {
 //         {30, 30, 12, 25, 11, 122}, // 2022-12-25T12:30:30

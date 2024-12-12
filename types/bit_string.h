@@ -8,7 +8,7 @@
 #include <string>
 #include <stdexcept>
 #include <bitset>
-#include "asncpp/asn_base.h"
+#include "asncpp/base/asn_base.h"
 //
 //class bit_string_t : public asn1_type<std::vector<uint8_t>, static_cast<uintmax_t>(asn1_tag::BIT_STRING)> {
 //public:

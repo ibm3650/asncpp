@@ -12,7 +12,7 @@
 #include <span>
 #include <sstream>
 #include <ranges>
-#include "asncpp/asn_base.h"
+#include "asncpp/base/asn_base.h"
 
 //TODO: Implement long sid encoding
 //TODO: Инициализация строкой

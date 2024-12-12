@@ -11,7 +11,7 @@
 #include <ctime>
 #include <iomanip>
 #include <sstream>
-#include "asncpp/asn_base.h"
+#include "asncpp/base/asn_base.h"
 
 //template<auto& placeholder, asn1_tag type>
 template<const char * placeholder, asn1_tag type>
@@ -110,10 +110,10 @@ private:
      }
 };
 
-constexpr char date_format[] = "%Y-%m-%d";
+
 constexpr char date_time_format[] = "%FT%T";
 constexpr char time_of_day_format[] = "%T";
-using date_t = iso8601_base<date_format, asn1_tag::DATE>;
+
 //using date_time_t = iso8601_base<date_time_format, asn1_tag::DATE_TIME>;
 //using time_of_day_t = iso8601_base<time_of_day_format, asn1_tag::TIME_OF_DAY>;
 #endif //ISO8601_BASE_H

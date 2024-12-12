@@ -2,7 +2,7 @@
 // Created by kandu on 04.12.2024.
 //
 #include <gtest/gtest.h>
-#include "asncpp/asn_base.h"
+#include "asncpp/base/asn_base.h"
 #include "asncpp/integer.h"
 
 std::vector<std::pair<std::vector<uint8_t>, int64_t>> integer_test_cases = {
@@ -30,7 +30,7 @@ std::vector<std::pair<std::vector<uint8_t>, int64_t>> integer_test_cases = {
         {{0x02, 0x08, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, INT64_MIN}  // INTEGER -9223372036854775808
 };
 
-TEST(ASN1BaseTest, DeserializeIntegerMultipleCases) {
+TEST(integer_enumerated_test, deserialize_test) {
     for (const auto &[encoded, expected]: integer_test_cases) {
         auto deserialized = deserialize_v(std::span<const uint8_t>(encoded.data(), encoded.size()));
         const integer_t *ptr = dynamic_cast<integer_t *>(deserialized.get());
@@ -38,7 +38,7 @@ TEST(ASN1BaseTest, DeserializeIntegerMultipleCases) {
     }
 }
 
-TEST(ASN1BaseTest, SerializeIntegerMultipleCases) {
+TEST(integer_enumerated_test, serialize_test) {
     for (const auto &[encoded, expected]: integer_test_cases) {
         integer_t obj(expected);
         const auto serialized = serialize(&obj);
@@ -46,7 +46,7 @@ TEST(ASN1BaseTest, SerializeIntegerMultipleCases) {
     }
 }
 
-TEST(ASN1BaseTest, OverflowType) {
+TEST(integer_enumerated_test, overflow_test) {
     //integer_t obj;
     using integer_inv = integer_base<uint32_t, asn1_tag::INTEGER>;
     EXPECT_ANY_THROW(

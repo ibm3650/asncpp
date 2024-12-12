@@ -9,7 +9,7 @@
 #include <cstdint>
 #include <stdexcept>
 #include <string>
-#include "asncpp/asn_base.h"
+#include "asn_base.h"
 
 //TODO: Добавить поддержку чисел, размер  которых превышает размер типа T
 /**

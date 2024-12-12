@@ -43,7 +43,7 @@ std::vector<std::pair<std::vector<uint32_t>, std::vector<uint8_t> > > oid_test_c
 };
 
 
-TEST(ObjectIdentifierTest, EncodeBasic) {
+TEST(objext_relative_identifier_test, serialize) {
     for (const auto &test_case: oid_test_cases) {
         object_identifier_t oid(test_case.first);
         const auto encoded = serialize(&oid);
@@ -52,7 +52,7 @@ TEST(ObjectIdentifierTest, EncodeBasic) {
 }
 
 
-TEST(ObjectIdentifierTest, DecodeBasic) {
+TEST(objext_relative_identifier_test, deserialize) {
     for (const auto &[expected, encoded]: oid_test_cases) {
         auto deserialized = deserialize_v(encoded);
         const object_identifier_t *ptr = dynamic_cast<object_identifier_t *>(deserialized.get());
@@ -61,25 +61,25 @@ TEST(ObjectIdentifierTest, DecodeBasic) {
 }
 
 
-TEST(ObjectIdentifierTest, InvalidFirstSID) {
+TEST(objext_relative_identifier_test, invalid_first_sid) {
     const auto invalid_oid = std::vector<uint32_t>{3, 0};
     object_identifier_t oid(invalid_oid);
     EXPECT_THROW(serialize(&oid), std::runtime_error);
 }
 
-TEST(ObjectIdentifierTest, NotEnoughSIDs) {
+TEST(objext_relative_identifier_test, not_enough_data) {
     const auto invalid_oid = std::vector<uint32_t>{0};
     object_identifier_t oid(invalid_oid);
     EXPECT_THROW(serialize(&oid), std::runtime_error);
 }
 
-TEST(ObjectIdentifierTest, InvalidSecondSID) {
+TEST(objext_relative_identifier_test, invalid_second_sid) {
     const auto invalid_oid = std::vector<uint32_t>{1, 50};
     object_identifier_t oid(invalid_oid);
     EXPECT_THROW(serialize(&oid), std::runtime_error);
 }
 
-TEST(ObjectIdentifierTest, EmptyOID) {
+TEST(objext_relative_identifier_test, empty_oid) {
     const auto invalid_oid = std::vector<uint32_t>{0x06, 0x00};
     object_identifier_t oid(invalid_oid);
     EXPECT_THROW(serialize(&oid), std::runtime_error);
