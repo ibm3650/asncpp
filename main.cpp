@@ -3,6 +3,9 @@
 #include <numeric>
 #include <iomanip>
 #include <sstream>
+#include <asncpp/bmp_string.h>
+#include <asncpp/visible_string.h>
+
 #include "asncpp/integer.h"
 #include "types/object_identifier.h"
 #include "asncpp/enumerated.h"
@@ -17,7 +20,6 @@
 //TODO: Add support for large numbers
 //DER encoding
 //https://www.itu.int/ITU-T/studygroups/com17/languages/X.690-0207.pdf
-
 
 
 inline std::ostream &operator<<(std::ostream &os, asn1_tag tag) {
@@ -155,16 +157,15 @@ inline std::ostream &operator<<(std::ostream &os, asn1_tag tag) {
 //}
 
 
-
 //IEEE-754 binary64 format
 inline std::vector<uint8_t> mantissa_bits(double mantissa) {
     // Умножаем мантиссу на 2^53 и отбрасываем дробную часть
     auto bits = static_cast<uint64_t>(mantissa * (1ULL << 53));
-    std::vector<uint8_t> result(8, 0);// Массив для результата (53 бита (56))
+    std::vector<uint8_t> result(8, 0); // Массив для результата (53 бита (56))
 
     for (int i = 7; i >= 0; --i) {
         result[i] = static_cast<uint8_t>(bits & 0xFF); // Извлекаем младший байт
-        bits >>= 8;                                   // Сдвигаем число вправо
+        bits >>= 8; // Сдвигаем число вправо
     }
 
     return result; // Возвращаем big-endian представление
@@ -359,8 +360,6 @@ std::vector<uint8_t> serialize(asn1_base *block) {
 }
 
 
-
-
 std::unique_ptr<asn1_base> deserialize_v(std::span<const uint8_t> data) {
     if (data.empty()) {
         throw std::invalid_argument("Invalid ASN.1 data");
@@ -371,7 +370,6 @@ std::unique_ptr<asn1_base> deserialize_v(std::span<const uint8_t> data) {
     }
     std::unique_ptr<asn1_base> ptr;
     switch (*std::get_if<asn1_tag>(&type)) {
-
         case asn1_tag::Reserved:
             break;
         case asn1_tag::BOOLEAN:
@@ -425,12 +423,15 @@ std::unique_ptr<asn1_base> deserialize_v(std::span<const uint8_t> data) {
         case asn1_tag::GRAPHIC_STRING:
             break;
         case asn1_tag::VISIBLE_STRING:
+            ptr = std::make_unique<visible_string_t>();
+
             break;
         case asn1_tag::GENERAL_STRING:
             break;
         case asn1_tag::UNIVERSAL_STRING:
             break;
         case asn1_tag::BMP_STRING:
+            ptr = std::make_unique<bmp_string_t>();
             break;
         case asn1_tag::DATE:
             ptr = std::make_unique<date_t>();
@@ -443,10 +444,11 @@ std::unique_ptr<asn1_base> deserialize_v(std::span<const uint8_t> data) {
         case asn1_tag::DURATION:
             break;
     }
-    (void)static_cast<asn1_base*>(ptr.get())->asn1_base::decode(data);
+    (void) static_cast<asn1_base *>(ptr.get())->asn1_base::decode(data);
     ptr->decode(data);
     return ptr;
 }
+
 //#include <variant>
 //auto deserialize_v(std::span<const uint8_t> data) {
 //    if (data.empty()) {
@@ -490,263 +492,263 @@ std::unique_ptr<asn1_base> deserialize_v(std::span<const uint8_t> data) {
 
 
 int main111() {
-   // integer_base inr(6564564);
+    // integer_base inr(6564564);
     // serialize(&inr);
     //using Type = typename std::remove_reference_t<decltype(inr)>::value_t;
     //using Type1 = typename inr::type;
     // asn1_base<Type, inr.type> *base = &inr;
     // base->encode();
-  //  const auto fff = serialize(&inr);
- //   for (uint8_t byte: fff) {
-  //      std::cout << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(byte) << " ";
-//    }
-//    const auto fffffd = deserialize_v(fff);
- //   std::cout << fffffd->to_string() << std::endl;
+    //  const auto fff = serialize(&inr);
+    //   for (uint8_t byte: fff) {
+    //      std::cout << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(byte) << " ";
+    //    }
+    //    const auto fffffd = deserialize_v(fff);
+    //   std::cout << fffffd->to_string() << std::endl;
     //const auto fff = inr.encode();
 
     return 0;
-//    // Example of the very popular RFC 3339 format UTC time
-//    struct tm tt = {0};
-//    const std::string rfc3339 = "20241203105321.000-1100";
-////    const std::string rfc3339 = "20241203105321";
-////    const std::string rfc3339 = "20241203105321.000Z";
-//    std::istringstream ss(rfc3339);
-//    //std::istringstream ss(raw.get_data().data());
-//
-//    // Парсим дату-время в формате ISO 8601 (без проверки часового пояса)
-//    ss >> std::get_time(&tt, "%Y%m%d%H%M%S");
-//    if (ss.fail()) {
-//        throw std::invalid_argument("Invalid ISO 8601 format: " + rfc3339);
-//    }
-//    std::string str;
-//    ss >> str;
-//    str = str.substr(str.length() - 5, 3);
-//    std::cout << "Stream" << str << '\n';
-//    int res{};
-//    res = std::stoi(str);
-////    int timezone = 0;
-////    if (rfc3339.size() > 15) {
-////        ss >> timezone;
-////    }
-//    std::time_t time = std::time({});
-//    std::timespec ts{};
-//    std::timespec_get(&ts, TIME_UTC);
-//    char timeString[std::size("yyyy-mm-ddThh:mm:ssZ")+ 100];
-//    std::strftime(std::data(timeString),
-//                  std::size(timeString),
-//                  "%y %m %d %H %M %S Z",
-//                  std::gmtime(&ts.tv_sec));
-//    std::cout << timeString << '\n'
-//            << "Raw timespec.tv_nsec: " << (ts.tv_nsec % 1000000) / 1000 << '\n';
-//
-//
-//
-//    double seconds;
-//    if (sscanf(generalized(*std::gmtime(&ts.tv_sec)).c_str(), "%04d%02d%02d%02d%02d%lfZ",
-//               &tt.tm_year, &tt.tm_mon, &tt.tm_mday,
-//               &tt.tm_hour, &tt.tm_min, &seconds) != 6)
-//    tt.tm_sec   = (int) seconds;
-//    tt.tm_mon  -= 1;
-//    tt.tm_year -= 1900;
-//    tt.tm_isdst =-1;
-//    const auto ff = mktime(&tt);
-//    std::strftime(std::data(timeString),
-//                  std::size(timeString),
-//                  "%Y %m %d %H %M %S",
-//                  std::gmtime(&ff));
-//    std::cout << timeString << '\n'
-//              << "Raw timespec.tv_nsec: " << (ts.tv_nsec % 1000000) / 1000 << '\n';
-//;
-////    const auto d = u8"\uD800\uDF48"
-//    bit_string_t bit_string(8564743, 24);
-//    std::cout << bit_string.to_string() << std::endl;
-//    std::vector<uint32_t> relativeOid = {123, 456};
-//
-//    auto encoded2 = encodeRelativeOid(relativeOid);
-//
-//    std::cout << "Encoded RELATIVE-OID: ";
-//    for (uint8_t byte: encoded2) {
-//        std::cout << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(byte) << " ";
-//    }
-//    std::cout << std::endl;
-//    const uint8_t values[] = {0x0a, 0x02, 0x01, 0x00};
-//    const uint8_t values1[] = {0x0D, 0x03, 0x7B, 0x83, 0x48};
-//    relative_identifier_t relative_oid;
-//    relative_oid.decode(std::span{values1});
-//    std::cout << relative_oid.to_string() << std::endl;
-//    enumerated_t enumerated;
-//    enumerated.decode(values);
-//    std::cout << static_cast<uintmax_t>(enumerated) << std::endl;
-//    std::cout << enumerated.to_string() << std::endl;
-//
-//
-//    const int mask = static_cast<int>(-1) << (8 * 2);
-//    std::cout << std::hex << mask << std::endl;
-//    std::vector<uint32_t> data = {1, 2, 840, 113549};
-//    std::vector<uint8_t> result;
-//
-//    if (data.size() >= 2) {
-//        result.push_back(40 * data[0] + data[1]);
-//    }
-//
-//    // Кодируем остальные идентификаторы (c, d, ...)
-//    for (size_t i = 2; i < data.size(); ++i) {
-//        uint32_t value = data[i];
-//        std::vector<uint8_t> temp;
-//
-//        // Кодируем value в base-128
-//        do {
-//            temp.insert(temp.begin(), static_cast<uint8_t>(value & 0x7F));
-//            value >>= 7;
-//        } while (value > 0);
-//
-//        // Устанавливаем MSB для всех байтов, кроме последнего
-//        for (size_t j = 0; j < temp.size() - 1; ++j) {
-//            temp[j] |= 0x80;
-//        }
-//
-//        // Добавляем закодированное значение в результат
-//        result.insert(result.end(), temp.begin(), temp.end());
-//    }
-//
-//
-//    for (const auto byte: result) {
-//        std::cout << std::hex << static_cast<uint32_t>(byte) << ' ';
-//    }
-//
-//    const uint8_t data1[] = {
-//            0x06, 0x06, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D
-//    };
-//    object_identifier_t oid;
-//    oid.decode(data1);
-//    std::cout << oid.to_string() << std::endl;
-//    return 0;
-////    const uint8_t buffer[] = {0x1F, 0x81, 0x2A, 0x82, 0x01, 0x2C}; // Длинный тег: 0x12A
-////    asn1_base block(buffer);
-////    std::cout << "Type: " << block.get_type() << std::endl;
-////    std::cout << "Class: " << static_cast<int>(block.get_cls()) << std::endl;
-////    std::cout << "Constructed: " << std::boolalpha << block.is_constructed() << std::endl;
-////    std::cout << "Length: " << block.get_length() << std::endl;
-////    std::cout << "Data: ";
-////    const uint8_t integerData[] = { //1
-////            0x02,       // Тег INTEGER
-////            0x01,       // Длина: 1 байт
-////            0x2A        // Значение: 42 (в шестнадцатеричной системе)
-////    };
-////
-//    const uint8_t largeIntegerData[] = {
-//            0x02,
-//            0x04,
-//            0xF8, 0xA4, 0x32, 0xEB
-//    };//-123456789
-////    integer_base integer;
-////    integer.decode(largeIntegerData);
-////    auto value = static_cast<intmax_t>(integer);
-////    std::cout << value << std::endl;
-////    integer_base i(5);
-////    const auto tl =  asn1_base::encode_length(30);
-////    std::cout << "Length: " << asn1_base::extract_length(tl.data()).first << std::endl;
-////    return 0;
-//
-//    const int64_t test_nums[] = {0, -0,
-//                                 1, -1,
-//                                 127, -127,
-//                                 128, -128,
-//                                 255, -255,
-//                                 256, -256,
-//                                 32767, -32767,
-//                                 32768, -32768,
-//                                 65535, -65535,
-//                                 65536, -65536,
-//                                 2147483647, -2147483647,
-//                                 2147483648, -2147483648,
-//                                 4294967295, -4294967295,
-//                                 4294967296, -4294967296,
-//                                 9223372036854775807, -9223372036854775807,
-//                                 9223372036854775808, -9223372036854775808};
-//    for (const auto &num: test_nums) {
-//        integer_base integer(num);
-//        const auto encoded = integer.encode();
-//        integer_base decoded(int64_t{0});
-//        decoded.decode(encoded.data());
-//        const auto decoded_num = static_cast<int64_t>(decoded);
-//        std::cout << "Original: " << num << ' ' << decoded.to_string() << std::endl;
-//    }
-////
-////
-////    const uint8_t sequenceData[] = { //4
-////            0x30,       // Тег SEQUENCE (конструкторный)
-////            0x06,       // Длина: 6 байт
-////            0x02, 0x01, 0x7B, // INTEGER: Тег (0x02), длина (0x01), значение (123 = 0x7B)
-////            0x01, 0x01, 0xFF  // BOOLEAN: Тег (0x01), длина (0x01), значение (TRUE = 0xFF)
-////    };
-////
-////    const uint8_t booleanData[] = {
-////            0x01,       // Тег BOOLEAN
-////            0x01,       // Длина: 1 байт
-////            0xFF        // Значение: TRUE (0xFF)
-////    };
-////
-////
-////    const uint8_t octetStringData[] = {
-////            0x04,       // Тег OCTET STRING
-////            0x05,       // Длина: 5 байт
-////            0x48, 0x65, 0x6C, 0x6C, 0x6F // Значение: "Hello"
-////    };
-////
-////    const uint8_t constructedOctetStringData[] = {
-////            0x24,       // Тег OCTET STRING (конструкторная форма)
-////            14,       // Длина: 12 байт (2 вложенных элемента по 6 байт каждый)
-////
-////            // Первый вложенный OCTET STRING ("Hello")
-////            0x04,       // Тег OCTET STRING (примитивная форма)
-////            0x05,       // Длина: 5 байт
-////            0x48, 0x65, 0x6C, 0x6C, 0x6F, // "Hello"
-////
-////            // Второй вложенный OCTET STRING ("World")
-////            0x04,       // Тег OCTET STRING (примитивная форма)
-////            0x05,       // Длина: 5 байт
-////            0x57, 0x6F, 0x72, 0x6C, 0x64 // "World"
-////    };
-////
-////
-//    // const uint8_t *ptr = largeIntegerData;
-////    //const uint8_t *ptr = constructedOctetStringData;
-////
-////    std::cout <<
-////              "Type: " << extract_type(ptr[0]) << std::endl <<
-////              "Constructed: " << std::boolalpha << extract_is_constructed(ptr[0]) << std::endl <<
-////              "Class: " << static_cast<int>(extract_class(ptr[0])) << std::endl;
-////
-////    const size_t length = ptr[1];
-////    const uint8_t *_data = ptr + 2;
-////    //const asn1_tag type = extract_type(ptr[0]);
-//////    if (type == asn1_tag::INTEGER) {
-////        int32_t value = 0;
-////        int sign = 1;
-////        if (*_data == 0x00)
-////            _data++;
-////        else if (*_data == 0x80) {
-////            sign = -1;
-////            _data++;
-////        }
-////        for (size_t i = 0; i < length; i++) {
-////            value = value << 8;
-////            value += *_data;
-////            _data++;
-////        }
-////        value *= sign;
-////        std::cout << std::dec << "Value: " << value << std::endl;
-////    }
-////
-////    if (type == asn1_tag::BOOLEAN) {
-////        bool value = *_data != 0x00;
-////        std::cout << "Value: " << std::boolalpha << value << std::endl;
-////    }
-////    if (type == asn1_tag::OCTET_STRING) {
-////        std::vector<uint8_t> output;
-////        decode_octet_string(ptr, sizeof octetStringData, output);
-////        std::cout << "Value: " << std::string{reinterpret_cast<char *>(output._data()), output.size()} << std::endl;
-////    }
-//    return 0;
+    //    // Example of the very popular RFC 3339 format UTC time
+    //    struct tm tt = {0};
+    //    const std::string rfc3339 = "20241203105321.000-1100";
+    ////    const std::string rfc3339 = "20241203105321";
+    ////    const std::string rfc3339 = "20241203105321.000Z";
+    //    std::istringstream ss(rfc3339);
+    //    //std::istringstream ss(raw.get_data().data());
+    //
+    //    // Парсим дату-время в формате ISO 8601 (без проверки часового пояса)
+    //    ss >> std::get_time(&tt, "%Y%m%d%H%M%S");
+    //    if (ss.fail()) {
+    //        throw std::invalid_argument("Invalid ISO 8601 format: " + rfc3339);
+    //    }
+    //    std::string str;
+    //    ss >> str;
+    //    str = str.substr(str.length() - 5, 3);
+    //    std::cout << "Stream" << str << '\n';
+    //    int res{};
+    //    res = std::stoi(str);
+    ////    int timezone = 0;
+    ////    if (rfc3339.size() > 15) {
+    ////        ss >> timezone;
+    ////    }
+    //    std::time_t time = std::time({});
+    //    std::timespec ts{};
+    //    std::timespec_get(&ts, TIME_UTC);
+    //    char timeString[std::size("yyyy-mm-ddThh:mm:ssZ")+ 100];
+    //    std::strftime(std::data(timeString),
+    //                  std::size(timeString),
+    //                  "%y %m %d %H %M %S Z",
+    //                  std::gmtime(&ts.tv_sec));
+    //    std::cout << timeString << '\n'
+    //            << "Raw timespec.tv_nsec: " << (ts.tv_nsec % 1000000) / 1000 << '\n';
+    //
+    //
+    //
+    //    double seconds;
+    //    if (sscanf(generalized(*std::gmtime(&ts.tv_sec)).c_str(), "%04d%02d%02d%02d%02d%lfZ",
+    //               &tt.tm_year, &tt.tm_mon, &tt.tm_mday,
+    //               &tt.tm_hour, &tt.tm_min, &seconds) != 6)
+    //    tt.tm_sec   = (int) seconds;
+    //    tt.tm_mon  -= 1;
+    //    tt.tm_year -= 1900;
+    //    tt.tm_isdst =-1;
+    //    const auto ff = mktime(&tt);
+    //    std::strftime(std::data(timeString),
+    //                  std::size(timeString),
+    //                  "%Y %m %d %H %M %S",
+    //                  std::gmtime(&ff));
+    //    std::cout << timeString << '\n'
+    //              << "Raw timespec.tv_nsec: " << (ts.tv_nsec % 1000000) / 1000 << '\n';
+    //;
+    ////    const auto d = u8"\uD800\uDF48"
+    //    bit_string_t bit_string(8564743, 24);
+    //    std::cout << bit_string.to_string() << std::endl;
+    //    std::vector<uint32_t> relativeOid = {123, 456};
+    //
+    //    auto encoded2 = encodeRelativeOid(relativeOid);
+    //
+    //    std::cout << "Encoded RELATIVE-OID: ";
+    //    for (uint8_t byte: encoded2) {
+    //        std::cout << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(byte) << " ";
+    //    }
+    //    std::cout << std::endl;
+    //    const uint8_t values[] = {0x0a, 0x02, 0x01, 0x00};
+    //    const uint8_t values1[] = {0x0D, 0x03, 0x7B, 0x83, 0x48};
+    //    relative_identifier_t relative_oid;
+    //    relative_oid.decode(std::span{values1});
+    //    std::cout << relative_oid.to_string() << std::endl;
+    //    enumerated_t enumerated;
+    //    enumerated.decode(values);
+    //    std::cout << static_cast<uintmax_t>(enumerated) << std::endl;
+    //    std::cout << enumerated.to_string() << std::endl;
+    //
+    //
+    //    const int mask = static_cast<int>(-1) << (8 * 2);
+    //    std::cout << std::hex << mask << std::endl;
+    //    std::vector<uint32_t> data = {1, 2, 840, 113549};
+    //    std::vector<uint8_t> result;
+    //
+    //    if (data.size() >= 2) {
+    //        result.push_back(40 * data[0] + data[1]);
+    //    }
+    //
+    //    // Кодируем остальные идентификаторы (c, d, ...)
+    //    for (size_t i = 2; i < data.size(); ++i) {
+    //        uint32_t value = data[i];
+    //        std::vector<uint8_t> temp;
+    //
+    //        // Кодируем value в base-128
+    //        do {
+    //            temp.insert(temp.begin(), static_cast<uint8_t>(value & 0x7F));
+    //            value >>= 7;
+    //        } while (value > 0);
+    //
+    //        // Устанавливаем MSB для всех байтов, кроме последнего
+    //        for (size_t j = 0; j < temp.size() - 1; ++j) {
+    //            temp[j] |= 0x80;
+    //        }
+    //
+    //        // Добавляем закодированное значение в результат
+    //        result.insert(result.end(), temp.begin(), temp.end());
+    //    }
+    //
+    //
+    //    for (const auto byte: result) {
+    //        std::cout << std::hex << static_cast<uint32_t>(byte) << ' ';
+    //    }
+    //
+    //    const uint8_t data1[] = {
+    //            0x06, 0x06, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D
+    //    };
+    //    object_identifier_t oid;
+    //    oid.decode(data1);
+    //    std::cout << oid.to_string() << std::endl;
+    //    return 0;
+    ////    const uint8_t buffer[] = {0x1F, 0x81, 0x2A, 0x82, 0x01, 0x2C}; // Длинный тег: 0x12A
+    ////    asn1_base block(buffer);
+    ////    std::cout << "Type: " << block.get_type() << std::endl;
+    ////    std::cout << "Class: " << static_cast<int>(block.get_cls()) << std::endl;
+    ////    std::cout << "Constructed: " << std::boolalpha << block.is_constructed() << std::endl;
+    ////    std::cout << "Length: " << block.get_length() << std::endl;
+    ////    std::cout << "Data: ";
+    ////    const uint8_t integerData[] = { //1
+    ////            0x02,       // Тег INTEGER
+    ////            0x01,       // Длина: 1 байт
+    ////            0x2A        // Значение: 42 (в шестнадцатеричной системе)
+    ////    };
+    ////
+    //    const uint8_t largeIntegerData[] = {
+    //            0x02,
+    //            0x04,
+    //            0xF8, 0xA4, 0x32, 0xEB
+    //    };//-123456789
+    ////    integer_base integer;
+    ////    integer.decode(largeIntegerData);
+    ////    auto value = static_cast<intmax_t>(integer);
+    ////    std::cout << value << std::endl;
+    ////    integer_base i(5);
+    ////    const auto tl =  asn1_base::encode_length(30);
+    ////    std::cout << "Length: " << asn1_base::extract_length(tl.data()).first << std::endl;
+    ////    return 0;
+    //
+    //    const int64_t test_nums[] = {0, -0,
+    //                                 1, -1,
+    //                                 127, -127,
+    //                                 128, -128,
+    //                                 255, -255,
+    //                                 256, -256,
+    //                                 32767, -32767,
+    //                                 32768, -32768,
+    //                                 65535, -65535,
+    //                                 65536, -65536,
+    //                                 2147483647, -2147483647,
+    //                                 2147483648, -2147483648,
+    //                                 4294967295, -4294967295,
+    //                                 4294967296, -4294967296,
+    //                                 9223372036854775807, -9223372036854775807,
+    //                                 9223372036854775808, -9223372036854775808};
+    //    for (const auto &num: test_nums) {
+    //        integer_base integer(num);
+    //        const auto encoded = integer.encode();
+    //        integer_base decoded(int64_t{0});
+    //        decoded.decode(encoded.data());
+    //        const auto decoded_num = static_cast<int64_t>(decoded);
+    //        std::cout << "Original: " << num << ' ' << decoded.to_string() << std::endl;
+    //    }
+    ////
+    ////
+    ////    const uint8_t sequenceData[] = { //4
+    ////            0x30,       // Тег SEQUENCE (конструкторный)
+    ////            0x06,       // Длина: 6 байт
+    ////            0x02, 0x01, 0x7B, // INTEGER: Тег (0x02), длина (0x01), значение (123 = 0x7B)
+    ////            0x01, 0x01, 0xFF  // BOOLEAN: Тег (0x01), длина (0x01), значение (TRUE = 0xFF)
+    ////    };
+    ////
+    ////    const uint8_t booleanData[] = {
+    ////            0x01,       // Тег BOOLEAN
+    ////            0x01,       // Длина: 1 байт
+    ////            0xFF        // Значение: TRUE (0xFF)
+    ////    };
+    ////
+    ////
+    ////    const uint8_t octetStringData[] = {
+    ////            0x04,       // Тег OCTET STRING
+    ////            0x05,       // Длина: 5 байт
+    ////            0x48, 0x65, 0x6C, 0x6C, 0x6F // Значение: "Hello"
+    ////    };
+    ////
+    ////    const uint8_t constructedOctetStringData[] = {
+    ////            0x24,       // Тег OCTET STRING (конструкторная форма)
+    ////            14,       // Длина: 12 байт (2 вложенных элемента по 6 байт каждый)
+    ////
+    ////            // Первый вложенный OCTET STRING ("Hello")
+    ////            0x04,       // Тег OCTET STRING (примитивная форма)
+    ////            0x05,       // Длина: 5 байт
+    ////            0x48, 0x65, 0x6C, 0x6C, 0x6F, // "Hello"
+    ////
+    ////            // Второй вложенный OCTET STRING ("World")
+    ////            0x04,       // Тег OCTET STRING (примитивная форма)
+    ////            0x05,       // Длина: 5 байт
+    ////            0x57, 0x6F, 0x72, 0x6C, 0x64 // "World"
+    ////    };
+    ////
+    ////
+    //    // const uint8_t *ptr = largeIntegerData;
+    ////    //const uint8_t *ptr = constructedOctetStringData;
+    ////
+    ////    std::cout <<
+    ////              "Type: " << extract_type(ptr[0]) << std::endl <<
+    ////              "Constructed: " << std::boolalpha << extract_is_constructed(ptr[0]) << std::endl <<
+    ////              "Class: " << static_cast<int>(extract_class(ptr[0])) << std::endl;
+    ////
+    ////    const size_t length = ptr[1];
+    ////    const uint8_t *_data = ptr + 2;
+    ////    //const asn1_tag type = extract_type(ptr[0]);
+    //////    if (type == asn1_tag::INTEGER) {
+    ////        int32_t value = 0;
+    ////        int sign = 1;
+    ////        if (*_data == 0x00)
+    ////            _data++;
+    ////        else if (*_data == 0x80) {
+    ////            sign = -1;
+    ////            _data++;
+    ////        }
+    ////        for (size_t i = 0; i < length; i++) {
+    ////            value = value << 8;
+    ////            value += *_data;
+    ////            _data++;
+    ////        }
+    ////        value *= sign;
+    ////        std::cout << std::dec << "Value: " << value << std::endl;
+    ////    }
+    ////
+    ////    if (type == asn1_tag::BOOLEAN) {
+    ////        bool value = *_data != 0x00;
+    ////        std::cout << "Value: " << std::boolalpha << value << std::endl;
+    ////    }
+    ////    if (type == asn1_tag::OCTET_STRING) {
+    ////        std::vector<uint8_t> output;
+    ////        decode_octet_string(ptr, sizeof octetStringData, output);
+    ////        std::cout << "Value: " << std::string{reinterpret_cast<char *>(output._data()), output.size()} << std::endl;
+    ////    }
+    //    return 0;
 }
