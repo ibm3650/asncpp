@@ -7,7 +7,7 @@
 #include "asncpp/visible_string.h"
 
 
-const std::vector<std::pair<std::vector<uint8_t>, std::string_view> > test_cases = {
+static const std::vector<std::pair<std::vector<uint8_t>, std::string_view> > test_cases = {
     {
         {0x1A, 0x05, 0x48, 0x65, 0x6C, 0x6C, 0x6F},
         "Hello"

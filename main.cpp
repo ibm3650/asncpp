@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <sstream>
 #include <asncpp/bmp_string.h>
+#include <asncpp/ia5_string.h>
 #include <asncpp/visible_string.h>
 
 #include "asncpp/integer.h"
@@ -415,6 +416,7 @@ std::unique_ptr<asn1_base> deserialize_v(std::span<const uint8_t> data) {
         case asn1_tag::VIDEOTEX_STRING:
             break;
         case asn1_tag::IA5_STRING:
+            ptr = std::make_unique<ia5_string_t>();
             break;
         case asn1_tag::UTC_TIME:
             break;

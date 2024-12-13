@@ -12,7 +12,7 @@
 template<class T, asn1_tag type, auto limitations = nullptr>
 class string_base_t : public asn1_base {
 public:
-    [[nodiscard]] const std::basic_string<T> & value() const {
+    [[nodiscard]] auto value() const -> const std::basic_string<T> & {
         return _value;
     }
 
@@ -21,7 +21,7 @@ public:
         _type = type;
     }
 
-    string_base_t(std::basic_string_view<T> data) {
+    explicit string_base_t(std::basic_string_view<T> data) {
         _type = type;
         if constexpr (limitations != nullptr) {
             for (const T symbol: data) {
