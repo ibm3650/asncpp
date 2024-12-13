@@ -2,7 +2,7 @@
 // Created by kandu on 06.12.2024.
 //
 #include <gtest/gtest.h>
-#include "object_identifier.h"
+#include "asncpp/object_identifier.h"
 
 std::vector<std::pair<std::vector<uint32_t>, std::vector<uint8_t> > > oid_test_cases = {
     // Простой OID: 0.0

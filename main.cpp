@@ -7,10 +7,10 @@
 #include <asncpp/visible_string.h>
 
 #include "asncpp/integer.h"
-#include "types/object_identifier.h"
+#include "asncpp/object_identifier.h"
 #include "asncpp/enumerated.h"
 #include "asncpp/date.h"
-#include "types/relative_oid.h"
+#include "asncpp/relative_oid.h"
 #include "types/bit_string.h"
 
 //TODO: Endianess check

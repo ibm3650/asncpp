@@ -1,10 +1,9 @@
 //
-// Created by kandu on 26.11.2024.
+// Created by kandu on 13.12.2024.
 //
 
-#ifndef ASNCPP_OBJECT_IDENTIFIER_H
-#define ASNCPP_OBJECT_IDENTIFIER_H
-
+#ifndef OID_BASE_H
+#define OID_BASE_H
 #include <algorithm>
 #include <vector>
 #include <string>
@@ -19,6 +18,7 @@
 //TODO: Ошибка, если при декодировании bse128 не хватает байтов
 //TODO: Проверка на длину массива
 //TODO: Оптимизация кода
+//FIXME: сделать чтобы вывод to_string был уникальным для каждого типа
 /**
  * @class object_identifier_base
  * @brief Реализация ASN.1 OBJECT IDENTIFIER с поддержкой кодирования и декодирования.
@@ -152,8 +152,4 @@ private:
     std::vector<sid_t> _value; ///< Хранение идентификаторов.
 };
 
-//TODO: кадый алиас вынести в отдельнй заголовочный файл
-//FIXME: сделать чтобы вывод to_string был уникальным для каждого типа
-using object_identifier_t = object_identifier_base<false, asn1_tag::OBJECT_IDENTIFIER>;
-using relative_oid_t = object_identifier_base<true, asn1_tag::RELATIVE_OID>;
-#endif //ASNCPP_OBJECT_IDENTIFIER_H
+#endif //OID_BASE_H
