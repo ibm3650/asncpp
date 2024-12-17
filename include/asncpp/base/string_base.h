@@ -10,7 +10,7 @@
 #include <string_view>
 
 template<class T, asn1_tag type, auto limitations = nullptr>
-class string_base_t : public asn1_base {
+class string_base_t : public asncpp::base::asn1_base {
 public:
     [[nodiscard]] auto value() const -> const std::basic_string<T> & {
         return _value;

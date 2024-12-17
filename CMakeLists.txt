@@ -1,16 +1,14 @@
 cmake_minimum_required(VERSION 3.30)
-if (MSVC)
-    add_compile_options(/utf-8)
-endif ()
 project(asncpp)
 
 set(CMAKE_CXX_STANDARD 23)
-#add_library(asncpp INTERFACE)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 add_library(
         asncpp
         main.cpp
+        src/common.cpp
 )
-
 
 target_include_directories(asncpp
         PUBLIC

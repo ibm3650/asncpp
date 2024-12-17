@@ -51,7 +51,7 @@ TEST(ASN1DateTests, EncodeDate) {
 
 TEST(ASN1DateTests, DecodeDate) {
     for (const auto &[tm_value, encoded_expected, expected]: date_tests) {
-        const auto ptr{deserialize_v(encoded_expected)};
+        const auto ptr{asncpp::base::deserialize_v(encoded_expected)};
         const date_t *date_obj = dynamic_cast<date_t *>(ptr.get());
         EXPECT_EQ(date_obj->get_value(), tm_value);
     }

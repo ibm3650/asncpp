@@ -355,106 +355,10 @@ std::string generalized(std::tm datetime, int8_t timezone = 0) {
 //    return static_cast<asn1_base<T1, U1> *>(block)->asn1_base<T1, U1>::encode();
 //}
 
-std::vector<uint8_t> serialize(asn1_base *block) {
-    (void) block->encode();
-    return static_cast<asn1_base *>(block)->asn1_base::encode();
-}
 
 
-std::unique_ptr<asn1_base> deserialize_v(std::span<const uint8_t> data) {
-    if (data.empty()) {
-        throw std::invalid_argument("Invalid ASN.1 data");
-    }
-    const auto type = asn1_base::extract_type(data).first;
-    if (!std::get_if<asn1_tag>(&type)) {
-        return nullptr;
-    }
-    std::unique_ptr<asn1_base> ptr;
-    switch (*std::get_if<asn1_tag>(&type)) {
-        case asn1_tag::Reserved:
-            break;
-        case asn1_tag::BOOLEAN:
-            break;
-        case asn1_tag::INTEGER:
-            ptr = std::make_unique<integer_t>();
-            break;
-        case asn1_tag::BIT_STRING:
-            break;
-        case asn1_tag::OCTET_STRING:
-            break;
-        case asn1_tag::Null:
-            break;
-        case asn1_tag::OBJECT_IDENTIFIER:
-            ptr = std::make_unique<object_identifier_t>();
-            break;
-        case asn1_tag::OBJECT_DESCRIPTOR:
-            break;
-        case asn1_tag::EXTERNAL:
-            break;
-        case asn1_tag::REAL:
-            break;
-        case asn1_tag::ENUMERATED:
-            ptr = std::make_unique<enumerated_t>();
-            break;
-        case asn1_tag::EMBEDDED_PDV:
-            break;
-        case asn1_tag::UTF8_STRING:
-            break;
-        case asn1_tag::RELATIVE_OID:
-            ptr = std::make_unique<relative_oid_t>();
-            break;
-        case asn1_tag::SEQUENCE:
-            break;
-        case asn1_tag::SET:
-            break;
-        case asn1_tag::NUMERIC_STRING:
-            ptr = std::make_unique<numeric_string_t>();
-            break;
-        case asn1_tag::PRINTABLE_STRING:
-            ptr = std::make_unique<printable_string_t>();
 
-            break;
-        case asn1_tag::T61_STRING:
-            break;
-        case asn1_tag::VIDEOTEX_STRING:
-            break;
-        case asn1_tag::IA5_STRING:
-            ptr = std::make_unique<ia5_string_t>();
-            break;
-        case asn1_tag::UTC_TIME:
-            break;
-        case asn1_tag::GENERALIZED_TIME:
-            break;
-        case asn1_tag::GRAPHIC_STRING:
-            break;
-        case asn1_tag::VISIBLE_STRING:
-            ptr = std::make_unique<visible_string_t>();
 
-            break;
-        case asn1_tag::GENERAL_STRING:
-            break;
-        case asn1_tag::UNIVERSAL_STRING:
-            ptr = std::make_unique<universal_string_t>();
-
-            break;
-        case asn1_tag::BMP_STRING:
-            ptr = std::make_unique<bmp_string_t>();
-            break;
-        case asn1_tag::DATE:
-            ptr = std::make_unique<date_t>();
-            break;
-        case asn1_tag::TIME_OF_DAY:
-            break;
-        case asn1_tag::DATE_TIME:
-
-            break;
-        case asn1_tag::DURATION:
-            break;
-    }
-    (void) static_cast<asn1_base *>(ptr.get())->asn1_base::decode(data);
-    ptr->decode(data);
-    return ptr;
-}
 
 //#include <variant>
 //auto deserialize_v(std::span<const uint8_t> data) {

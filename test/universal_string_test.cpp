@@ -50,7 +50,7 @@ TEST(universal_string_test, encode) {
 
 TEST(universal_string_test, decode) {
     for (const auto &[encoded, expected]: test_cases) {
-        const auto deserialized = deserialize_v(encoded);
+        const auto deserialized = asncpp::base::deserialize_v(encoded);
         const universal_string_t *ptr = dynamic_cast<universal_string_t *>(deserialized.get());
         EXPECT_EQ(ptr->value(), expected);
     }

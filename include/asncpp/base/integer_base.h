@@ -18,7 +18,7 @@
  * @tparam T Тип данных для хранения значения INTEGER (например, intmax_t).
  */
 template<std::integral T , asn1_tag type>
-class integer_base : public asn1_base {
+class integer_base : public asncpp::base::asn1_base {
 public:
     using value_t = T;
 

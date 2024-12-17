@@ -54,7 +54,7 @@ TEST(objext_relative_identifier_test, serialize) {
 
 TEST(objext_relative_identifier_test, deserialize) {
     for (const auto &[expected, encoded]: oid_test_cases) {
-        auto deserialized = deserialize_v(encoded);
+        auto deserialized = asncpp::base::deserialize_v(encoded);
         const object_identifier_t *ptr = dynamic_cast<object_identifier_t *>(deserialized.get());
         EXPECT_EQ(ptr->get_value(), expected);
     }

@@ -13,14 +13,16 @@
 #include <iterator>
 #include <memory>
 
-/**
- * @enum asn1_tag
- * @brief Enumerates ASN.1 tags as defined in the DER/BER standards.
- *
- * This enumeration provides a comprehensive list of ASN.1 tags used
- * for identifying the type of encoded data. Tags are based on the
- * X.690 standard and include both modern and deprecated types.
- */
+
+namespace asncpp::base {
+    class asn1_base;
+
+    std::unique_ptr<asn1_base> deserialize_v(std::span<const uint8_t> data);
+
+    std::vector<uint8_t> serialize(asn1_base *block);
+}
+
+
 enum class asn1_tag : uint8_t {
     Reserved = 0x00, /**< Reserved tag, not used. */
     BOOLEAN = 0x01, /**< Boolean type: TRUE or FALSE. */
@@ -70,11 +72,11 @@ enum class asn1_class : uint8_t {
     CONTEXT_SPECIFIC = 0x02, /**< Context-specific class: interpreted relative to the context. */
     PRIVATE = 0x03 /**< Private class: used for application-specific purposes. */
 };
+using tag_t = std::variant<asn1_tag, uintmax_t>;
 
 
-class asn1_base {
+class asncpp::base::asn1_base {
 public:
-    using tag_t = std::variant<asn1_tag, uintmax_t>;
     using dynamic_data_t = std::vector<uint8_t>;
 
     asn1_base() = default;
@@ -110,9 +112,9 @@ public:
     }
 
 
-    friend std::vector<uint8_t> serialize(asn1_base *block);
+    friend auto serialize(asn1_base *block) -> std::vector<uint8_t>;
 
-    friend std::unique_ptr<asn1_base> deserialize_v(std::span<const uint8_t> data);
+    friend auto deserialize_v(std::span<const uint8_t> data) -> std::unique_ptr<asn1_base>;
 
     template<typename T>
     friend std::unique_ptr<T> deserialize(std::span<const uint8_t> data) {
@@ -131,7 +133,6 @@ public:
 
 protected:
     virtual void decode(std::span<const uint8_t> data) {
-        size_t offset = 0;
         if (data.size_bytes() < 2) {
             throw std::invalid_argument("Invalid ASN.1 data. Length is too short");
         }
@@ -154,15 +155,12 @@ protected:
     [[nodiscard]] virtual std::vector<uint8_t> encode() {
         dynamic_data_t output = _data;
         output.insert_range(output.begin(), asn1_base::encode_length(_data.size()));
-        //TODO: Encode long tags
-        output.insert_range(output.begin(),encode_type());
-       // output.insert(output.begin(), static_cast<uint8_t>(std::get<asn1_tag>(_type)));
+        output.insert_range(output.begin(), encode_type());
         return output;
     }
 
     dynamic_data_t _data;
     tag_t _type;
-    //value_t _decoded;
 private:
     bool _constructed{};
 
@@ -170,7 +168,7 @@ private:
     size_t _length{};
 
     //TODO: Проверка длинны массива
-    [[nodiscard]] static std::pair<tag_t, size_t> extract_type(std::span<const uint8_t> buffer) {
+    [[nodiscard]] static auto extract_type(std::span<const uint8_t> buffer) -> std::pair<tag_t, size_t> {
         const uint8_t tag_decoded = buffer[0] & 0x1FU;
         if (tag_decoded < 0x1FU) {
             return std::make_pair(static_cast<asn1_tag>(tag_decoded), 1ULL);
@@ -195,7 +193,7 @@ private:
         return std::make_pair(type_decoded, it - buffer.begin());
     }
 
-    [[nodiscard]] static std::vector<uint8_t> encode_length(size_t length) {
+    [[nodiscard]] static auto encode_length(size_t length) -> std::vector<uint8_t> {
         if (length <= 127) {
             return {static_cast<uint8_t>(length)};
         }
@@ -209,7 +207,7 @@ private:
         return output;
     }
 
-    [[nodiscard]]std::vector<uint8_t> encode_type() {
+    [[nodiscard]] auto encode_type() -> std::vector<uint8_t> {
         std::vector<uint8_t> output;
         uintmax_t raw_type{};
 
@@ -219,52 +217,38 @@ private:
             raw_type = std::get<uintmax_t>(_type);
         }
         if (raw_type < 0x1FU) {
-            return{static_cast<unsigned char>(static_cast<uint8_t>(get_cls()) << 6U |
-                                              static_cast<uint8_t>(is_constructed()) << 5U |
-                                              static_cast<uint8_t>(raw_type))};
+            return {
+                static_cast<unsigned char>(static_cast<uint8_t>(get_cls()) << 6U |
+                                           static_cast<uint8_t>(is_constructed()) << 5U |
+                                           static_cast<uint8_t>(raw_type))
+            };
             //output.push_back(static_cast<uint8_t>(raw_type))};
             //return output;
         }
 
 
-            std::vector<uint8_t> result;
+        std::vector<uint8_t> result;
         result.push_back(static_cast<unsigned char>(static_cast<uint8_t>(get_cls()) << 6U |
-                                              static_cast<uint8_t>(is_constructed()) << 5U |
-                                              static_cast<uint8_t>(0x1FU)));
-            do {
-                result.push_back( static_cast<uint8_t>(raw_type & 0x7FU));
-                raw_type >>= 7U;
-            } while (raw_type > 0);
+                                                    static_cast<uint8_t>(is_constructed()) << 5U |
+                                                    static_cast<uint8_t>(0x1FU)));
+        do {
+            result.push_back(static_cast<uint8_t>(raw_type & 0x7FU));
+            raw_type >>= 7U;
+        } while (raw_type > 0);
 
-            std::transform(std::next(result.begin()),
-                          std::prev(result.end()),
-                           std::next(result.begin()),
-                           [](const uint8_t byte) {
-                               return byte | 0x80U;
-                           });
-            return result;
+        std::transform(std::next(result.begin()),
+                       std::prev(result.end()),
+                       std::next(result.begin()),
+                       [](const uint8_t byte) {
+                           return byte | 0x80U;
+                       });
+        return result;
 
-        // if (std::holds_alternative<asn1_tag>(this->_type)) {
-        //     output.push_back(static_cast<uint8_t>(std::get<asn1_tag>(_type)));
-        //     return output;
-        // }
-        // output.push_back(_cls | _constructed);
-        // if (length <= 127) {
-        //     return {static_cast<uint8_t>(length)};
-        // }
-        // std::vector<uint8_t> output;
-        // output.reserve(sizeof(size_t));
-        // while (length > 0) {
-        //     output.emplace(output.begin(), static_cast<uint8_t>(length & 0xFFU));
-        //     length >>= 8U;
-        // }
-        // output.emplace(output.begin(), static_cast<uint8_t>(output.size() | 0x80U));
-        return output;
     }
 
     //TODO: Implement long tag encoding
     //TODO: Проверка длинны массива
-    [[nodiscard]] static std::pair<size_t, size_t> extract_length(std::span<const uint8_t> buffer) {
+    [[nodiscard]] static auto extract_length(std::span<const uint8_t> buffer) -> std::pair<size_t, size_t> {
         if (!(buffer[0] & 0x80U)) {
             return std::make_pair(buffer[0], 1ULL);
         }
@@ -280,19 +264,18 @@ private:
         return std::make_pair(length, num_octets + 1);
     }
 
-    [[nodiscard]] static inline bool extract_is_constructed(const uint8_t tag) noexcept {
+    [[nodiscard]] static auto extract_is_constructed(const uint8_t tag) noexcept -> bool {
         return (tag & 0x20U) >> 5U;
     }
 
-    [[nodiscard]] static inline asn1_class extract_class(const uint8_t tag) noexcept {
+    [[nodiscard]] static auto extract_class(const uint8_t tag) noexcept -> asn1_class {
         return static_cast<asn1_class>((tag & 0xC0U) >> 6U);
     }
 };
 
-std::unique_ptr<asn1_base> deserialize_v(std::span<const uint8_t> data);
 
 template<typename T>
-std::unique_ptr<T> deserialize(std::span<const uint8_t> data);
+auto deserialize(std::span<const uint8_t> data) -> std::unique_ptr<T>;
 
 
 #endif //ASNCPP_ASN_BASE_H

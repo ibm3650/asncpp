@@ -24,7 +24,7 @@
  * @brief Реализация ASN.1 OBJECT IDENTIFIER с поддержкой кодирования и декодирования.
  */
 template<bool relative, asn1_tag type>
-class object_identifier_base : public asn1_base {
+class object_identifier_base : public asncpp::base::asn1_base {
 public:
     using sid_t = uint32_t;
 

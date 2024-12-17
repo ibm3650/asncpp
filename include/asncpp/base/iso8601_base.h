@@ -17,7 +17,7 @@
 template<const char * placeholder, asn1_tag type>
 //template<const char * placeholder, size_t N,asn1_tag type>
 class iso8601_base
-        : public asn1_base {
+        : public asncpp::base::asn1_base{
 public:
     //TODO: Add support for fractional seconds
     //TODO: Default constructor set local time
