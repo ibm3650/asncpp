@@ -75,7 +75,7 @@ private:
 };
 
 //using bmp_string_t = string_base_t<char16_t, asn1_tag::BMP_STRING>;
-using universal_string_t = string_base_t<char32_t, asn1_tag::UNIVERSAL_STRING>;
+//using universal_string_t = string_base_t<char32_t, asn1_tag::UNIVERSAL_STRING>;
 // using visible_string_t [[deprecated]] = string_base_t<char, asn1_tag::VISIBLE_STRING, [](char c) { return std::isprint(c); }>;
 
 #endif //STRING_BASE_H

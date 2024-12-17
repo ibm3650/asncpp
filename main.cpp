@@ -1,11 +1,11 @@
-#include <iostream>
 #include <vector>
 #include <numeric>
-#include <iomanip>
-#include <sstream>
 #include <asncpp/bmp_string.h>
 #include <asncpp/ia5_string.h>
+#include <asncpp/numeric_string.h>
+#include <asncpp/universl_string.h>
 #include <asncpp/visible_string.h>
+#include <asncpp/printable_string.h>
 
 #include "asncpp/integer.h"
 #include "asncpp/object_identifier.h"
@@ -408,8 +408,11 @@ std::unique_ptr<asn1_base> deserialize_v(std::span<const uint8_t> data) {
         case asn1_tag::SET:
             break;
         case asn1_tag::NUMERIC_STRING:
+            ptr = std::make_unique<numeric_string_t>();
             break;
         case asn1_tag::PRINTABLE_STRING:
+            ptr = std::make_unique<printable_string_t>();
+
             break;
         case asn1_tag::T61_STRING:
             break;
@@ -431,6 +434,8 @@ std::unique_ptr<asn1_base> deserialize_v(std::span<const uint8_t> data) {
         case asn1_tag::GENERAL_STRING:
             break;
         case asn1_tag::UNIVERSAL_STRING:
+            ptr = std::make_unique<universal_string_t>();
+
             break;
         case asn1_tag::BMP_STRING:
             ptr = std::make_unique<bmp_string_t>();
