@@ -2,7 +2,7 @@
   <profile version="1.0">
     <option name="myName" value="Project Default" />
     <inspection_tool class="ClangTidy" enabled="true" level="WARNING" enabled_by_default="true">
-      <option name="clangTidyChecks" value="-*,bugprone-*,cppcoreguidelines-*,google-*,hicpp-*,misc-*,modernize-*,performance-*,portability-*,readability-*,cert-err52-cpp,cert-err60-cpp,cert-err34-c,cert-str34-c,cert-msc50-cpp,cert-msc51-cpp,cert-dcl58-cpp,cert-flp30-c,-cppcoreguidelines-avoid-magic-numbers,-readability-magic-numbers,-hicpp-explicit-conversions" />
+      <option name="clangTidyChecks" value="-*,bugprone-*,cppcoreguidelines-*,google-*,hicpp-*,misc-*,modernize-*,performance-*,portability-*,readability-*,cert-err52-cpp,cert-err60-cpp,cert-err34-c,cert-str34-c,cert-msc50-cpp,cert-msc51-cpp,cert-dcl58-cpp,cert-flp30-c,-cppcoreguidelines-avoid-magic-numbers,-readability-magic-numbers,-hicpp-explicit-conversions,-modernize-use-trailing-return-type" />
     </inspection_tool>
   </profile>
 </component>
