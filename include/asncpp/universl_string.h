@@ -4,7 +4,7 @@
 
 #ifndef UNIVERSL_STRING_H
 #define UNIVERSL_STRING_H
-#include "base/asn_base.h"
+#include "base/common.h"
 #include "base/string_base.h"
-using universal_string_t = string_base_t<char32_t, asn1_tag::UNIVERSAL_STRING>;
+using universal_string_t = string_base_t<char32_t, asncpp::base::asn1_tag::UNIVERSAL_STRING>;
 #endif //UNIVERSL_STRING_H

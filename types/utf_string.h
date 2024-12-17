@@ -6,7 +6,7 @@
 #define ASNCPP_UTF_STRING_H
 #include <string>
 #include <stdexcept>
-#include "asncpp/asn_base.h"
+#include "asncpp/common.h"
 
 class utf8_string_t : public asn1_type<std::vector<uint8_t >, static_cast<uintmax_t>(asn1_tag::UTF8_STRING)> {
 public:

@@ -7,6 +7,6 @@
 
 #include "base/iso8601_base.h"
 constexpr char date_format[] = "%Y-%m-%d";
-using date_t = iso8601_base<date_format, asn1_tag::DATE>;
+using date_t = iso8601_base<date_format, asncpp::base::asn1_tag::DATE>;
 
 #endif //ASNCPP_DATE_H

@@ -6,7 +6,7 @@
 #define ASNCPP_OCTET_STRING_H
 #include <string>
 #include <stdexcept>
-#include "base/asn_base.h"
+#include "base/common.h"
 
 class octet_string_t : public asn1_base {
 public:

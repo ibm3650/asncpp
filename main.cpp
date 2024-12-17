@@ -22,93 +22,94 @@
 //DER encoding
 //https://www.itu.int/ITU-T/studygroups/com17/languages/X.690-0207.pdf
 
-
-inline std::ostream &operator<<(std::ostream &os, asn1_tag tag) {
-    switch (tag) {
-        case asn1_tag::Reserved:
-            os << "Reserved";
-            break;
-        case asn1_tag::BOOLEAN:
-            os << "BOOLEAN";
-            break;
-        case asn1_tag::INTEGER:
-            os << "INTEGER";
-            break;
-        case asn1_tag::BIT_STRING:
-            os << "BIT_STRING";
-            break;
-        case asn1_tag::OCTET_STRING:
-            os << "OCTET_STRING";
-            break;
-        case asn1_tag::Null:
-            os << "Null";
-            break;
-        case asn1_tag::OBJECT_IDENTIFIER:
-            os << "OBJECT_IDENTIFIER";
-            break;
-        case asn1_tag::OBJECT_DESCRIPTOR:
-            os << "OBJECT_DE";
-            break;
-        case asn1_tag::EXTERNAL:
-            os << "EXTERNAL";
-            break;
-        case asn1_tag::REAL:
-            os << "REAL";
-            break;
-        case asn1_tag::ENUMERATED:
-            os << "ENUMERATED";
-            break;
-        case asn1_tag::EMBEDDED_PDV:
-            os << "EMBEDDED_PDV";
-            break;
-        case asn1_tag::UTF8_STRING:
-            os << "UTF8_STRING";
-            break;
-        case asn1_tag::SEQUENCE:
-            os << "SEQUENCE";
-            break;
-        case asn1_tag::SET:
-            os << "Set";
-            break;
-        case asn1_tag::NUMERIC_STRING:
-            os << "NUMERIC_STRING";
-            break;
-        case asn1_tag::PRINTABLE_STRING:
-            os << "PRINTABLE_STRING";
-            break;
-        case asn1_tag::T61_STRING:
-            os << "T61String";
-            break;
-        case asn1_tag::VIDEOTEX_STRING:
-            os << "VideotexString";
-            break;
-        case asn1_tag::IA5_STRING:
-            os << "IA5_STRING";
-            break;
-        case asn1_tag::UTC_TIME:
-            os << "UTC_TIME";
-            break;
-        case asn1_tag::GENERALIZED_TIME:
-            os << "GENERALIZED_TIME";
-            break;
-        case asn1_tag::GRAPHIC_STRING:
-            os << "GRA";
-            break;
-        case asn1_tag::VISIBLE_STRING:
-            os << "VISIBLE_STRING";
-            break;
-        case asn1_tag::GENERAL_STRING:
-            os << "GeneralString";
-            break;
-        case asn1_tag::UNIVERSAL_STRING:
-            break;
-        case asn1_tag::BMP_STRING:
-            break;
-        default:
-            break;
-    }
-    return os;
-}
+//
+// inline std::ostream &operator<<(std::ostream &os, asncpp::base::asn1_tag tag) {
+//     switch (tag) {
+//         using enum asncpp::base::asn1_tag;
+//         case asn1_tag::Reserved:
+//             os << "Reserved";
+//             break;
+//         case asn1_tag::BOOLEAN:
+//             os << "BOOLEAN";
+//             break;
+//         case asn1_tag::INTEGER:
+//             os << "INTEGER";
+//             break;
+//         case asn1_tag::BIT_STRING:
+//             os << "BIT_STRING";
+//             break;
+//         case asn1_tag::OCTET_STRING:
+//             os << "OCTET_STRING";
+//             break;
+//         case asn1_tag::Null:
+//             os << "Null";
+//             break;
+//         case asn1_tag::OBJECT_IDENTIFIER:
+//             os << "OBJECT_IDENTIFIER";
+//             break;
+//         case asn1_tag::OBJECT_DESCRIPTOR:
+//             os << "OBJECT_DE";
+//             break;
+//         case asn1_tag::EXTERNAL:
+//             os << "EXTERNAL";
+//             break;
+//         case asn1_tag::REAL:
+//             os << "REAL";
+//             break;
+//         case asn1_tag::ENUMERATED:
+//             os << "ENUMERATED";
+//             break;
+//         case asn1_tag::EMBEDDED_PDV:
+//             os << "EMBEDDED_PDV";
+//             break;
+//         case asn1_tag::UTF8_STRING:
+//             os << "UTF8_STRING";
+//             break;
+//         case asn1_tag::SEQUENCE:
+//             os << "SEQUENCE";
+//             break;
+//         case asn1_tag::SET:
+//             os << "Set";
+//             break;
+//         case asn1_tag::NUMERIC_STRING:
+//             os << "NUMERIC_STRING";
+//             break;
+//         case asn1_tag::PRINTABLE_STRING:
+//             os << "PRINTABLE_STRING";
+//             break;
+//         case asn1_tag::T61_STRING:
+//             os << "T61String";
+//             break;
+//         case asn1_tag::VIDEOTEX_STRING:
+//             os << "VideotexString";
+//             break;
+//         case asn1_tag::IA5_STRING:
+//             os << "IA5_STRING";
+//             break;
+//         case asn1_tag::UTC_TIME:
+//             os << "UTC_TIME";
+//             break;
+//         case asn1_tag::GENERALIZED_TIME:
+//             os << "GENERALIZED_TIME";
+//             break;
+//         case asn1_tag::GRAPHIC_STRING:
+//             os << "GRA";
+//             break;
+//         case asn1_tag::VISIBLE_STRING:
+//             os << "VISIBLE_STRING";
+//             break;
+//         case asn1_tag::GENERAL_STRING:
+//             os << "GeneralString";
+//             break;
+//         case asn1_tag::UNIVERSAL_STRING:
+//             break;
+//         case asn1_tag::BMP_STRING:
+//             break;
+//         default:
+//             break;
+//     }
+//     return os;
+// }
 
 
 //void decode_octet_string(const uint8_t* _data, size_t length, std::vector<uint8_t>& output) {

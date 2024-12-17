@@ -7,7 +7,7 @@
 #define ASNCPP_NULL_H
 #include <string>
 #include <stdexcept>
-#include "asncpp/asn_base.h"
+#include "asncpp/common.h"
 
 class null_t : public asn1_type<std::nullptr_t, static_cast<uintmax_t>(asn1_tag::Null)> {
 public:

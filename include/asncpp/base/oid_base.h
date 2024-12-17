@@ -11,7 +11,8 @@
 #include <span>
 #include <sstream>
 #include <ranges>
-#include "asncpp/base/asn_base.h"
+#include "asncpp/base/common.h"
+#include "asncpp/base/asn1_basic.h"
 
 //TODO: Implement long sid encoding
 //TODO: Инициализация строкой
@@ -23,8 +24,8 @@
  * @class object_identifier_base
  * @brief Реализация ASN.1 OBJECT IDENTIFIER с поддержкой кодирования и декодирования.
  */
-template<bool relative, asn1_tag type>
-class object_identifier_base : public asncpp::base::asn1_base {
+template<bool relative, asncpp::base::asn1_tag type>
+class object_identifier_base : public asncpp::base::asn1_basic {
 public:
     using sid_t = uint32_t;
 

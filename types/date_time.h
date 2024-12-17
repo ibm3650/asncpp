@@ -4,7 +4,7 @@
 
 #ifndef ASNCPP_DATE_TIME_H
 #define ASNCPP_DATE_TIME_H
-#include "asncpp/asn_base.h"
+#include "asncpp/common.h"
 #include <stdexcept>
 #include <string>
 #include <string_view>

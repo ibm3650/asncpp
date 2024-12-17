@@ -9,7 +9,8 @@
 #include <cstdint>
 #include <stdexcept>
 #include <string>
-#include "asn_base.h"
+#include "common.h"
+#include "asn1_basic.h"
 
 //TODO: Добавить поддержку чисел, размер  которых превышает размер типа T
 /**
@@ -17,8 +18,8 @@
  * @brief ASN.1 INTEGER тип с поддержкой кодирования и декодирования.
  * @tparam T Тип данных для хранения значения INTEGER (например, intmax_t).
  */
-template<std::integral T , asn1_tag type>
-class integer_base : public asncpp::base::asn1_base {
+template<std::integral T , asncpp::base::asn1_tag type>
+class integer_base : public asncpp::base::asn1_basic {
 public:
     using value_t = T;
 

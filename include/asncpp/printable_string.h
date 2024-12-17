@@ -5,9 +5,9 @@
 #ifndef ASNCPP_PRINTABLE_STRING_H
 #define ASNCPP_PRINTABLE_STRING_H
 #include "base/string_base.h"
-#include "base/asn_base.h"
+#include "base/common.h"
 
-using printable_string_t = string_base_t<char, asn1_tag::PRINTABLE_STRING,
+using printable_string_t = string_base_t<char, asncpp::base::asn1_tag::PRINTABLE_STRING,
                                                       [](char c) {
                                                           using namespace std::string_view_literals;
                                                           const auto allowed_specs = " '()+,-./:=?"sv;

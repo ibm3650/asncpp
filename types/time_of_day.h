@@ -5,7 +5,7 @@
 #ifndef ASNCPP_TIME_OF_DAY_H
 #define ASNCPP_TIME_OF_DAY_H
 
-#include "asncpp/asn_base.h"
+#include "asncpp/common.h"
 #include <stdexcept>
 #include <string>
 #include <string_view>

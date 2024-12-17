@@ -5,7 +5,7 @@
 #ifndef ASNCPP_GENERALIZED_TIME_H
 #define ASNCPP_GENERALIZED_TIME_H
 
-#include "asncpp/asn_base.h"
+#include "asncpp/common.h"
 #include <stdexcept>
 #include <string>
 #include <string_view>

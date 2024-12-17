@@ -8,6 +8,7 @@ add_library(
         asncpp
         main.cpp
         src/common.cpp
+        src/asn1_basic.cpp
 )
 
 target_include_directories(asncpp

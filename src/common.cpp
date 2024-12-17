@@ -1,16 +1,16 @@
 //
 // Created by kandu on 17.12.2024.
 //
-#include "asncpp/base/asn_base.h"
+#include "asncpp/base/common.h"
 #include "asncpp/types.h"
 
-auto asncpp::base::deserialize_v(std::span<const uint8_t> data) -> std::unique_ptr<asn1_base> {
-    const tag_t type = asn1_base::extract_type(data).first;
+auto asncpp::base::deserialize_v(std::span<const uint8_t> data) -> std::unique_ptr<asn1_basic> {
+    const tag_t type = asn1_basic::extract_type(data).first;
     if (!std::holds_alternative<asn1_tag>(type)) {
         return nullptr;
     }
 
-    std::unique_ptr<asn1_base> ptr;
+    std::unique_ptr<asn1_basic> ptr;
     switch (std::get<asn1_tag>(type)) {
         using enum asn1_tag;
         case INTEGER:
@@ -49,13 +49,13 @@ auto asncpp::base::deserialize_v(std::span<const uint8_t> data) -> std::unique_p
         default:
             return nullptr;
     }
-    ptr->asn1_base::decode(data);
+    ptr->asn1_basic::decode(data);
     ptr->decode(data);
     return ptr;
 }
 
 
-auto asncpp::base::serialize(asn1_base *block) -> std::vector<uint8_t> {
+auto asncpp::base::serialize(asn1_basic *block) -> std::vector<uint8_t> {
     (void) block->encode();
-    return block->asn1_base::encode();
+    return block->asn1_basic::encode();
 }

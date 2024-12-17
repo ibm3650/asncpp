@@ -2,7 +2,7 @@
 // Created by kandu on 04.12.2024.
 //
 #include <gtest/gtest.h>
-#include "asncpp/base/asn_base.h"
+#include "asncpp/base/common.h"
 #include "asncpp/integer.h"
 
 std::vector<std::pair<std::vector<uint8_t>, int64_t>> integer_test_cases = {

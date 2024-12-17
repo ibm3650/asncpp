@@ -5,12 +5,12 @@
 #ifndef STRING_BASE_H
 #define STRING_BASE_H
 
-#include "asn_base.h"
+#include "asn1_basic.h"
 #include <string>
 #include <string_view>
 
-template<class T, asn1_tag type, auto limitations = nullptr>
-class string_base_t : public asncpp::base::asn1_base {
+template<class T, asncpp::base::asn1_tag type, auto limitations = nullptr>
+class string_base_t : public asncpp::base::asn1_basic {
 public:
     [[nodiscard]] auto value() const -> const std::basic_string<T> & {
         return _value;

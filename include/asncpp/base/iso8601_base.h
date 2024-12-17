@@ -11,13 +11,14 @@
 #include <ctime>
 #include <iomanip>
 #include <sstream>
-#include "asncpp/base/asn_base.h"
+#include "asncpp/base/common.h"
+#include "asncpp/base/asn1_basic.h"
 
 //template<auto& placeholder, asn1_tag type>
-template<const char * placeholder, asn1_tag type>
+template<const char * placeholder, asncpp::base::asn1_tag type>
 //template<const char * placeholder, size_t N,asn1_tag type>
 class iso8601_base
-        : public asncpp::base::asn1_base{
+        : public asncpp::base::asn1_basic{
 public:
     //TODO: Add support for fractional seconds
     //TODO: Default constructor set local time
