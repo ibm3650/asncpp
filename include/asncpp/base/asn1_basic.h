@@ -5,12 +5,12 @@
 #ifndef ASN1_BASIC_H
 #define ASN1_BASIC_H
 #include <string>
-
 #include "common.h"
+
 
 class asncpp::base::asn1_basic {
 public:
-    asn1_basic() = default;
+    asn1_basic() noexcept = default;
 
     asn1_basic(asn1_basic &&) = default;
 
@@ -22,16 +22,12 @@ public:
 
     virtual ~asn1_basic() = default;
 
-    asn1_basic(std::span<const uint8_t> data) { // NOLINT(*-explicit-constructor)
+    asn1_basic(std::span<const uint8_t> data){ // NOLINT(*-explicit-constructor)
         asn1_basic::decode(data);
     }
 
     [[nodiscard]] bool is_constructed() const noexcept {
         return _constructed;
-    }
-
-    [[nodiscard, maybe_unused]] const tag_t &get_type() const noexcept {
-        return _type;
     }
 
     [[nodiscard]] asn1_class get_cls() const noexcept {
@@ -53,6 +49,8 @@ public:
     friend std::unique_ptr<asn1_basic> deserialize_v(std::span<const uint8_t> data);
 
 protected:
+    [[nodiscard]] constexpr virtual tag_t get_tag() const noexcept = 0;
+
     virtual void decode(std::span<const uint8_t> data);
 
     virtual dynamic_array_t encode();
@@ -62,13 +60,12 @@ protected:
     }
 
     dynamic_array_t _data; // NOLINT(*-non-private-member-variables-in-classes)
-    tag_t _type;
 private:
     bool _constructed{};
     asn1_class _cls{};
     size_t _length{};
 
-    dynamic_array_t encode_type();
+    [[nodiscard]] dynamic_array_t encode_type() const;
 
     [[nodiscard]] static dynamic_array_t encode_length(size_t length);
 

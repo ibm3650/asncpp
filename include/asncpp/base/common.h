@@ -64,15 +64,15 @@ namespace asncpp::base {
         DURATION = 0x22, /**< Duration: time interval in ISO 8601 format. */
     };
 
-    using tag_t = std::variant<asncpp::base::asn1_tag, uintmax_t>;
+    using tag_t = std::variant<std::monostate, asncpp::base::asn1_tag, uintmax_t>;
 
     using dynamic_array_t = std::vector<uint8_t>;
 
     class asn1_basic;
 
-    auto deserialize_v(std::span<const uint8_t> data) -> std::unique_ptr<asn1_basic>;
+    std::unique_ptr<asn1_basic> deserialize_v(std::span<const uint8_t> data);
 
-    auto serialize(asn1_basic *block) -> std::vector<uint8_t>;
+    dynamic_array_t serialize(asncpp::base::asn1_basic *block);
 
 
 } // namespace asncpp::base

@@ -43,7 +43,7 @@ static auto operator==(const std::tm &lhs, const std::tm &rhs) -> bool {
 TEST(ASN1DateTests, EncodeDate) {
     for (const auto &[tm_value, encoded_expected, expected]: date_tests) {
         date_t date_obj(tm_value);
-        const std::vector encoded{serialize(&date_obj)};
+        const std::vector encoded{asncpp::base::serialize(&date_obj)};
         EXPECT_EQ(encoded, encoded_expected);
     }
 }

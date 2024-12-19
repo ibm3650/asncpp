@@ -10,6 +10,9 @@
 #include <string_view>
 #include <stdexcept>
 
+#include "asn1_basic.h"
+#include "asn1_basic.h"
+
 template<class T, asncpp::base::asn1_tag type, auto limitations = nullptr>
 class string_base_t : public asncpp::base::asn1_basic {
 public:
@@ -18,12 +21,10 @@ public:
     }
 
     using value_t = std::basic_string<T>;
-    string_base_t() {
-        _type = type;
-    }
+    string_base_t() noexcept = default;
 
     explicit string_base_t(std::basic_string_view<T> data) {
-        _type = type;
+       // _type = type;
         if constexpr (limitations != nullptr) {
             for (const T symbol: data) {
                 if (!limitations(symbol)) {
@@ -69,7 +70,10 @@ public:
     }
 
 
-
+protected:
+    [[nodiscard]] constexpr asncpp::base::tag_t get_tag() const noexcept override {
+        return type;
+    }
 
 private:
     value_t _value{};

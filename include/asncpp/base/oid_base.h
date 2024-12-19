@@ -11,6 +11,9 @@
 #include <span>
 #include <sstream>
 #include <ranges>
+
+#include "asn1_basic.h"
+#include "asn1_basic.h"
 #include "asncpp/base/common.h"
 #include "asncpp/base/asn1_basic.h"
 
@@ -32,18 +35,13 @@ public:
     /**
      * @brief Конструктор по умолчанию.
      */
-    object_identifier_base() {
-        _type = type;
-    }
+    object_identifier_base() noexcept = default;
 
     /**
      * @brief Конструктор с инициализацией значением.
      * @param data Последовательность идентификаторов.
      */
-    object_identifier_base(std::span<const sid_t> data) {
-        _type = type;
-        _value.assign(data.begin(), data.end());
-    }
+    object_identifier_base(std::span<const sid_t> data) : _value{data.begin(), data.end()} {}
 
     /**
      * @brief Получение строки, представляющей OBJECT IDENTIFIER.
@@ -70,6 +68,9 @@ public:
     }
 
 protected:
+    [[nodiscard]] constexpr asncpp::base::tag_t get_tag() const noexcept override {
+        return type;
+    }
     /**
      * @brief Кодирование OBJECT IDENTIFIER в DER.
      * @return Вектор байтов, представляющий закодированное значение.

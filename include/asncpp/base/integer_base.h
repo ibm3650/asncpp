@@ -4,39 +4,33 @@
 
 #ifndef ASNCPP_INTEGER_H
 #define ASNCPP_INTEGER_H
-
-
 #include <cstdint>
 #include <stdexcept>
 #include <string>
-#include "common.h"
 #include "asn1_basic.h"
+#include "common.h"
 
-//TODO: Добавить поддержку чисел, размер  которых превышает размер типа T
 /**
- * @class integer_base
+ * @class integer_basic
  * @brief ASN.1 INTEGER тип с поддержкой кодирования и декодирования.
  * @tparam T Тип данных для хранения значения INTEGER (например, intmax_t).
  */
 template<std::integral T , asncpp::base::asn1_tag type>
-class integer_base : public asncpp::base::asn1_basic {
+class integer_basic : public asncpp::base::asn1_basic {
 public:
     using value_t = T;
 
     /**
      * @brief Конструктор по умолчанию.
      */
-    integer_base() noexcept {
-        _type = type;
-    };
+    integer_basic() noexcept = default;
 
 
     /**
      * @brief Конструктор с инициализацией значением.
      * @param val Значение для инициализации INTEGER.
      */
-    explicit integer_base(T val) noexcept: _decoded{val} {
-        _type = type;
+    explicit integer_basic(T val) noexcept: _decoded{val} {
     }
 
     /**
@@ -52,7 +46,7 @@ public:
      * @brief Получить декодированное значение INTEGER.
      * @return Ссылка на декодированное значение.
      */
-    [[maybe_unused]] auto get_value() const noexcept -> value_t & {
+    [[maybe_unused]] const value_t &get_value() const noexcept {
         return this->_decoded;
     }
 
@@ -96,7 +90,7 @@ public:
      * @param data Байтовый диапазон, представляющий закодированное значение.
      * @throws std::runtime_error Если значение слишком велико для типа T.
      */
-    void decode(std::span<const uint8_t>  /*data*/) final {
+    void decode(std::span<const uint8_t> /*data*/) final {
         if (this->_data.size() > sizeof(T)) {
             throw std::runtime_error("Integer value is too large");
         }
@@ -119,6 +113,10 @@ public:
             const T mask = static_cast<T>(-1) << (8U * length);
             this->_decoded |= mask;
         }
+    }
+
+    [[nodiscard]] constexpr asncpp::base::tag_t get_tag() const noexcept override {
+        return static_cast<uintmax_t>(type);
     }
 
 private:

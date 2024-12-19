@@ -15,9 +15,7 @@ void asncpp::base::asn1_basic::decode(std::span<const uint8_t> data) {
 
     _constructed = extract_is_constructed(data[0]);
 
-    const auto type{extract_type(data)};
-    _type = type.first;
-    data = data.subspan(type.second);
+    data = data.subspan(extract_type(data).second);
 
     const auto length{extract_length(data)};
     data = data.subspan(length.second);
@@ -85,11 +83,11 @@ asncpp::base::dynamic_array_t asncpp::base::asn1_basic::encode_length(size_t len
 
 //TODO: USE ALGORITHM
 //TODO: USE ATTRIBUTE
-asncpp::base::dynamic_array_t asncpp::base::asn1_basic::encode_type() {
+asncpp::base::dynamic_array_t asncpp::base::asn1_basic::encode_type() const {
     uintmax_t raw_type{
-        std::holds_alternative<asn1_tag>(_type)
-            ? static_cast<uintmax_t>(std::get<asn1_tag>(_type))
-            : std::get<uintmax_t>(_type)
+        std::holds_alternative<asn1_tag>(get_tag())
+            ? static_cast<uintmax_t>(std::get<asn1_tag>(get_tag()))
+            : std::get<uintmax_t>(get_tag())
     };
     const uint8_t base = static_cast<uint8_t>(get_cls()) << 6U |
                          static_cast<uint8_t>(is_constructed()) << 5U;
