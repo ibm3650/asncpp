@@ -74,17 +74,7 @@ namespace asncpp::base {
 
     auto serialize(asn1_basic *block) -> std::vector<uint8_t>;
 
-    std::pair<tag_t, size_t> extract_type(std::span<const uint8_t> buffer);
 
-    dynamic_array_t encode_length(size_t length);
-
-    dynamic_array_t encode_type();
-
-    std::pair<size_t, size_t> base::extract_length(std::span<const uint8_t> buffer);
-
-    bool extract_is_constructed(const uint8_t tag) noexcept;
-
-    asn1_class extract_class(const uint8_t tag) noexcept;
 } // namespace asncpp::base
 
 

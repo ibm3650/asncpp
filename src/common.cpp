@@ -4,7 +4,7 @@
 #include "asncpp/base/common.h"
 #include "asncpp/types.h"
 
-auto asncpp::base::deserialize_v(std::span<const uint8_t> data) -> std::unique_ptr<asn1_basic> {
+std::unique_ptr<asncpp::base::asn1_basic> asncpp::base::deserialize_v(std::span<const uint8_t> data)  {
     const tag_t type = asn1_basic::extract_type(data).first;
     if (!std::holds_alternative<asn1_tag>(type)) {
         return nullptr;
@@ -55,7 +55,7 @@ auto asncpp::base::deserialize_v(std::span<const uint8_t> data) -> std::unique_p
 }
 
 
-auto asncpp::base::serialize(asn1_basic *block) -> std::vector<uint8_t> {
+std::vector<uint8_t> asncpp::base::serialize(asn1_basic *block) {
     (void) block->encode();
     return block->asn1_basic::encode();
 }

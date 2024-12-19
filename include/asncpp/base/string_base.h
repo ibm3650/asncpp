@@ -8,6 +8,7 @@
 #include "asn1_basic.h"
 #include <string>
 #include <string_view>
+#include <stdexcept>
 
 template<class T, asncpp::base::asn1_tag type, auto limitations = nullptr>
 class string_base_t : public asncpp::base::asn1_basic {

@@ -4,6 +4,8 @@
 
 #ifndef ASN1_BASIC_H
 #define ASN1_BASIC_H
+#include <string>
+
 #include "common.h"
 
 class asncpp::base::asn1_basic {
@@ -24,48 +26,57 @@ public:
         asn1_basic::decode(data);
     }
 
-    [[nodiscard]] auto is_constructed() const noexcept -> bool {
+    [[nodiscard]] bool is_constructed() const noexcept {
         return _constructed;
     }
 
-    [[nodiscard]] auto get_type() const noexcept -> tag_t {
+    [[nodiscard, maybe_unused]] const tag_t &get_type() const noexcept {
         return _type;
     }
 
-    [[nodiscard]] auto get_cls() const noexcept -> asn1_class {
+    [[nodiscard]] asn1_class get_cls() const noexcept {
         return _cls;
     }
 
-    [[nodiscard]] auto get_length() const noexcept -> size_t {
+    [[nodiscard, maybe_unused]] size_t get_length() const noexcept {
         return _length;
     }
 
-    [[nodiscard]] auto get_data() const noexcept -> const dynamic_array_t & {
+    [[nodiscard, maybe_unused]] const dynamic_array_t &get_data() const noexcept {
         return _data;
     }
 
-    [[nodiscard]] virtual auto to_string() const -> std::string {
-        return "ASN.1 Base";
-    }
+    static std::pair<tag_t, size_t> extract_type(std::span<const uint8_t> buffer);
 
-    friend auto serialize(asn1_basic *block) -> std::vector<uint8_t>;
+    friend dynamic_array_t serialize(asn1_basic *block);
 
-    friend auto deserialize_v(std::span<const uint8_t> data) -> std::unique_ptr<asn1_basic>;
+    friend std::unique_ptr<asn1_basic> deserialize_v(std::span<const uint8_t> data);
 
 protected:
     virtual void decode(std::span<const uint8_t> data);
 
-    virtual std::vector<uint8_t> encode();
+    virtual dynamic_array_t encode();
 
-    dynamic_array_t _data;
+    [[nodiscard, maybe_unused]] virtual std::string to_string() const {
+        return "ASN.1 basic";
+    }
 
+    dynamic_array_t _data; // NOLINT(*-non-private-member-variables-in-classes)
     tag_t _type;
 private:
     bool _constructed{};
     asn1_class _cls{};
     size_t _length{};
 
+    dynamic_array_t encode_type();
 
+    [[nodiscard]] static dynamic_array_t encode_length(size_t length);
+
+    [[nodiscard]] static std::pair<size_t, size_t> extract_length(std::span<const uint8_t> buffer);
+
+    [[nodiscard]] static bool extract_is_constructed(const uint8_t tag) noexcept;
+
+    [[nodiscard]] static asn1_class extract_class(const uint8_t tag) noexcept;
 };
 
 #endif //ASN1_BASIC_H
