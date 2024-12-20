@@ -3,6 +3,8 @@
 //
 
 #include "asncpp/base/asn1_basic.h"
+
+#include <bit>
 #include <stdexcept>
 //TODO: USE ALGORITHM
 //TODO: USE ATTRIBUTE
@@ -14,8 +16,9 @@ void asncpp::base::asn1_basic::decode(std::span<const uint8_t> data) {
     _cls = extract_class(data[0]);
 
     _constructed = extract_is_constructed(data[0]);
-
-    data = data.subspan(extract_type(data).second);
+    const auto type = extract_type(data);
+    _type = type.first;
+    data = data.subspan(type.second);
 
     const auto length{extract_length(data)};
     data = data.subspan(length.second);
@@ -84,7 +87,18 @@ asncpp::base::dynamic_array_t asncpp::base::asn1_basic::encode_length(size_t len
 //TODO: USE ALGORITHM
 //TODO: USE ATTRIBUTE
 asncpp::base::dynamic_array_t asncpp::base::asn1_basic::encode_type() const {
-    uintmax_t raw_type{get_tag()};
+    uintmax_t raw_type = 0;
+    std::visit([&](auto &&arg) {
+                   using T = std::decay_t<decltype(arg)>;
+                   if constexpr (std::is_same_v<T, std::monostate>) {
+                       raw_type = get_tag();
+                   } else if constexpr (std::is_same_v<T, asn1_tag>) {
+                       raw_type = static_cast<uintmax_t>(arg);
+                   } else if constexpr (std::is_same_v<T, uintmax_t>) {
+                       raw_type = arg;
+                   }
+               },
+               _type);
     const uint8_t base = static_cast<uint8_t>(get_cls()) << 6U |
                          static_cast<uint8_t>(is_constructed()) << 5U;
 
@@ -93,6 +107,7 @@ asncpp::base::dynamic_array_t asncpp::base::asn1_basic::encode_type() const {
     }
 
     std::vector<uint8_t> result{static_cast<uint8_t>(base | static_cast<uint8_t>(0x1FU))};
+
     do {
         result.push_back(static_cast<uint8_t>(raw_type & 0x7FU));
         raw_type >>= 7U;
@@ -125,10 +140,10 @@ std::pair<size_t, size_t> asncpp::base::asn1_basic::extract_length(std::span<con
     return std::make_pair(length, num_octets + 1);
 }
 
-bool asncpp::base::asn1_basic::extract_is_constructed(const uint8_t tag) noexcept {
+constexpr bool asncpp::base::asn1_basic::extract_is_constructed(uint8_t tag) noexcept {
     return (tag & 0x20U) >> 5U;
 }
 
-asncpp::base::asn1_class asncpp::base::asn1_basic::extract_class(const uint8_t tag) noexcept {
+constexpr asncpp::base::asn1_class asncpp::base::asn1_basic::extract_class(uint8_t tag) noexcept {
     return static_cast<asn1_class>((tag & 0xC0U) >> 6U);
 }

@@ -7,7 +7,7 @@
 
 
 template<std::integral T, asncpp::base::asn1_tag type>
-std::vector<uint8_t> integer_basic<T, type>::encode() {
+std::vector<uint8_t> asncpp::base::integer_basic<T, type>::encode() {
     /*Число уже хранится в формате дополнения до двух, нет необходимости в дополнительном кодировании
      * Кодирование значения в big-endian формате
      * */
@@ -29,7 +29,7 @@ std::vector<uint8_t> integer_basic<T, type>::encode() {
 }
 
 template<std::integral T, asncpp::base::asn1_tag type>
-void integer_basic<T, type>::decode(std::span<const uint8_t> /*data*/) {
+void asncpp::base::integer_basic<T, type>::decode(std::span<const uint8_t> /*data*/) {
     if (_data.size() > sizeof(T)) {
         throw std::runtime_error("Integer value is too large");
     }
@@ -54,5 +54,5 @@ void integer_basic<T, type>::decode(std::span<const uint8_t> /*data*/) {
     }
 }
 
-template class integer_basic<intmax_t, asncpp::base::asn1_tag::INTEGER>;
-template class integer_basic<intmax_t, asncpp::base::asn1_tag::ENUMERATED>;
+template class asncpp::base::integer_basic<intmax_t, asncpp::base::asn1_tag::INTEGER>;
+template class asncpp::base::integer_basic<intmax_t, asncpp::base::asn1_tag::ENUMERATED>;

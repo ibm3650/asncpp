@@ -2,18 +2,30 @@
 // Created by kandu on 17.12.2024.
 //
 #include "asncpp/base/common.h"
+
+#include <iostream>
+
 #include "asncpp/types.h"
 
 std::unique_ptr<asncpp::base::asn1_basic> asncpp::base::deserialize_v(std::span<const uint8_t> data)  {
     const tag_t type = asn1_basic::extract_type(data).first;
+    // if (!std::holds_alternative<asn1_tag>(type)) {
+    //     return nullptr;
+    // }
     if (!std::holds_alternative<asn1_tag>(type)) {
+        std::cerr << "Tag is not an ASN.1 tag. Current type state: ";
+        if (std::holds_alternative<std::monostate>(type)) {
+            std::cerr << "std::monostate";
+        } else if (std::holds_alternative<uintmax_t>(type)) {
+            std::cerr << "uintmax_t: " << std::get<uintmax_t>(type);
+        }
+        std::cerr << std::endl;
         return nullptr;
     }
-
     auto create_object = [](const asn1_tag tag) -> std::unique_ptr<asn1_basic> {
         using enum asn1_tag;
         switch (tag) {
-            case INTEGER:           return std::make_unique<integer_t>();
+            case INTEGER:           return std::make_unique<asncpp::types::integer_t>();
             case OBJECT_IDENTIFIER: return std::make_unique<object_identifier_t>();
             case ENUMERATED:        return std::make_unique<enumerated_t>();
             case RELATIVE_OID:      return std::make_unique<relative_oid_t>();

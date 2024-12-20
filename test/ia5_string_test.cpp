@@ -22,6 +22,7 @@ static std::vector<std::pair<std::vector<uint8_t>, std::string>> ia5_string_inva
 
 TEST(ia5_string_test, encode) {
     for (const auto &[encoded_expected, expected]: test_cases) {
+        //ia5_string_t obj{expected};
         ia5_string_t obj(expected);
         const std::vector<uint8_t> encoded = serialize(&obj);
         EXPECT_EQ(encoded, encoded_expected);

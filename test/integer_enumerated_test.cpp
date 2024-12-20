@@ -29,14 +29,14 @@ static const std::vector<std::pair<std::vector<uint8_t>, int64_t>> test_cases{
 TEST(integer_enumerated_test, deserialize_test) {
     for (const auto &[encoded, expected]: test_cases) {
         auto deserialized{ asncpp::base::deserialize_v(encoded)};
-        const auto* ptr{dynamic_cast<integer_t*>(deserialized.get())};
-        EXPECT_EQ(static_cast<integer_t::value_type>(*ptr), expected) << "Failed for encoded value: " << expected;
+        const auto* ptr{dynamic_cast<asncpp::types::integer_t*>(deserialized.get())};
+        EXPECT_EQ(static_cast<asncpp::types::integer_t::value_type>(*ptr), expected) << "Failed for encoded value: " << expected;
     }
 }
 
 TEST(integer_enumerated_test, serialize_test) {
     for (const auto &[encoded, expected]: test_cases) {
-        integer_t obj{expected};
+        asncpp::types::integer_t obj{expected};
         EXPECT_EQ(serialize(&obj), encoded) << "Failed for encoded value: " << expected;
     }
 }

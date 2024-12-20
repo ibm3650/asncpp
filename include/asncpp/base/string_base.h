@@ -10,18 +10,31 @@
 #include <string_view>
 #include <stdexcept>
 
-#include "asn1_basic.h"
-#include "asn1_basic.h"
 
 template<class T, asncpp::base::asn1_tag type, auto limitations = nullptr>
 class string_base_t : public asncpp::base::asn1_basic {
 public:
+
+
     [[nodiscard]] auto value() const -> const std::basic_string<T> & {
         return _value;
     }
 
     using value_t = std::basic_string<T>;
+
+
     string_base_t() noexcept = default;
+
+    string_base_t(string_base_t &&) noexcept = default;
+
+    string_base_t(const string_base_t &) noexcept = default;
+
+    string_base_t &operator=(string_base_t &&) noexcept = default;
+
+    string_base_t &operator=(const string_base_t &) noexcept = default;
+
+    ~string_base_t() noexcept final = default;
+
 
     explicit string_base_t(std::basic_string_view<T> data) {
        // _type = type;

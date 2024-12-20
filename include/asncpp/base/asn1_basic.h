@@ -26,19 +26,19 @@ public:
         asn1_basic::decode(data);
     }
 
-    [[nodiscard]] bool is_constructed() const noexcept {
+    constexpr bool is_constructed() const noexcept {
         return _constructed;
     }
 
-    [[nodiscard]] asn1_class get_cls() const noexcept {
+    constexpr asn1_class get_cls() const noexcept {
         return _cls;
     }
 
-    [[nodiscard, maybe_unused]] size_t get_length() const noexcept {
+    constexpr size_t get_length() const noexcept {
         return _length;
     }
 
-    [[nodiscard, maybe_unused]] const dynamic_array_t &get_data() const noexcept {
+    constexpr const dynamic_array_t &get_data() const noexcept {
         return _data;
     }
 
@@ -48,8 +48,9 @@ public:
 
     friend std::unique_ptr<asn1_basic> deserialize_v(std::span<const uint8_t> data);
 
+
 protected:
-    [[nodiscard]] constexpr virtual uintmax_t get_tag() const noexcept = 0;
+    constexpr virtual uintmax_t get_tag() const noexcept = 0;
 
     virtual void decode(std::span<const uint8_t> data);
 
@@ -64,6 +65,7 @@ private:
     bool _constructed{};
     asn1_class _cls{};
     size_t _length{};
+    tag_t _type;
 
     [[nodiscard]] dynamic_array_t encode_type() const;
 
@@ -71,9 +73,9 @@ private:
 
     [[nodiscard]] static std::pair<size_t, size_t> extract_length(std::span<const uint8_t> buffer);
 
-    [[nodiscard]] static bool extract_is_constructed(const uint8_t tag) noexcept;
+    [[nodiscard]] constexpr static bool extract_is_constructed(uint8_t tag) noexcept;
 
-    [[nodiscard]] static asn1_class extract_class(const uint8_t tag) noexcept;
+    [[nodiscard]] constexpr static asn1_class extract_class(uint8_t tag) noexcept;
 };
 
 #endif //ASN1_BASIC_H
