@@ -49,7 +49,7 @@ public:
     friend std::unique_ptr<asn1_basic> deserialize_v(std::span<const uint8_t> data);
 
 protected:
-    [[nodiscard]] constexpr virtual tag_t get_tag() const noexcept = 0;
+    [[nodiscard]] constexpr virtual uintmax_t get_tag() const noexcept = 0;
 
     virtual void decode(std::span<const uint8_t> data);
 

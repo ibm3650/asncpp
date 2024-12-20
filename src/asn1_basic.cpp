@@ -84,11 +84,7 @@ asncpp::base::dynamic_array_t asncpp::base::asn1_basic::encode_length(size_t len
 //TODO: USE ALGORITHM
 //TODO: USE ATTRIBUTE
 asncpp::base::dynamic_array_t asncpp::base::asn1_basic::encode_type() const {
-    uintmax_t raw_type{
-        std::holds_alternative<asn1_tag>(get_tag())
-            ? static_cast<uintmax_t>(std::get<asn1_tag>(get_tag()))
-            : std::get<uintmax_t>(get_tag())
-    };
+    uintmax_t raw_type{get_tag()};
     const uint8_t base = static_cast<uint8_t>(get_cls()) << 6U |
                          static_cast<uint8_t>(is_constructed()) << 5U;
 

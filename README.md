@@ -1,9 +1,12 @@
 ## TODO's and ideas
+
 Common:
 - [ ] Add tests for basic class asn1_basic
 - [ ] Add Endian-independent class for the integer type
+
 Integer type:
 - [ ] Add tests for `to_string`
+- [ ] Add tests for overflow case
 - [ ] Add constructor from string representation
 - [ ] Add support of long integers, who has length more then 64 bits.
 - [ ] Add support of arithmetic operations

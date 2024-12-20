@@ -33,7 +33,7 @@ public:
     }
 
     //TODO: Use std::chrono::parse
-    void decode(std::span<const uint8_t> data) final {
+    void decode(std::span<const uint8_t> /*data*/) final {
         const std::string iso8601{this->_data.begin(), this->_data.begin() + this->get_length()};
         std::tm tm = {};
         std::istringstream input_stream(iso8601);
@@ -58,8 +58,8 @@ public:
         return oss.str();
     }
 
-    [[nodiscard]] constexpr asncpp::base::tag_t get_tag() const noexcept final {
-        return type;
+    [[nodiscard]] constexpr uintmax_t get_tag() const noexcept final {
+        return static_cast<uintmax_t>(type);
     }
 
 private:

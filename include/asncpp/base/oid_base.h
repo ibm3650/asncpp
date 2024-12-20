@@ -68,8 +68,8 @@ public:
     }
 
 protected:
-    [[nodiscard]] constexpr asncpp::base::tag_t get_tag() const noexcept override {
-        return type;
+    [[nodiscard]] constexpr uintmax_t get_tag() const noexcept override {
+        return static_cast<uintmax_t>(type);
     }
     /**
      * @brief Кодирование OBJECT IDENTIFIER в DER.
