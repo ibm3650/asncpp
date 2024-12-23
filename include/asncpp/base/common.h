@@ -11,16 +11,15 @@
 #include <variant>
 #include <memory>
 
-
 namespace asncpp::base {
     /**
- * @enum asn1_class
- * @brief Enumerates the classes of ASN.1 tags.
- *
- * ASN.1 tags are divided into four primary classes, which determine the scope
- * and application of the tag. Each class has a specific use case as defined
- * in the X.690 standard.
- */
+     * @enum asn1_class
+     * @brief Enumerates the classes of ASN.1 tags.
+     *
+     * ASN.1 tags are divided into four primary classes, which determine the scope
+     * and application of the tag. Each class has a specific use case as defined
+     * in the X.690 standard.
+     */
     enum class asn1_class : uint8_t {
         UNIVERSAL = 0x00, /**< Universal class: globally defined and applicable for all contexts. */
         APPLICATION = 0x01, /**< Application class: specific to a particular application. */
@@ -28,7 +27,12 @@ namespace asncpp::base {
         PRIVATE = 0x03 /**< Private class: used for application-specific purposes. */
     };
 
-
+    /**
+     * @enum asn1_tag
+     * @brief Defines various ASN.1 tag types.
+     *
+     * Each tag type represents a different data type or structure in ASN.1 encoding.
+     */
     enum class asn1_tag : uint8_t {
         Reserved = 0x00, /**< Reserved tag, not used. */
         BOOLEAN = 0x01, /**< Boolean type: TRUE or FALSE. */
@@ -64,18 +68,47 @@ namespace asncpp::base {
         DURATION = 0x22, /**< Duration: time interval in ISO 8601 format. */
     };
 
-    using tag_t = std::variant<std::monostate, asncpp::base::asn1_tag, uintmax_t>;
+    /**
+     * @typedef tag_t
+     * @brief Represents a variant type for storing ASN.1 tag information.
+     *
+     * The tag can be either:
+     * - `std::monostate` (uninitialized),
+     * - `asn1_tag` (standard ASN.1 tag type),
+     * - `uintmax_t` (for extended tags).
+     */
+    using tag_t = std::variant<std::monostate, asn1_tag, uintmax_t>;
 
+    /**
+     * @typedef dynamic_array_t
+     * @brief Represents a dynamic byte array used for ASN.1 encoding and decoding.
+     */
     using dynamic_array_t = std::vector<uint8_t>;
 
+    /**
+     * @class asn1_basic
+     * @brief Abstract base class for representing ASN.1 data types.
+     *
+     * Provides a foundation for encoding, decoding, and managing ASN.1 data.
+     */
     class asn1_basic;
 
+    /**
+     * @brief Deserializes a byte stream into an ASN.1 object.
+     *
+     * @param data The byte stream to deserialize.
+     * @return A unique pointer to the deserialized ASN.1 object.
+     * @throws std::runtime_error If the data cannot be parsed.
+     */
     std::unique_ptr<asn1_basic> deserialize_v(std::span<const uint8_t> data);
 
-    dynamic_array_t serialize(asncpp::base::asn1_basic *block);
-
-
+    /**
+     * @brief Serializes an ASN.1 object into a byte stream.
+     *
+     * @param block The ASN.1 object to serialize.
+     * @return A byte stream representing the serialized ASN.1 object.
+     */
+    dynamic_array_t serialize(asn1_basic *block);
 } // namespace asncpp::base
-
 
 #endif //ASNCPP_ASN_BASE_H
