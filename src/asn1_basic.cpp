@@ -5,6 +5,7 @@
 #include "asncpp/base/asn1_basic.h"
 
 #include <bit>
+#include <ranges>
 #include <stdexcept>
 //TODO: USE ALGORITHM
 //TODO: USE ATTRIBUTE
@@ -41,7 +42,12 @@ asncpp::base::dynamic_array_t asncpp::base::asn1_basic::encode() {
 
 //TODO: USE ALGORITHM
 //TODO: USE ATTRIBUTE
+namespace views = std::ranges::views;
+
 std::pair<asncpp::base::tag_t, size_t> asncpp::base::asn1_basic::extract_type(std::span<const uint8_t> buffer) {
+    if (buffer.empty()) {
+        throw std::runtime_error("Data is too short for the long encoding");
+    }
     const uint8_t tag_decoded = buffer[0] & 0x1FU;
 
     if (tag_decoded < 0x1FU) {
@@ -53,19 +59,36 @@ std::pair<asncpp::base::tag_t, size_t> asncpp::base::asn1_basic::extract_type(st
         throw std::runtime_error("Data is too short for the long encoding");
     }
 
-    auto type_begin = std::next(buffer.cbegin());
+    //auto type_begin = std::next(buffer.cbegin());
+    //auto type_end = buffer.cend();
+    constexpr auto predicate = [](const auto &byte) { return byte & 0x80U; };
+    // if (predicate(buffer.back())) {
+    //     throw std::runtime_error("Data is too short for the long encoding");
+    // }
+    auto type_view = buffer | views::drop(1) | views::take_while(predicate);
     uintmax_t type_decoded{0};
-    for (; *type_begin & 0x80U && type_begin != buffer.cend(); ++type_begin) {
-        type_decoded = (type_decoded << 7U) | (*type_begin & 0x7FU);
+    size_t count = 0;
+    for (const auto &byte: type_view) {
+        type_decoded = (type_decoded << 7U) | (byte & 0x7FU);
+        count++;
     }
-    if (type_begin == buffer.cend()) {
+    if (count == 0) {
         throw std::runtime_error("Data is too short for the long encoding");
     }
-    type_decoded = (type_decoded << 7U) | (*type_begin++ & 0x7FU);
-    if (type_decoded <= 0x22U) {
-        return std::make_pair(static_cast<asn1_tag>(type_decoded), type_begin - buffer.cbegin());
+    if (count + 1 == buffer.size_bytes()) {
+        throw std::runtime_error("Data is too short for the long encoding");
     }
-    return std::make_pair(type_decoded, type_begin - buffer.cbegin());
+    // for (; (*type_begin & 0x80U) && (type_begin < buffer.cend()); ++type_begin) {
+    //     type_decoded = (type_decoded << 7U) | (*type_begin & 0x7FU);
+    // }
+    //  if (type_begin == buffer.cend()) {
+    //     throw std::runtime_error("Data is too short for the long encoding");
+    //78  }
+    //  type_decoded = (type_decoded << 7U) | (*type_begin++ & 0x7FU);
+    if (type_decoded <= 0x22U) {
+        return std::make_pair(static_cast<asn1_tag>(type_decoded), count +1);
+    }
+    return std::make_pair(type_decoded, count+1 );
 }
 
 //TODO: USE ALGORITHM
@@ -106,13 +129,15 @@ asncpp::base::dynamic_array_t asncpp::base::asn1_basic::encode_type() const {
         return {static_cast<unsigned char>(base | static_cast<uint8_t>(raw_type))};
     }
 
-    std::vector<uint8_t> result{static_cast<uint8_t>(base | static_cast<uint8_t>(0x1FU))};
+    std::vector<uint8_t> result;
+    //std::vector<uint8_t> result{static_cast<uint8_t>(base | static_cast<uint8_t>(0x1FU))};
 
     do {
-        result.push_back(static_cast<uint8_t>(raw_type & 0x7FU));
+        result.insert(result.begin(), static_cast<uint8_t>(raw_type & 0x7FU));
+        //result.push_back(static_cast<uint8_t>(raw_type & 0x7FU));
         raw_type >>= 7U;
     } while (raw_type > 0);
-
+    result.insert(result.begin(), static_cast<uint8_t>(base | static_cast<uint8_t>(0x1FU)));
     std::transform(std::next(result.cbegin()),
                    std::prev(result.cend()),
                    std::next(result.begin()),

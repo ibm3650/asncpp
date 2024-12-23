@@ -7,7 +7,13 @@
 #include <string>
 #include "common.h"
 
-
+class TestASN1Basic;
+class asn_basic_test_encode_short_tag_Test;
+class asn_basic_test_encode_long_tag_Test;
+class asn_basic_test_encode_short_length_Test;
+class asn_basic_test_encode_long_length_Test;
+class asn_basic_test_decode_short_length_Test;
+class asn_basic_test_decode_long_length_Test;
 class asncpp::base::asn1_basic {
 public:
     asn1_basic() noexcept = default;
@@ -22,7 +28,8 @@ public:
 
     virtual ~asn1_basic() = default;
 
-    asn1_basic(std::span<const uint8_t> data){ // NOLINT(*-explicit-constructor)
+    asn1_basic(std::span<const uint8_t> data) {
+        // NOLINT(*-explicit-constructor)
         asn1_basic::decode(data);
     }
 
@@ -48,7 +55,6 @@ public:
 
     friend std::unique_ptr<asn1_basic> deserialize_v(std::span<const uint8_t> data);
 
-
 protected:
     constexpr virtual uintmax_t get_tag() const noexcept = 0;
 
@@ -61,11 +67,23 @@ protected:
     }
 
     dynamic_array_t _data; // NOLINT(*-non-private-member-variables-in-classes)
+
 private:
+    // #define FRIEND_TEST(test_case_name, test_name)\
+    // friend class test_case_name##_##test_name##_Test
+    //     FRIEND_TEST(asn_basic_test, encode_short_tag);
+    friend class ::TestASN1Basic;
+    friend class ::asn_basic_test_encode_short_tag_Test;
+    friend class ::asn_basic_test_encode_long_tag_Test;
+    friend class asn_basic_test_encode_short_length_Test;
+    friend class asn_basic_test_encode_long_length_Test;
+    friend class asn_basic_test_decode_short_length_Test;
+    friend class asn_basic_test_decode_long_length_Test;
     bool _constructed{};
     asn1_class _cls{};
     size_t _length{};
     tag_t _type;
+
 
     [[nodiscard]] dynamic_array_t encode_type() const;
 
