@@ -6,6 +6,7 @@
 #include <array>
 #include <gtest/gtest.h>
 #include "asncpp/date.h"
+#include "asncpp/bit_string.h"
 
 
 using test_item_t = std::tuple<std::tm, std::vector<uint8_t>, std::string_view>;
@@ -82,3 +83,6 @@ TEST(ASN1DateTests, StringifyDate) {
 //         EXPECT_EQ(time_of_day_obj.to_string(), expected);
 //     }
 // }
+TEST(ASN1TimeOfDayTests, EncodeDecodeTimeOfDay) {
+    bit_string_t bool_obj();
+}

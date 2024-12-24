@@ -15,4 +15,6 @@
 #include "asncpp/enumerated.h"
 #include "asncpp/date.h"
 #include "asncpp/relative_oid.h"
+#include "asncpp/boolean.h"
+#include "asncpp/bit_string.h"
 #endif //TYPES_H

@@ -22,7 +22,9 @@ std::unique_ptr<asncpp::base::asn1_basic> asncpp::base::deserialize_v(std::span<
     auto create_object = [](const asn1_tag tag) -> std::unique_ptr<asn1_basic> {
         using enum asn1_tag;
         switch (tag) {
+            case BOOLEAN: return std::make_unique<asncpp::types::boolean_t>();
             case INTEGER: return std::make_unique<asncpp::types::integer_t>();
+            case BIT_STRING: return std::make_unique<bit_string_t>();
             case OBJECT_IDENTIFIER: return std::make_unique<object_identifier_t>();
             case ENUMERATED: return std::make_unique<enumerated_t>();
             case RELATIVE_OID: return std::make_unique<relative_oid_t>();

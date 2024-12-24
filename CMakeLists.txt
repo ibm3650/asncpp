@@ -17,10 +17,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_library(
         asncpp
-        main.cpp
         src/common.cpp
         src/asn1_basic.cpp
         src/integer_basic.cpp
+        src/boolean.cpp
 )
 
 target_include_directories(asncpp

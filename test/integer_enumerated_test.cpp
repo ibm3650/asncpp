@@ -30,7 +30,7 @@ TEST(integer_enumerated_test, deserialize_test) {
     for (const auto &[encoded, expected]: test_cases) {
         auto deserialized{ asncpp::base::deserialize_v(encoded)};
         const auto* ptr{dynamic_cast<asncpp::types::integer_t*>(deserialized.get())};
-        EXPECT_EQ(static_cast<asncpp::types::integer_t::value_type>(*ptr), expected) << "Failed for encoded value: " << expected;
+        EXPECT_EQ(ptr->get_value(), expected) << "Failed for encoded value: " << expected;
     }
 }
 
