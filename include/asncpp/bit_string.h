@@ -10,21 +10,23 @@
 #include <numeric>
 
 #include "asncpp/base/asn1_basic.h"
-
+//TODO: move to the source file
 class bit_string_t : public asncpp::base::asn1_basic {
 public:
     //template<size_t N>
     //bit_string_t(const std::bitset<N>& data);
 
+    explicit bit_string_t(asn1_basic &&base) : asn1_basic(std::move(base)) {
+    };
 
     /**
      * @brief Конструктор из вектора булевых значений.
      * @param data Вектор значений `bool`.
      */
-    bit_string_t(const std::vector<bool>& data) : _bit_length{data.size()} {
-        for (const auto& chunk : data | std::views::chunk(8) ) {
+    bit_string_t(const std::vector<bool> &data) : _bit_length{data.size()} {
+        for (const auto &chunk: data | std::views::chunk(8)) {
             uint8_t byte{0};
-            for (const bool bit : chunk) {
+            for (const bool bit: chunk) {
                 byte <<= 1U;
                 byte |= static_cast<uint8_t>(bit);
             }
@@ -36,18 +38,16 @@ public:
     }
 
 
-
     /**
      * @brief Конструктор из вектора байтов и длины в битах.
      * @param data Вектор байтов.
      * @param bit_length Длина в битах.
      */
-    bit_string_t(const std::vector<uint8_t>& data, size_t bit_length): _value{data}, _bit_length{bit_length} {
+    bit_string_t(const std::vector<uint8_t> &data, size_t bit_length): _value{data}, _bit_length{bit_length} {
         if (bit_length > data.size() * 8) {
             throw std::invalid_argument("Bit length exceeds data size");
         }
     }
-
 
 
     /**
@@ -55,9 +55,9 @@ public:
      * @param data Строка, где '1' и '0' представляют биты.
      */
     bit_string_t(std::string_view data) : _bit_length{data.size()} {
-        for (const auto& chunk : data | std::views::chunk(8) ) {
+        for (const auto &chunk: data | std::views::chunk(8)) {
             uint8_t byte{0};
-            for (const char bit : chunk) {
+            for (const char bit: chunk) {
                 if (bit != '0' && bit != '1') {
                     throw std::invalid_argument("Invalid character in bit string");
                 }
@@ -89,8 +89,6 @@ public:
     }
 
 
-
-
     bit_string_t() = default;
 
     ~bit_string_t() final = default;
@@ -100,7 +98,7 @@ public:
     }
 
 
-    [[nodiscard]] const std::vector<uint8_t> & value() const {
+    [[nodiscard]] const std::vector<uint8_t> &value() const {
         return _value;
     }
 
@@ -108,8 +106,11 @@ public:
         return _bit_length;
     }
 
-    void decode(std::span<const uint8_t>  /*data*/) final {
+    void decode(std::span<const uint8_t> /*data*/) final {
         if (_data.empty()) {
+            if (!_children.empty()) {
+                return;
+            }
             throw std::invalid_argument("Invalid BIT STRING: empty data");
         }
 
@@ -124,6 +125,9 @@ public:
     }
 
     asncpp::base::dynamic_array_t encode() final {
+        if (!_children.empty()) {
+            return _data;
+        }
         _data.clear();
         _data.push_back(static_cast<uint8_t>((8 - (_bit_length % 8)) % 8)); // Неиспользуемые биты.
         _data.insert(_data.end(), _value.begin(), _value.end());
@@ -134,17 +138,16 @@ public:
 
     [[nodiscard]] std::string to_string() const override {
         return "BIT STRING: "
-        // + std::accumulate(_value.begin(), _value.end(), std::string{},
-        //                                         [](std::string& acc, uint8_t byte) {
-        //                                             for (size_t i = 0; i < 8; ++i) {
-        //                                                 acc += ((byte & 0x80) == 0x80) + '0';
-        //                                                 byte <<= 1;
-        //                                             }
-        //                                             return acc;
-        //                                         })
-        ;
+                // + std::accumulate(_value.begin(), _value.end(), std::string{},
+                //                                         [](std::string& acc, uint8_t byte) {
+                //                                             for (size_t i = 0; i < 8; ++i) {
+                //                                                 acc += ((byte & 0x80) == 0x80) + '0';
+                //                                                 byte <<= 1;
+                //                                             }
+                //                                             return acc;
+                //                                         })
+                ;
     }
-
 
 private:
     std::vector<uint8_t> _value;

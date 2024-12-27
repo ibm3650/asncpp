@@ -5,6 +5,7 @@
 #ifndef ASN1_BASIC_H
 #define ASN1_BASIC_H
 
+#include <stdexcept>
 #include <string>
 #include "common.h"
 
@@ -33,6 +34,8 @@ namespace asncpp::base {
      * ASN.1 data types. Derived classes should implement the `get_tag` method to define
      * the specific tag associated with their ASN.1 type.
      */
+    //TODO: Переосмысдить инкапсуляцию, чтобы не было необходимости в дружественных классах и чтобы обезопасить достуап к членам класса
+    //TODO: Навести порядок с указателями, заменить на shared_ptr
     class asn1_basic {
     public:
         /**
@@ -72,6 +75,7 @@ namespace asncpp::base {
          */
         asn1_basic(std::span<const uint8_t> data) {
             // NOLINT(*-explicit-constructor)
+            //TODO: Is secure to use virtual of base class in base class method in constructor?
             asn1_basic::decode(data);
         }
 
@@ -80,7 +84,7 @@ namespace asncpp::base {
          * @return `true` if the object is constructed, `false` otherwise.
          */
         constexpr bool is_constructed() const noexcept {
-            return _constructed;
+            return _constructed || is_have_children();
         }
 
         /**
@@ -128,14 +132,22 @@ namespace asncpp::base {
          * @return A unique pointer to the deserialized object.
          */
         friend std::unique_ptr<asn1_basic> deserialize_v(std::span<const uint8_t> data);
+        void append_child(std::unique_ptr<asn1_basic> child) {
+            _children.emplace_back(std::move(child));
+        }
 
+        const auto get_children(size_t index) const  {
+            return _children.at(index).get();
+        }
     protected:
         /**
          * @brief Retrieves the tag value of the ASN.1 object.
          * Derived classes must implement this method to define their specific tag value.
          * @return The tag value of the object.
          */
-        constexpr virtual uintmax_t get_tag() const noexcept = 0;
+        constexpr virtual uintmax_t get_tag() const noexcept {
+            return 0;
+        }
 
         /**
          * @brief Decodes an ASN.1 object from a byte buffer.
@@ -159,12 +171,41 @@ namespace asncpp::base {
         }
 
         dynamic_array_t _data; /**< Internal buffer storing the ASN.1 object's raw data. */
+        unsigned long long _raw_length;
+        std::vector<std::unique_ptr<asn1_basic> > _children; /**< Child ASN.1 objects for constructed types. */
+        [[nodiscard]] bool is_have_children() const {
+            return !_children.empty();
+        }
+
+        [[nodiscard]] size_t children_count() const {
+            return _children.size();
+        }
+
+        void truncate_data(size_t length) {
+            // _data.erase(_data.begin(), _data.begin() + length);
+            //size_t const n = 3;
+            if (length > _data.size()) {
+                throw std::invalid_argument("Length exceeds buffer size");
+            }
+
+
+            std::move(_data.begin() + length, _data.end(), _data.begin());
+            _data.resize(_data.size() - length);
+            //}
+        }
+
+        void append_data(std::span<const uint8_t> data) {
+            _data.insert(_data.end(), data.begin(), data.end());
+        }
+
+
 
     private:
         bool _constructed{}; /**< Indicates whether the ASN.1 object is constructed. */
         asn1_class _cls{}; /**< The class of the ASN.1 tag (`UNIVERSAL`, `APPLICATION`, etc.). */
         size_t _length{}; /**< The length of the ASN.1 object's encoded data. */
         tag_t _type; /**< The tag type of the ASN.1 object. */
+
 
         /**
          * @brief Encodes the tag value of the ASN.1 object.

@@ -29,6 +29,7 @@ void asncpp::base::asn1_basic::decode(std::span<const uint8_t> data) {
     if (std::distance(data.cbegin() + static_cast<std::ptrdiff_t>(length.first), data.end()) < 0) {
         throw std::invalid_argument("Invalid ASN.1 data. Length exceeds buffer size");
     }
+    _raw_length = type.second + length.second + length.first;
     _data.assign(data.cbegin(), data.cbegin() + static_cast<std::ptrdiff_t>(length.first));
 }
 
@@ -112,6 +113,9 @@ asncpp::base::dynamic_array_t asncpp::base::asn1_basic::encode_type() const {
     const uint8_t base = (static_cast<uint8_t>(get_cls()) << 6U) |
                          (static_cast<uint8_t>(is_constructed()) << 5U);
 
+    if (raw_type == 0) {
+        throw std::runtime_error("Tag is not set");
+    }
     if (raw_type < 0x1FU) {
         return {static_cast<unsigned char>(base | static_cast<uint8_t>(raw_type))};
     }

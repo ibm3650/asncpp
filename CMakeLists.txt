@@ -21,6 +21,7 @@ add_library(
         src/asn1_basic.cpp
         src/integer_basic.cpp
         src/boolean.cpp
+        src/bit_string.cpp
 )
 
 target_include_directories(asncpp
