@@ -26,7 +26,7 @@ std::vector<std::pair<std::vector<uint8_t>, std::vector<bool> > > bit_string_tes
 
 TEST(bit_string_test, encode) {
     for (const auto &[encoded, expected]: bit_string_test_data) {
-        bit_string_t obj{expected};
+        asncpp::types::bit_string_t obj{expected};
         const auto att = asncpp::base::serialize(&obj);
         EXPECT_EQ(att, encoded);
     }
@@ -44,7 +44,7 @@ TEST(bit_string_test, encode) {
 TEST(bit_string_test, consructed_uint8_vector) {
     std::vector<uint8_t> bytes = {0b10110010, 0b11001100};
     size_t bitLength = 15; // Last bit of the second byte is unused.
-    bit_string_t bitStr(bytes, bitLength);
+    asncpp::types::bit_string_t bitStr(bytes, bitLength);
 
     EXPECT_EQ(bitStr.value(), bytes);
     EXPECT_EQ(bitStr.bit_length(), bitLength);
@@ -56,7 +56,7 @@ TEST(bit_string_test, consructed_uint8_vector) {
 
 TEST(bit_string_test, consructed_string_view) {
     std::string_view bitStrView = "101100101";
-    bit_string_t bitStr(bitStrView);
+    asncpp::types::bit_string_t bitStr(bitStrView);
 
     EXPECT_EQ(bitStr.value(), std::vector<uint8_t>({0b10110010, 0b10000000}));
     EXPECT_EQ(bitStr.bit_length(), bitStrView.size());
@@ -69,7 +69,7 @@ TEST(bit_string_test, consructed_string_view) {
 TEST(bit_string_test, consructed_uint64) {
     uint64_t number = 0b101100101100;
     size_t bitLength = 12;
-    bit_string_t bitStr(number, bitLength);
+    asncpp::types::bit_string_t bitStr(number, bitLength);
 
     EXPECT_EQ(bitStr.value(), std::vector<uint8_t>({0b00001011, 0b00101100}));
     EXPECT_EQ(bitStr.bit_length(), bitLength);
@@ -80,7 +80,7 @@ TEST(bit_string_test, consructed_uint64) {
 }
 
 TEST(bit_string_test, consructed_empty) {
-    bit_string_t bitStr;
+    asncpp::types::bit_string_t bitStr;
 
     EXPECT_EQ(bitStr.value(), std::vector<uint8_t>());
     EXPECT_EQ(bitStr.bit_length(), 0);
@@ -111,7 +111,7 @@ TEST(bit_string_test, decoding_constructable) {
             0x03, 0x02, 0x02, 0x0F  // Nested BIT STRING (2 unused bits, value: 0x0F)
         };
     auto deserialized = asncpp::base::deserialize_v(encoded);
-    const auto *ptr{dynamic_cast<bit_string_t *>(deserialized.get())};
+    const auto *ptr{dynamic_cast<asncpp::types::bit_string_t *>(deserialized.get())};
     auto childs{ ptr->get_children(0)};
     const auto ggg  = std::vector<uint8_t>{0x00, 0x11, 0x22};
     const auto ggg1  = std::vector<uint8_t>{0x01,0xF0};
@@ -126,11 +126,11 @@ TEST(bit_string_test, decoding_constructable) {
     // childs->get_children(2)->get_data() == std::vector<uint8_t>{0x0F};
 
 
-    bit_string_t bitStr;
-    std::unique_ptr<bit_string_t> t[] = {std::make_unique<bit_string_t>(std::vector<uint8_t>{0x11, 0x22}, 16),
-                std::make_unique<bit_string_t>(std::vector<uint8_t>{0xF0}, 7),
-                std::make_unique<bit_string_t>(std::vector<uint8_t>{0x0F}, 6)};
-    auto t1 = std::make_unique<bit_string_t>();
+    asncpp::types::bit_string_t bitStr;
+    std::unique_ptr<asncpp::types::bit_string_t> t[] = {std::make_unique<asncpp::types::bit_string_t>(std::vector<uint8_t>{0x11, 0x22}, 16),
+                std::make_unique<asncpp::types::bit_string_t>(std::vector<uint8_t>{0xF0}, 7),
+                std::make_unique<asncpp::types::bit_string_t>(std::vector<uint8_t>{0x0F}, 6)};
+    auto t1 = std::make_unique<asncpp::types::bit_string_t>();
     t1->append_child(std::move(t[0]));
     t1->append_child(std::move(t[1]));
     t1->append_child(std::move(t[2]));

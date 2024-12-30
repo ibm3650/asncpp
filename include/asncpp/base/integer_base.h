@@ -27,6 +27,11 @@ namespace asncpp::base {
         using value_type = T;
         using const_reference = const T &;
 
+
+        explicit integer_basic(asn1_basic &&base) : asn1_basic(std::move(base)) {
+        };
+
+
         integer_basic() noexcept = default;
 
         integer_basic(integer_basic &&) noexcept = default;

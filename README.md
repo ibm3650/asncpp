@@ -35,6 +35,10 @@ Bit string type:
 - [ ] Add support of getting full constructed structure
 - [ ] Add exception on try to get value of not constructed structure and not constructed bit
 
+Octet string type:
+- [ ] Add tests for `to_string`
+- [ ] Add concatenation operator
+
 ## Realization progress 🤔
 
 | Type              | Primitive | Constructed | Tests | Doxygen | Additional |
@@ -42,7 +46,7 @@ Bit string type:
 | Boolean           | ✅         | 🔒          | ✅     | ✅       | Released   |
 | Integer           | ✅         | 🔒          | ✅     | ✅       | Released   |
 | Bit String        | ✅         | ✅           | ✅     | ✅       | Released   |
-| Octet String      | ✅         | ❌           | 🚧    | ❌       | 🔄         |
+| Octet String      | ✅         | ✅           | ✅    | ✅       | Released         |
 | NULL              | 🚧        | 🔒          | ❌     | ❌       | 🔄         |
 | Object identifier | ✅         | 🔒          | ✅     | ❌       | 🔄         |
 | Object descriptor | 🚧        | ❌           | ❌     | ❌       | 🔄         |

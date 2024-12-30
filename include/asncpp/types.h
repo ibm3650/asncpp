@@ -17,4 +17,5 @@
 #include "asncpp/relative_oid.h"
 #include "asncpp/boolean.h"
 #include "asncpp/bit_string.h"
+#include "asncpp/octet_string.h"
 #endif //TYPES_H

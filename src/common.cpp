@@ -34,9 +34,10 @@ std::unique_ptr<asncpp::base::asn1_basic> asncpp::base::deserialize_v(std::span<
     auto create_object = [base = std::move(base)](const asn1_tag tag) mutable -> std::unique_ptr<asn1_basic> {
         using enum asn1_tag;
         switch (tag) {
-            // case BOOLEAN: return std::make_unique<types::boolean_t>{std::move(base)};
-            // case INTEGER: return std::make_unique<types::integer_t>{std::move(base)};
-            case BIT_STRING: return std::make_unique<bit_string_t>(std::move(base));
+            case BOOLEAN: return std::make_unique<types::boolean_t>(std::move(base));
+            case INTEGER: return std::make_unique<types::integer_t>(std::move(base));
+            case BIT_STRING: return std::make_unique<types::bit_string_t>(std::move(base));
+            case OCTET_STRING: return std::make_unique<octet_string_t>(std::move(base));
             case OBJECT_IDENTIFIER: return std::make_unique<object_identifier_t>();
             case ENUMERATED: return std::make_unique<enumerated_t>();
             case RELATIVE_OID: return std::make_unique<relative_oid_t>();

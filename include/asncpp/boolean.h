@@ -15,6 +15,9 @@ namespace asncpp::types {
     public:
         using value_type = bool;
 
+        explicit boolean_t(asn1_basic &&base) : asn1_basic(std::move(base)) {
+        };
+
         /**
          * @brief Конструктор по умолчанию.
          */
