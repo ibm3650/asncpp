@@ -32,6 +32,8 @@ class object_identifier_base : public asncpp::base::asn1_basic {
 public:
     using sid_t = uint32_t;
 
+    explicit object_identifier_base( asn1_basic && basic): asncpp::base::asn1_basic(std::move(basic)) {};
+
     /**
      * @brief Конструктор по умолчанию.
      */

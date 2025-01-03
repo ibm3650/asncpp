@@ -38,16 +38,17 @@ std::unique_ptr<asncpp::base::asn1_basic> asncpp::base::deserialize_v(std::span<
             case INTEGER: return std::make_unique<types::integer_t>(std::move(base));
             case BIT_STRING: return std::make_unique<types::bit_string_t>(std::move(base));
             case OCTET_STRING: return std::make_unique<octet_string_t>(std::move(base));
-            case OBJECT_IDENTIFIER: return std::make_unique<object_identifier_t>();
-            case ENUMERATED: return std::make_unique<enumerated_t>();
-            case RELATIVE_OID: return std::make_unique<relative_oid_t>();
-            case NUMERIC_STRING: return std::make_unique<numeric_string_t>();
-            case PRINTABLE_STRING: return std::make_unique<printable_string_t>();
-            case IA5_STRING: return std::make_unique<ia5_string_t>();
-            case VISIBLE_STRING: return std::make_unique<visible_string_t>();
-            case UNIVERSAL_STRING: return std::make_unique<universal_string_t>();
-            case BMP_STRING: return std::make_unique<bmp_string_t>();
-            case DATE: return std::make_unique<date_t>();
+            case OBJECT_IDENTIFIER: return std::make_unique<object_identifier_t>(std::move(base));
+            case OBJECT_DESCRIPTOR: return std::make_unique<object_descriptor_t>(std::move(base));
+            case ENUMERATED: return std::make_unique<enumerated_t>(std::move(base));
+            case RELATIVE_OID: return std::make_unique<relative_oid_t>(std::move(base));
+            case NUMERIC_STRING: return std::make_unique<numeric_string_t>(std::move(base));
+            case PRINTABLE_STRING: return std::make_unique<printable_string_t>(std::move(base));
+            case IA5_STRING: return std::make_unique<ia5_string_t>(std::move(base));
+            case VISIBLE_STRING: return std::make_unique<visible_string_t>(std::move(base));
+            case UNIVERSAL_STRING: return std::make_unique<universal_string_t>(std::move(base));
+            case BMP_STRING: return std::make_unique<bmp_string_t>(std::move(base));
+            case DATE: return std::make_unique<date_t>(std::move(base));
             default: return nullptr;
         }
     };
@@ -64,10 +65,7 @@ std::unique_ptr<asncpp::base::asn1_basic> asncpp::base::deserialize_v(std::span<
 
 std::vector<uint8_t> asncpp::base::serialize(asn1_basic *block) {
     for (size_t i = 0; i < block->children_count(); ++i) {
-       // if (block->is_constructed())
             block->_data.append_range(serialize(block->_children[i].get()));
-
-       // block->_data.append_range(serialize(block->_children[i].get()));
     }
     (void) block->encode();
     return block->asn1_basic::encode();

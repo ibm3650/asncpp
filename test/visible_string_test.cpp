@@ -80,7 +80,7 @@ TEST(visible_string_test, encode) {
 TEST(visible_string_test, decode) {
     for (const auto &[encoded, expected]: test_cases) {
         const auto deserialized = asncpp::base::deserialize_v(encoded);
-        const visible_string_t *ptr = dynamic_cast<visible_string_t *>(deserialized.get());
+        const visible_string_t *ptr = static_cast<visible_string_t *>(deserialized.get());
         EXPECT_EQ(ptr->value(), expected);
     }
 }

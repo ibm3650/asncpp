@@ -8,6 +8,8 @@ Common:
 - [ ] Use compile-time functions
 - [ ] Documentations for all classes
 - [ ] Decoding and encoding make as coroutine
+- [ ] Check type of appended child in constructed types
+- [ ] Constructor as initializer lists in format like json
 
 Integer type:
 
@@ -36,8 +38,14 @@ Bit string type:
 - [ ] Add exception on try to get value of not constructed structure and not constructed bit
 
 Octet string type:
+
 - [ ] Add tests for `to_string`
 - [ ] Add concatenation operator
+
+OID/Relative OID type:
+
+- [ ] Add tests for `to_string`
+- [ ] Add support of [] operator for SID`s
 
 ## Realization progress 🤔
 
@@ -46,35 +54,35 @@ Octet string type:
 | Boolean           | ✅         | 🔒          | ✅     | ✅       | Released   |
 | Integer           | ✅         | 🔒          | ✅     | ✅       | Released   |
 | Bit String        | ✅         | ✅           | ✅     | ✅       | Released   |
-| Octet String      | ✅         | ✅           | ✅    | ✅       | Released         |
+| Octet String      | ✅         | ✅           | ✅     | ✅       | Released   |
 | NULL              | 🚧        | 🔒          | ❌     | ❌       | 🔄         |
-| Object identifier | ✅         | 🔒          | ✅     | ❌       | 🔄         |
-| Object descriptor | 🚧        | ❌           | ❌     | ❌       | 🔄         |
+| Object identifier | ✅         | 🔒          | ✅     | ✅       | Released   |
+| Object descriptor | ✅         | ✅           | ✅     | ✅       | Released   |
 | External          | 🔒        | ❌           | ❌     | ❌       | 🔄         |
 | Real              | ❌         | 🔒          | ❌     | ❌       | 🔄         |
-| Enumerated        | ✅         | 🔒          | ✅     | ❌       | 🔄         |
+| Enumerated        | ✅         | 🔒          | ✅     | ✅       | Released   |
 | Embedded PDV      | 🔒        | ❌           | ❌     | ❌       | 🔄         |
 | UTF-8 string      | 🚧        | ❌           | ❌     | ❌       | 🔄         |
-| Relative OID      | ✅         | 🔒          | ✅     | ❌       | 🔄         |
+| Relative OID      | ✅         | 🔒          | ✅     | ✅       | Released   |
 | Time              | ❌         | 🔒          | ❌     | ❌       | 🔄         |
 | Sequence          | 🔒        | ❌           | ❌     | ❌       | 🔄         |
 | Sequence of       | 🔒        | ❌           | ❌     | ❌       | 🔄         |
 | Set               | 🔒        | ❌           | ❌     | ❌       | 🔄         |
 | Set of            | 🔒        | ❌           | ❌     | ❌       | 🔄         |
-| Numeric String    | ✅         | ❌           | 🚧    | ❌       | 🔄         |
-| Printable String  | ✅         | ❌           | 🚧    | ❌       | 🔄         |
+| Numeric String    | ✅         | ✅           | ✅     | ✅       | Released   |
+| Printable String  | ✅         | ✅           | ✅     | ✅       | Released   |
 | T61 String        | ❌         | ❌           | ❌     | ❌       | 🔄         |
 | Videotex String   | ❌         | ❌           | ❌     | ❌       | 🔄         |
-| IA5 String        | ✅         | ❌           | ✅     | ❌       | 🔄         |
+| IA5 String        | ✅         | ✅           | ✅     | ✅       | Released   |
 | UTC Time          | 🚧        | ❌           | ❌     | ❌       | 🔄         |
 | Generalized Time  | 🚧        | ❌           | ❌     | ❌       | 🔄         |
 | Graphic string    | ❌         | ❌           | ❌     | ❌       | 🔄         |
-| Visible String    | ✅         | ❌           | 🚧    | ❌       | 🔄         |
+| Visible String    | ✅         | ✅           | ✅     | ✅       | Released   |
 | General String    | ❌         | ❌           | ❌     | ❌       | 🔄         |
-| Universal String  | ✅         | ❌           | 🚧    | ❌       | 🔄         |
+| Universal String  | ✅         | ✅           | ✅     | ✅       | Released   |
 | Character String  | 🔒        | ❌           | ❌     | ❌       | 🔄         |
-| BMP String        | ✅         | ❌           | 🚧    | ❌       | 🔄         |
-| DATE              | ✅         | 🔒          | ✅     | ❌       | 🔄         |
+| BMP String        | ✅         | ✅           | ✅     | ✅       | Released   |
+| DATE              | ✅         | 🔒          | ✅     | ✅       | Released   |
 | TIME-OF-DAY       | 🚧        | 🔒          | ❌     | ❌       | 🔄         |
 | DATE-TIME         | 🚧        | 🔒          | ❌     | ❌       | 🔄         |
 | DURATION          | 🚧        | 🔒          | ❌     | ❌       | 🔄         |

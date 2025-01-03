@@ -76,7 +76,7 @@ TEST(printable_string_testest, encode) {
 TEST(printable_string_testest, decode) {
     for (const auto &[encoded, expected]: test_cases) {
         const auto deserialized = asncpp::base::deserialize_v(encoded);
-        const printable_string_t *ptr = dynamic_cast<printable_string_t *>(deserialized.get());
+        const printable_string_t *ptr = static_cast<printable_string_t *>(deserialized.get());
         EXPECT_EQ(ptr->value(), expected);
     }
 }

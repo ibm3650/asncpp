@@ -25,6 +25,8 @@ public:
 
     iso8601_base() noexcept = default;
 
+    explicit iso8601_base(asn1_basic &&base) : asncpp::base::asn1_basic(std::move(base)) {
+    }
     explicit iso8601_base(std::tm data) noexcept: _decoded{data} {
     }
 

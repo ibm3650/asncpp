@@ -18,4 +18,5 @@
 #include "asncpp/boolean.h"
 #include "asncpp/bit_string.h"
 #include "asncpp/octet_string.h"
+#include "asncpp/object_descriptor.h"
 #endif //TYPES_H

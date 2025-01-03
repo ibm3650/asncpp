@@ -22,7 +22,7 @@ TEST(common_test, serialize) {
 
 TEST(common_test, invalid_tag) {
     const uint8_t encoded[] = {0xFF}; // Invalid tag
-    ASSERT_THROW(asncpp::base::deserialize_v(encoded), std::runtime_error);
+    ASSERT_THROW(asncpp::base::deserialize_v(encoded), std::invalid_argument);
 }
 
 
