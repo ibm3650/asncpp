@@ -84,6 +84,7 @@ namespace asncpp::base {
          * @return `true` if the object is constructed, `false` otherwise.
          */
         constexpr bool is_constructed() const noexcept {
+            //FIXME: Переделать на проверку по тегу. Для типов-коллекций результат неверен. Они конструкционные по определнию.
             return _constructed || is_have_children();
         }
 
@@ -133,7 +134,7 @@ namespace asncpp::base {
          */
         friend std::unique_ptr<asn1_basic> deserialize_v(std::span<const uint8_t> data);
 
-        void append_child(std::unique_ptr<asn1_basic> child) {
+        virtual void append_child(std::unique_ptr<asn1_basic> child) {
             _children.emplace_back(std::move(child));
         }
 
@@ -160,7 +161,6 @@ namespace asncpp::base {
             return static_cast<T *>(this);
         }
 
-    protected:
         /**
          * @brief Retrieves the tag value of the ASN.1 object.
          * Derived classes must implement this method to define their specific tag value.
@@ -169,6 +169,8 @@ namespace asncpp::base {
         constexpr virtual uintmax_t get_tag() const noexcept {
             return 0;
         }
+    protected:
+
 
         /**
          * @brief Decodes an ASN.1 object from a byte buffer.

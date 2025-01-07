@@ -27,5 +27,7 @@
 #include "asncpp/duration.h"
 #include "asncpp/generalized_time.h"
 #include "asncpp/null.h"
+#include "asncpp/set.h"
+#include "asncpp/set_of_t.h"
 
 #endif //TYPES_H

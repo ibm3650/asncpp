@@ -57,6 +57,9 @@ std::unique_ptr<asncpp::base::asn1_basic> asncpp::base::deserialize_v(std::span<
             case GENERALIZED_TIME: return std::make_unique<generalized_time_t>(std::move(base));
             case DURATION: return std::make_unique<duration_t>(std::move(base));
             case Null: return std::make_unique<null_t>(std::move(base));
+            //FIXME: SET_OF is have same type as SET. But we ned to check> is all types ov elements are same
+            case SET: return std::make_unique<set_t>(std::move(base));
+           // case SET_OF: return std::make_unique<set_of_t>(std::move(base));
             default: return nullptr;
         }
     };

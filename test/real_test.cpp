@@ -3,6 +3,7 @@
 //
 #include "asncpp/real.h" // Заголовочный файл с реализацией класса
 #include "asncpp/null.h" // Заголовочный файл с реализацией класса
+#include "asncpp/set.h" // Заголовочный файл с реализацией класса
 #include <gtest/gtest.h>
 
 TEST(real_test, encode) {
@@ -15,6 +16,7 @@ TEST(real_test, encode) {
    // std::vector<uint8_t> expected = {0x09, 0x03, 0x80, 0x5E, 0x80};
     EXPECT_EQ(123.456, real_ptr->value());
     null_t null;
+    set_t set;
    // duration_t duration;
     //EXPECT_EQ(encoded, expected);
 }

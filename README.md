@@ -14,9 +14,11 @@ Common:
 - [ ] Add support of std::visit analog on sets/sequences/sequence of/sets of/choice/asn1_basic
 - [ ] Add tests for all exceptions
 - [ ] Realize deprecated VideotexString/GraphicString/GeneralString/T61String
-- [ ] Make encode const, and fields mutable. It will allow to change fields after encoding. Skip encoding if data encoded and not modified
-
-Integer type:
+- [ ] Make encode const, and fields mutable. It will allow to change fields after encoding. Skip encoding if data
+  encoded and not modified
+- [ ] Separate interface for service derived classes encode_children/decode_chidlren
+- [ ] Add check in asn1_basic::append_child for constructed types. Is type of child allowed for this type
+  Integer type:
 
 - [ ] Add tests for `to_string`
 - [ ] Add tests for overflow case
@@ -60,6 +62,12 @@ Time types:
 - [ ] Add support of converting to std::time_t
 - [ ] Add Default constructor set local time
 
+Collection types:
+
+- [ ] Add tests for `to_string`
+- [ ] Add support of [] operator for children
+- [ ] Add support of layout map for sequence for control order of children
+
 ## Realization progress 🤔
 
 | Type              | Primitive | Constructed | Tests | Doxygen | Additional |
@@ -85,15 +93,15 @@ Time types:
 | UTC Time          | ✅         | 🔒          | ✅     | ❌       | Released   |
 | Generalized Time  | ✅         | 🔒          | ✅     | ❌       | Released   |
 | DURATION          | ✅         | 🔒          | ✅     | ❌       | Released   |
-| NULL              | ✅        | 🔒          | ❌     | ❌       | Released           |
+| NULL              | ✅         | 🔒          | ❌     | ❌       | Released   |
+| Set               | 🔒        | ✅           | ❌     | ❌       | Released   |
+| Set of            | 🔒        | ✅           | ❌     | ❌       | Released   |
 | Time              | ❌         | 🔒          | ❌     | ❌       | 🔄         |
 | Real              | 🚧        | 🔒          | 🚧    | 🚧      | 🔄         |
 | External          | 🔒        | ❌           | ❌     | ❌       | 🔄         |
 | Embedded PDV      | 🔒        | ❌           | ❌     | ❌       | 🔄         |
 | Sequence          | 🔒        | ❌           | ❌     | ❌       | 🔄         |
 | Sequence of       | 🔒        | ❌           | ❌     | ❌       | 🔄         |
-| Set               | 🔒        | ❌           | ❌     | ❌       | 🔄         |
-| Set of            | 🔒        | ❌           | ❌     | ❌       | 🔄         |
 | Character String  | 🔒        | ❌           | ❌     | ❌       | 🔄         |
 
 
