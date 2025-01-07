@@ -59,6 +59,7 @@ std::unique_ptr<asncpp::base::asn1_basic> asncpp::base::deserialize_v(std::span<
             case Null: return std::make_unique<null_t>(std::move(base));
             //FIXME: SET_OF is have same type as SET. But we ned to check> is all types ov elements are same
             case SET: return std::make_unique<set_t>(std::move(base));
+            case SEQUENCE: return std::make_unique<sequence_t>(std::move(base));
            // case SET_OF: return std::make_unique<set_of_t>(std::move(base));
             default: return nullptr;
         }

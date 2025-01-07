@@ -29,5 +29,6 @@
 #include "asncpp/null.h"
 #include "asncpp/set.h"
 #include "asncpp/set_of_t.h"
+#include "asncpp/sequence.h"
 
 #endif //TYPES_H

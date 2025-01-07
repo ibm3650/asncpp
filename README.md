@@ -96,12 +96,12 @@ Collection types:
 | NULL              | ✅         | 🔒          | ❌     | ❌       | Released   |
 | Set               | 🔒        | ✅           | ❌     | ❌       | Released   |
 | Set of            | 🔒        | ✅           | ❌     | ❌       | Released   |
+| Sequence          | 🔒        | ❌           | ❌     | ✅       | Released   |
+| Sequence of       | 🔒        | ❌           | ❌     | ✅       | Released   |
 | Time              | ❌         | 🔒          | ❌     | ❌       | 🔄         |
 | Real              | 🚧        | 🔒          | 🚧    | 🚧      | 🔄         |
 | External          | 🔒        | ❌           | ❌     | ❌       | 🔄         |
 | Embedded PDV      | 🔒        | ❌           | ❌     | ❌       | 🔄         |
-| Sequence          | 🔒        | ❌           | ❌     | ❌       | 🔄         |
-| Sequence of       | 🔒        | ❌           | ❌     | ❌       | 🔄         |
 | Character String  | 🔒        | ❌           | ❌     | ❌       | 🔄         |
 
 
