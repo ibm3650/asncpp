@@ -27,6 +27,7 @@ public:
 
     explicit iso8601_base(asn1_basic &&base) : asncpp::base::asn1_basic(std::move(base)) {
     }
+
     explicit iso8601_base(std::tm data) noexcept: _decoded{data} {
     }
 
@@ -79,9 +80,4 @@ private:
 };
 
 
-//constexpr char date_time_format[] = "%FT%T";
-//constexpr char time_of_day_format[] = "%T";
-
-//using date_time_t = iso8601_base<date_time_format, asn1_tag::DATE_TIME>;
-//using time_of_day_t = iso8601_base<time_of_day_format, asn1_tag::TIME_OF_DAY>;
 #endif //ISO8601_BASE_H

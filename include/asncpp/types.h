@@ -19,4 +19,13 @@
 #include "asncpp/bit_string.h"
 #include "asncpp/octet_string.h"
 #include "asncpp/object_descriptor.h"
+#include "asncpp/utf8_string.h"
+#include "asncpp/date_time.h"
+#include "asncpp/time_of_day.h"
+#include "asncpp/real.h"
+#include "asncpp/utc_time.h"
+#include "asncpp/duration.h"
+#include "asncpp/generalized_time.h"
+#include "asncpp/null.h"
+
 #endif //TYPES_H

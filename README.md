@@ -10,6 +10,11 @@ Common:
 - [ ] Decoding and encoding make as coroutine
 - [ ] Check type of appended child in constructed types
 - [ ] Constructor as initializer lists in format like json
+- [ ] Add support of std::get analog on sets/sequences/sequence of/sets of/choice/asn1_basic
+- [ ] Add support of std::visit analog on sets/sequences/sequence of/sets of/choice/asn1_basic
+- [ ] Add tests for all exceptions
+- [ ] Realize deprecated VideotexString/GraphicString/GeneralString/T61String
+- [ ] Make encode const, and fields mutable. It will allow to change fields after encoding. Skip encoding if data encoded and not modified
 
 Integer type:
 
@@ -29,10 +34,10 @@ Bit string type:
 
 - [ ] Add tests for `to_string`
 - [ ] Add tests for exception cases
-- [ ] Add support of comparsion operations
+- [ ] Add support of comparison operations
 - [ ] Add support of bitwise operations
 - [ ] Add support of conversations operations
-- [ ] Add support of [] operator for childs
+- [ ] Add support of [] operator for children
 - [ ] Add support of [] operator for bits
 - [ ] Add support of getting full constructed structure
 - [ ] Add exception on try to get value of not constructed structure and not constructed bit
@@ -47,6 +52,14 @@ OID/Relative OID type:
 - [ ] Add tests for `to_string`
 - [ ] Add support of [] operator for SID`s
 
+Time types:
+
+- [ ] Add tests for `to_string`
+- [ ] Add support of converting to std::chrono::time_point
+- [ ] Add support of converting from std::chrono::time_point
+- [ ] Add support of converting to std::time_t
+- [ ] Add Default constructor set local time
+
 ## Realization progress 🤔
 
 | Type              | Primitive | Constructed | Tests | Doxygen | Additional |
@@ -55,37 +68,34 @@ OID/Relative OID type:
 | Integer           | ✅         | 🔒          | ✅     | ✅       | Released   |
 | Bit String        | ✅         | ✅           | ✅     | ✅       | Released   |
 | Octet String      | ✅         | ✅           | ✅     | ✅       | Released   |
-| NULL              | 🚧        | 🔒          | ❌     | ❌       | 🔄         |
 | Object identifier | ✅         | 🔒          | ✅     | ✅       | Released   |
 | Object descriptor | ✅         | ✅           | ✅     | ✅       | Released   |
-| External          | 🔒        | ❌           | ❌     | ❌       | 🔄         |
-| Real              | ❌         | 🔒          | ❌     | ❌       | 🔄         |
 | Enumerated        | ✅         | 🔒          | ✅     | ✅       | Released   |
-| Embedded PDV      | 🔒        | ❌           | ❌     | ❌       | 🔄         |
-| UTF-8 string      | 🚧        | ❌           | ❌     | ❌       | 🔄         |
+| UTF-8 string      | ✅         | ✅           | ✅     | ✅       | Released   |
 | Relative OID      | ✅         | 🔒          | ✅     | ✅       | Released   |
+| Numeric String    | ✅         | ✅           | ✅     | ✅       | Released   |
+| Printable String  | ✅         | ✅           | ✅     | ✅       | Released   |
+| IA5 String        | ✅         | ✅           | ✅     | ✅       | Released   |
+| Visible String    | ✅         | ✅           | ✅     | ✅       | Released   |
+| Universal String  | ✅         | ✅           | ✅     | ✅       | Released   |
+| BMP String        | ✅         | ✅           | ✅     | ✅       | Released   |
+| DATE              | ✅         | 🔒          | ✅     | ✅       | Released   |
+| TIME-OF-DAY       | ✅         | 🔒          | ✅     | ❌       | Released   |
+| DATE-TIME         | ✅         | 🔒          | ✅     | ❌       | Released   |
+| UTC Time          | ✅         | 🔒          | ✅     | ❌       | Released   |
+| Generalized Time  | ✅         | 🔒          | ✅     | ❌       | Released   |
+| DURATION          | ✅         | 🔒          | ✅     | ❌       | Released   |
+| NULL              | ✅        | 🔒          | ❌     | ❌       | Released           |
 | Time              | ❌         | 🔒          | ❌     | ❌       | 🔄         |
+| Real              | 🚧        | 🔒          | 🚧    | 🚧      | 🔄         |
+| External          | 🔒        | ❌           | ❌     | ❌       | 🔄         |
+| Embedded PDV      | 🔒        | ❌           | ❌     | ❌       | 🔄         |
 | Sequence          | 🔒        | ❌           | ❌     | ❌       | 🔄         |
 | Sequence of       | 🔒        | ❌           | ❌     | ❌       | 🔄         |
 | Set               | 🔒        | ❌           | ❌     | ❌       | 🔄         |
 | Set of            | 🔒        | ❌           | ❌     | ❌       | 🔄         |
-| Numeric String    | ✅         | ✅           | ✅     | ✅       | Released   |
-| Printable String  | ✅         | ✅           | ✅     | ✅       | Released   |
-| T61 String        | ❌         | ❌           | ❌     | ❌       | 🔄         |
-| Videotex String   | ❌         | ❌           | ❌     | ❌       | 🔄         |
-| IA5 String        | ✅         | ✅           | ✅     | ✅       | Released   |
-| UTC Time          | 🚧        | ❌           | ❌     | ❌       | 🔄         |
-| Generalized Time  | 🚧        | ❌           | ❌     | ❌       | 🔄         |
-| Graphic string    | ❌         | ❌           | ❌     | ❌       | 🔄         |
-| Visible String    | ✅         | ✅           | ✅     | ✅       | Released   |
-| General String    | ❌         | ❌           | ❌     | ❌       | 🔄         |
-| Universal String  | ✅         | ✅           | ✅     | ✅       | Released   |
 | Character String  | 🔒        | ❌           | ❌     | ❌       | 🔄         |
-| BMP String        | ✅         | ✅           | ✅     | ✅       | Released   |
-| DATE              | ✅         | 🔒          | ✅     | ✅       | Released   |
-| TIME-OF-DAY       | 🚧        | 🔒          | ❌     | ❌       | 🔄         |
-| DATE-TIME         | 🚧        | 🔒          | ❌     | ❌       | 🔄         |
-| DURATION          | 🚧        | 🔒          | ❌     | ❌       | 🔄         |
+
 
 
 

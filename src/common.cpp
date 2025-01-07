@@ -48,7 +48,15 @@ std::unique_ptr<asncpp::base::asn1_basic> asncpp::base::deserialize_v(std::span<
             case VISIBLE_STRING: return std::make_unique<visible_string_t>(std::move(base));
             case UNIVERSAL_STRING: return std::make_unique<universal_string_t>(std::move(base));
             case BMP_STRING: return std::make_unique<bmp_string_t>(std::move(base));
+            case UTF8_STRING: return std::make_unique<utf8_string_t>(std::move(base));
             case DATE: return std::make_unique<date_t>(std::move(base));
+            case DATE_TIME: return std::make_unique<date_time_t>(std::move(base));
+            case TIME_OF_DAY: return std::make_unique<time_of_day_t>(std::move(base));
+            case REAL: return std::make_unique<real_t>(std::move(base));
+            case UTC_TIME: return std::make_unique<utc_time_t>(std::move(base));
+            case GENERALIZED_TIME: return std::make_unique<generalized_time_t>(std::move(base));
+            case DURATION: return std::make_unique<duration_t>(std::move(base));
+            case Null: return std::make_unique<null_t>(std::move(base));
             default: return nullptr;
         }
     };

@@ -132,13 +132,34 @@ namespace asncpp::base {
          * @return A unique pointer to the deserialized object.
          */
         friend std::unique_ptr<asn1_basic> deserialize_v(std::span<const uint8_t> data);
+
         void append_child(std::unique_ptr<asn1_basic> child) {
             _children.emplace_back(std::move(child));
         }
 
-        const auto get_children(size_t index) const  {
+        const auto get_children(size_t index) const {
             return _children.at(index).get();
         }
+
+        template<class T>
+        T *get() {
+            uintmax_t raw_type{0};
+            std::visit([&](auto &&arg) {
+                           using T = std::decay_t<decltype(arg)>;
+                           if constexpr (std::is_same_v<T, std::monostate>) {
+                               raw_type = get_tag();
+                           } else if constexpr (std::is_same_v<T, asn1_tag>) {
+                               raw_type = static_cast<uintmax_t>(arg);
+                           } else if constexpr (std::is_same_v<T, uintmax_t>) {
+                               raw_type = arg;
+                           }
+                       },
+                       _type);
+            if (T().get_tag() != raw_type)
+                return nullptr;
+            return static_cast<T *>(this);
+        }
+
     protected:
         /**
          * @brief Retrieves the tag value of the ASN.1 object.
@@ -197,8 +218,6 @@ namespace asncpp::base {
         void append_data(std::span<const uint8_t> data) {
             _data.insert(_data.end(), data.begin(), data.end());
         }
-
-
 
     private:
         bool _constructed{}; /**< Indicates whether the ASN.1 object is constructed. */
