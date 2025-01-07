@@ -14,9 +14,6 @@ public:
     explicit sequence_t(asncpp::base::asn1_basic &&base) : asncpp::base::asn1_basic(std::move(base)) {
     }
 
-
-
-
     constexpr uintmax_t get_tag() const noexcept override {
         return static_cast<uintmax_t>(asncpp::base::asn1_tag::SEQUENCE);
     }
