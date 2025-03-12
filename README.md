@@ -1,6 +1,56 @@
+# asncpp
+
+---
+
+> [!NOTE]
+> Библиотека все еще разрабатывается и находится в стадии активной разработки. 
+> Часть функционала может быть не реализована или не работать корректно.
+> Если вы хотите принять участие в разработке, то я буду рад вашей помощи.
+> Сообщайте о найденных ошибках, пожеланиях и предложениях в разделе Issues.
+
+
+# Описание
+
+---
+
+**_asncpp_** - Полностью объектно-ориентированная библиотека для работы с ASN.1 стандарта. Поддерживает все базовые типы данных ASN.1 и позволяет создавать свои типы данных.
+Выгодно отличается от конкурентов своей простотой и удобством применения. Имеет воозможность как периализации, так и десериализации.
+
+
+# Принципы и идеология
+
+---
+
+Уже сейчас библиотека отлично протестирована и в полной мере выполняет свои функции. Однако, я активно продолжаю развивать проект,
+к чему хочу привлечь и вас ;) Свои планы и идеи я описал в разделе TODO's and ideas. Если у вас есть свои идеи, предложения или пожелания, то я рад буду из принять и развивать.
+## Мои основные принципы
+- George Washington
+* John Adams
++ Thomas Jefferson
+
+
+## Пример использования
+TOOO
+
+## Установка
+
+### Сборка из исходников
+
+## Clang-Tidy and Clang-Format | Стиль кода и форматирование
+
+## Сотрудничество
+
+## Лицензия
+
+## Контакты
+
+## Архитектура
+
 ## TODO's and ideas
 
-Common:
+## формат коммитов
+
+### Common:
 
 - [ ] Add tests for basic class asn1_basic
 - [ ] Add Endian-independent class for the integer type
@@ -26,13 +76,13 @@ Common:
 - [ ] Add support of long integers, who has length more then 64 bits.
 - [ ] Add support of arithmetic operations
 
-Boolean type:
+### Boolean type:
 
 - [ ] Add tests for `to_string`
 - [ ] Add constructor from string representation
 - [ ] Add support of logical operations
 
-Bit string type:
+### Bit string type:
 
 - [ ] Add tests for `to_string`
 - [ ] Add tests for exception cases
@@ -44,17 +94,17 @@ Bit string type:
 - [ ] Add support of getting full constructed structure
 - [ ] Add exception on try to get value of not constructed structure and not constructed bit
 
-Octet string type:
+### Octet string type:
 
 - [ ] Add tests for `to_string`
 - [ ] Add concatenation operator
 
-OID/Relative OID type:
+### OID/Relative OID type:
 
 - [ ] Add tests for `to_string`
 - [ ] Add support of [] operator for SID`s
 
-Time types:
+### Time types:
 
 - [ ] Add tests for `to_string`
 - [ ] Add support of converting to std::chrono::time_point
@@ -62,13 +112,15 @@ Time types:
 - [ ] Add support of converting to std::time_t
 - [ ] Add Default constructor set local time
 
-Collection types:
+### Collection types:
 
 - [ ] Add tests for `to_string`
 - [ ] Add support of [] operator for children
 - [ ] Add support of layout map for sequence for control order of children
 
-## Realization progress 🤔
+# Realization progress 🤔
+
+---
 
 | Type              | Primitive | Constructed | Tests | Doxygen | Additional |
 |-------------------|-----------|-------------|-------|---------|------------|
