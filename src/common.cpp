@@ -31,6 +31,7 @@ std::unique_ptr<asncpp::base::asn1_basic> asncpp::base::deserialize_v(std::span<
             base._children.emplace_back(std::move(child));
         }
     }
+    const auto type = std::get<asn1_tag>(base._type);
     auto create_object = [base = std::move(base)](const asn1_tag tag) mutable -> std::unique_ptr<asn1_basic> {
         using enum asn1_tag;
         switch (tag) {
@@ -64,7 +65,8 @@ std::unique_ptr<asncpp::base::asn1_basic> asncpp::base::deserialize_v(std::span<
             default: return nullptr;
         }
     };
-    auto ptr = create_object(std::get<asn1_tag>(base._type));
+    auto ptr = create_object(type);
+    //auto ptr = create_object(std::get<asn1_tag>(base._type));
     if (!ptr) {
         throw std::runtime_error("Unsupported ASN.1 tag type");
     }
