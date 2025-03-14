@@ -3,7 +3,7 @@
 //
 #include <stdexcept>
 
-#include "asncpp/base/integer_base.h"
+#include "asncpp/base/integer_basic.h"
 
 
 template<std::integral T, asncpp::base::asn1_tag type>

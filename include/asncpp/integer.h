@@ -4,7 +4,7 @@
 
 #ifndef INTEGER_H
 #define INTEGER_H
-#include "base/integer_base.h"
+#include "base/integer_basic.h"
 #include "base/common.h"
 //FIXME: сделать чтобы вывод to_string был уникальным для каждого типа
 namespace asncpp::types {
