@@ -26,152 +26,130 @@ class asn_basic_test_encode_invalid_tag_Test;
 class common_test_deserialize_Test;
 
 namespace asncpp::base {
-    /**
-     * @class asn1_basic
-     * @brief Base class for ASN.1 data representation and manipulation.
-     *
-     * This class provides the core functionality for encoding, decoding, and managing
-     * ASN.1 data types. Derived classes should implement the `get_tag` method to define
-     * the specific tag associated with their ASN.1 type.
-     */
-    //TODO: Переосмысдить инкапсуляцию, чтобы не было необходимости в дружественных классах и чтобы обезопасить достуап к членам класса
-    //TODO: Навести порядок с указателями, заменить на shared_ptr
+
     class asn1_basic {
+        //TODO: Переосмыслить инкапсуляцию, чтобы не было необходимости в дружественных классах и чтобы обезопасить доступ к членам класса
+        //TODO: Навести порядок с указателями, заменить на shared_ptr
     public:
-        /**
-         * @brief Default constructor.
-         */
-        asn1_basic() noexcept = default;
-
-        /**
-         * @brief Move constructor.
-         */
-        asn1_basic(asn1_basic &&) = default;
-
-        /**
-         * @brief Copy constructor.
-         */
-        asn1_basic(const asn1_basic &) = default;
-
-        /**
-         * @brief Move assignment operator.
-         */
-        asn1_basic &operator=(asn1_basic &&) = default;
-
-        /**
-         * @brief Copy assignment operator.
-         */
-        asn1_basic &operator=(const asn1_basic &) = default;
-
-        /**
-         * @brief Virtual destructor.
-         */
-        virtual ~asn1_basic() = default;
-
-        /**
-         * @brief Constructor to initialize an `asn1_basic` object from a data buffer.
-         * @param data The buffer containing ASN.1 encoded data.
-         * @throws std::invalid_argument If the buffer does not contain valid ASN.1 data.
+        /** @brief Конструктор TLV-объекта ASN.1 из буфера данных.
+         *  @details Конструктор декодирует объект ASN.1 из буфера данных, разделяя его на тег, длину и данные.
+         *  При этом конструктор не разбирает данные, оставляя их в закодированном виде, и не создаёт дочерних объектов.
+         *  Для этого используется функция deserialize_v.
+         *  Сам конструктор вызывает функцию decode, которая разбирает данные объекта.
+         * @param[in] data Буфер данных, содержащий закодированный объект ASN.1.
+         * @throws std::invalid_argument Если буфер не содержит корректных данных ASN.1.
          */
         asn1_basic(std::span<const uint8_t> data) {
-            // NOLINT(*-explicit-constructor)
             //TODO: Is secure to use virtual of base class in base class method in constructor?
             asn1_basic::decode(data);
         }
 
         /**
-         * @brief Checks whether the ASN.1 object is constructed or primitive.
-         * @return `true` if the object is constructed, `false` otherwise.
+         * @brief Метод для получения информации о конструктивности объекта ASN.1.
+         * @return Конструктивный ли объект ASN.1.
+         * @retval true Объект ASN.1 конструктивный или составной (содержит дочерние объекты).
+         * @retval false Объект ASN.1 примитивный.
          */
-        constexpr bool is_constructed() const noexcept {
+        [[nodiscard]] constexpr bool constructed() const noexcept {
             //FIXME: Переделать на проверку по тегу. Для типов-коллекций результат неверен. Они конструкционные по определнию.
             return _constructed || is_have_children();
         }
 
         /**
-         * @brief Retrieves the class of the ASN.1 tag.
-         * @return The class of the ASN.1 tag (`UNIVERSAL`, `APPLICATION`, etc.).
+         * @brief Метод для получения класса тега ASN.1.
+         * @return Класс тега ASN.1.
+         * @retval asn1_class::UNIVERSAL Универсальный класс тега.
+         * @retval asn1_class::APPLICATION Прикладной класс тега.
+         * @retval asn1_class::CONTEXT_SPECIFIC Контекстно-специфический класс тега.
+         * @retval asn1_class::PRIVATE Частный класс тега.
          */
-        constexpr asn1_class get_cls() const noexcept {
+        [[nodiscard]] constexpr asn1_class get_class() const noexcept {
             return _cls;
         }
 
         /**
-         * @brief Retrieves the length of the ASN.1 data.
-         * @return The length of the encoded data.
+         * @brief Метод для получения длины закодированных данных объекта ASN.1.
+         * @return Длина закодированных данных уже без учёта тега и длины.
          */
-        constexpr size_t get_length() const noexcept {
+        [[nodiscard]] constexpr size_t length() const noexcept {
             return _length;
         }
 
         /**
-         * @brief Retrieves the raw data of the ASN.1 object.
-         * @return A reference to the internal dynamic array containing the raw data.
+         * @brief Метод для получения данных объекта ASN.1.
+         * @return Константная ссылка на буфер данных объекта ASN.1. Уже без тега и длины.
          */
-        constexpr const dynamic_array_t &get_data() const noexcept {
+        [[nodiscard]] constexpr const dynamic_array_t &data() const noexcept {
             return _data;
         }
 
         /**
-         * @brief Extracts the tag type from the given data buffer.
-         * @param buffer The buffer containing ASN.1 encoded data.
-         * @return A pair containing the tag type and the number of bytes used by the tag.
-         * @throws std::runtime_error If the tag type cannot be determined from the buffer.
+         * @brief Виртуальный метод для добавления дочернего объекта в составной объект ASN.1.
+         * @details Метод виртуальный, так как каждый составной объект ASN.1 может иметь свои правила добавления дочерних объектов.
+         * @param[in] child Умный указатель на дочерний объект ASN.1.
          */
-        static std::pair<tag_t, size_t> extract_type(std::span<const uint8_t> buffer);
-
-        /**
-         * @brief Serializes the ASN.1 object into a byte array.
-         * @param block The ASN.1 object to serialize.
-         * @return A byte array representing the serialized object.
-         */
-        friend dynamic_array_t serialize(asn1_basic *block);
-
-        /**
-         * @brief Deserializes a byte array into an ASN.1 object.
-         * @param data The byte array to deserialize.
-         * @return A unique pointer to the deserialized object.
-         */
-        friend std::unique_ptr<asn1_basic> deserialize_v(std::span<const uint8_t> data);
-
         virtual void append_child(std::unique_ptr<asn1_basic> child) {
+            //TODO: Переделать на shared_ptr?
+            //TODO: Кинуть  исключение, если объект не конструктивный
             _children.emplace_back(std::move(child));
         }
 
-        const auto get_children(size_t index) const {
+
+        /**
+         * @brief Метод для получения дочернего объекта по индексу.
+         * @param[in] index Индекс дочернего объекта.
+         * @return Указатель на дочерний объект ASN.1.
+         * @throws std::out_of_range Если индекс выходит за пределы массива дочерних объектов.
+         */
+        [[nodiscard]] auto get_child(size_t index) const {
+            //TODO: Переделать на shared_ptr?
+            //TODO: Может, стоит вернуть константную ссылку?
+            //TODO: Кинуть исключение, если индекс выходит за пределы массива?
+            //TODO: Кинуть исключение, если объект не конструктивный?
             return _children.at(index).get();
         }
 
-        template<class T>
-        T *get() {
-            uintmax_t raw_type{0};
-            std::visit([&](auto &&arg) {
-                           using T = std::decay_t<decltype(arg)>;
-                           if constexpr (std::is_same_v<T, std::monostate>) {
-                               raw_type = get_tag();
-                           } else if constexpr (std::is_same_v<T, asn1_tag>) {
-                               raw_type = static_cast<uintmax_t>(arg);
-                           } else if constexpr (std::is_same_v<T, uintmax_t>) {
-                               raw_type = arg;
-                           }
-                       },
-                       _type);
-            if (T().get_tag() != raw_type)
-                return nullptr;
-            return static_cast<T *>(this);
-        }
-
         /**
-         * @brief Retrieves the tag value of the ASN.1 object.
-         * Derived classes must implement this method to define their specific tag value.
-         * @return The tag value of the object.
+         * @brief Метод возвращает значение тега объекта ASN.1.
+         * @details Метод виртуальный, так как каждый объект ASN.1 может иметь свой тег. Каждый дочерний метод должен в обязательном порядке переопределить этот метод.
+         * @return Значение тега объекта ASN.1 в виде числа.
+         * Какждый тип объекта ASN.1 имеет свой уникальный тег и возвращать его как обычное число, это важно для корректной сериализации и десериализации.
          */
-        constexpr virtual uintmax_t get_tag() const noexcept {
-            return 0;
+        [[nodiscard]] constexpr virtual uintmax_t get_tag() const noexcept {
+            return static_cast<uintmax_t>(asn1_tag::Reserved);
         }
+
+        //TODO: Инкапсулировать данную переменную от дочерних класов?
+        dynamic_array_t _data; /**< Внутренний буффер для хранения данных в сыром виде. Только данные. */
+        //TODO: Инкапсулировать данную переменную от дочерних класов?
+        std::vector<std::unique_ptr<asn1_basic> > _children; /**< Массив дочерних объектов для конструкционных типов или сотавных верий типов. */
+
+        asn1_basic() noexcept = default;
+        asn1_basic(asn1_basic &&) = default;
+        asn1_basic(const asn1_basic &) = default;
+        asn1_basic &operator=(asn1_basic &&) = default;
+        asn1_basic &operator=(const asn1_basic &) = default;
+        virtual ~asn1_basic() = default;
+
+        // template<class T>
+        // T *get() {
+        //     uintmax_t raw_type{0};
+        //     std::visit([&](auto &&arg) {
+        //                    using T = std::decay_t<decltype(arg)>;
+        //                    if constexpr (std::is_same_v<T, std::monostate>) {
+        //                        raw_type = get_tag();
+        //                    } else if constexpr (std::is_same_v<T, asn1_tag>) {
+        //                        raw_type = static_cast<uintmax_t>(arg);
+        //                    } else if constexpr (std::is_same_v<T, uintmax_t>) {
+        //                        raw_type = arg;
+        //                    }
+        //                },
+        //                _type);
+        //     if (T().get_tag() != raw_type)
+        //         return nullptr;
+        //     return static_cast<T *>(this);
+        // }
     protected:
-
-
         /**
          * @brief Decodes an ASN.1 object from a byte buffer.
          * @param data The buffer containing ASN.1 encoded data.
@@ -193,9 +171,7 @@ namespace asncpp::base {
             return "ASN.1 basic";
         }
 
-        dynamic_array_t _data; /**< Internal buffer storing the ASN.1 object's raw data. */
-        unsigned long long _raw_length;
-        std::vector<std::unique_ptr<asn1_basic> > _children; /**< Child ASN.1 objects for constructed types. */
+
         [[nodiscard]] bool is_have_children() const {
             return !_children.empty();
         }
@@ -222,11 +198,37 @@ namespace asncpp::base {
         }
 
     private:
-        bool _constructed{}; /**< Indicates whether the ASN.1 object is constructed. */
-        asn1_class _cls{}; /**< The class of the ASN.1 tag (`UNIVERSAL`, `APPLICATION`, etc.). */
-        size_t _length{}; /**< The length of the ASN.1 object's encoded data. */
-        tag_t _type; /**< The tag type of the ASN.1 object. */
+        bool _constructed{}; /**< Флаг конструктивности объекта ASN.1. */
+        asn1_class _cls{}; /**< Класс объекта ASN.1. */
+        size_t _length{}; /**< Длинна исключительно данных */
+        size_t _raw_length{}; /**< Длинна полного, сырого TLV-пакета */
+        tag_t _type; /**< Тип объекта ASN.1. Может быть как стандартным, так и пользовательским. Значение по умолчанию - std::monostate */
 
+        /**
+         * @brief Сериализует объект ASN.1 в байтовый массив.
+         * @details Дружественная функция, для доступа к закрытым членам класса.
+         * @param[in, out] block Объект ASN.1 для сериализации. Сырой блок данны c базовым классом @ref asn1_basic.
+         * @return Байтовый массив, представляющий сериализованный объект ASN.1. Полный TLV-блок.
+         */
+        friend dynamic_array_t serialize(asn1_basic* block);
+
+        /**
+         * @brief Десериализует байтовый поток в объект ASN.1.
+         * @details Дружественная функция, для доступа к закрытым членам класса.
+         * @param[in] data Байтовый поток для десериализации.
+         * @return Указатель на десериализованный объект ASN.1.
+         * @throws std::runtime_error Если данные не могут быть разобраны.
+         */
+        friend std::unique_ptr<asn1_basic> deserialize_v(std::span<const uint8_t> data);
+
+
+        /**
+ * @brief Extracts the tag type from the given data buffer.
+ * @param buffer The buffer containing ASN.1 encoded data.
+ * @return A pair containing the tag type and the number of bytes used by the tag.
+ * @throws std::runtime_error If the tag type cannot be determined from the buffer.
+ */
+        static std::pair<tag_t, size_t> extract_type(std::span<const uint8_t> buffer);
 
         /**
          * @brief Encodes the tag value of the ASN.1 object.

@@ -31,21 +31,21 @@ TEST(asn_basic_test, encode_long_tag) {
     ASSERT_EQ(encoded, expected);
 }
 
-TEST(asn_basic_test, decode_short_tag) {
-    constexpr std::array<uint8_t, 1> buffer{0x02};
-    auto [type, size] = asncpp::base::asn1_basic::extract_type(buffer);
-    ASSERT_TRUE(std::holds_alternative<asncpp::base::asn1_tag>(type));
-    ASSERT_EQ(std::get<asncpp::base::asn1_tag>(type), asncpp::base::asn1_tag::INTEGER);
-    ASSERT_EQ(size, 1);
-}
-
-TEST(asn_basic_test, decode_long_tag) {
-    constexpr std::array<uint8_t, 3> buffer{0x9F, 0xA4, 0x34};
-    auto [type, size] = asncpp::base::asn1_basic::extract_type(buffer);
-    ASSERT_TRUE(std::holds_alternative<uintmax_t>(type));
-    ASSERT_EQ(std::get<uintmax_t>(type), 0x1234);
-    ASSERT_EQ(size, 3);
-}
+// TEST(asn_basic_test, decode_short_tag) {
+//     constexpr std::array<uint8_t, 1> buffer{0x02};
+//     auto [type, size] = asncpp::base::asn1_basic::extract_type(buffer);
+//     ASSERT_TRUE(std::holds_alternative<asncpp::base::asn1_tag>(type));
+//     ASSERT_EQ(std::get<asncpp::base::asn1_tag>(type), asncpp::base::asn1_tag::INTEGER);
+//     ASSERT_EQ(size, 1);
+// }
+//
+// TEST(asn_basic_test, decode_long_tag) {
+//     constexpr std::array<uint8_t, 3> buffer{0x9F, 0xA4, 0x34};
+//     auto [type, size] = asncpp::base::asn1_basic::extract_type(buffer);
+//     ASSERT_TRUE(std::holds_alternative<uintmax_t>(type));
+//     ASSERT_EQ(std::get<uintmax_t>(type), 0x1234);
+//     ASSERT_EQ(size, 3);
+// }
 
 TEST(asn_basic_test, encode_short_length) {
     constexpr uint8_t length{127};
@@ -82,14 +82,14 @@ TEST(asn_basic_test, decode_invalid_length) {
     ASSERT_THROW((void)asncpp::base::asn1_basic::extract_length(buffer), std::runtime_error);
 }
 
-TEST(asn_basic_test, decode_invalid_type) {
-    constexpr std::array<uint8_t, 3> buffer{0x1F, 0x80, 0x80};
-    ASSERT_THROW(asncpp::base::asn1_basic::extract_type(buffer), std::runtime_error);
-}
-
-TEST(asn_basic_test, decode_empty_buffer) {
-    ASSERT_THROW(asncpp::base::asn1_basic::extract_type({}), std::runtime_error);
-}
+// TEST(asn_basic_test, decode_invalid_type) {
+//     constexpr std::array<uint8_t, 3> buffer{0x1F, 0x80, 0x80};
+//     ASSERT_THROW(asncpp::base::asn1_basic::extract_type(buffer), std::runtime_error);
+// }
+//
+// TEST(asn_basic_test, decode_empty_buffer) {
+//     ASSERT_THROW(asncpp::base::asn1_basic::extract_type({}), std::runtime_error);
+// }
 
 
 

@@ -169,6 +169,24 @@ namespace asncpp::base {
             return _decoded;
         }
 
+
+        // Арифметические операторы
+        // constexpr integer_basic operator+(const integer_basic& other) const noexcept;
+        // constexpr integer_basic operator-(const integer_basic& other) const noexcept;
+        // constexpr integer_basic operator*(const integer_basic& other) const noexcept;
+        // constexpr integer_basic operator/(const integer_basic& other) const noexcept;
+        // constexpr integer_basic operator%(const integer_basic& other) const noexcept;
+        //
+        // constexpr integer_basic operator+(const value_type other) const noexcept;
+        // constexpr integer_basic operator-(const value_type other) const noexcept;
+        // constexpr integer_basic operator*(const value_type other) const noexcept;
+        // constexpr integer_basic operator/(const value_type other) const noexcept;
+        // constexpr integer_basic operator%(const value_type other) const noexcept;
+        //
+        //
+        // constexpr auto operator<=>(const integer_basic&) const noexcept = default;
+        // constexpr auto operator<=>(const value_type&) const noexcept = default;
+
     private:
         value_type _decoded{}; ///< Decoded integer value.
     };

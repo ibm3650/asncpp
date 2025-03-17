@@ -37,7 +37,7 @@ public:
 
     //TODO: Use std::chrono::parse
     void decode(std::span<const uint8_t> /*data*/) final {
-        const std::string iso8601{this->_data.begin(), this->_data.begin() + this->get_length()};
+        const std::string iso8601{this->_data.begin(), this->_data.begin() + this->length()};
         std::tm tm = {};
         std::istringstream input_stream(iso8601);
         input_stream >> std::get_time(&tm, _placeholder_without_delim().c_str());

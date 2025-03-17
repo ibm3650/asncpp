@@ -15,4 +15,5 @@ void asncpp::types::boolean_t::decode(std::span<const uint8_t> /*data*/) {
 asncpp::base::dynamic_array_t asncpp::types::boolean_t::encode() {
     _data.push_back(_value ? 0xFF : 0x00);
     return _data;
+
 }

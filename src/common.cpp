@@ -21,7 +21,7 @@ std::unique_ptr<asncpp::base::asn1_basic> asncpp::base::deserialize_v(std::span<
         // std::cerr << '\n';
         // return nullptr;
     }
-    if (base.is_constructed()) {
+    if (base.constructed()) {
         while (!base._data.empty()) {
             auto child = deserialize_v(base._data);
             if (!child) {

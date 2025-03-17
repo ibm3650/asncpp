@@ -112,13 +112,13 @@ TEST(bit_string_test, decoding_constructable) {
         };
     auto deserialized = asncpp::base::deserialize_v(encoded);
     const auto *ptr{dynamic_cast<asncpp::types::bit_string_t *>(deserialized.get())};
-    auto childs{ ptr->get_children(0)};
+    auto childs{ ptr->get_child(0)};
     const auto ggg  = std::vector<uint8_t>{0x00, 0x11, 0x22};
     const auto ggg1  = std::vector<uint8_t>{0x01,0xF0};
     const auto ggg2  = std::vector<uint8_t>{0x02,0x0F};
-    EXPECT_EQ(childs->get_children(0)->get_data(), ggg);
-    EXPECT_EQ(childs->get_children(1)->get_data(), ggg1);
-    EXPECT_EQ(childs->get_children(2)->get_data(), ggg2);
+    EXPECT_EQ(childs->get_child(0)->data(), ggg);
+    EXPECT_EQ(childs->get_child(1)->data(), ggg1);
+    EXPECT_EQ(childs->get_child(2)->data(), ggg2);
     // EXPECT_EQ(childs->bit_length(), 16);
     //
     // childs->get_children(0)->get_data() == std::vector<uint8_t>{0x11, 0x22};

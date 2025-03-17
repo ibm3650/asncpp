@@ -32,7 +32,7 @@ public:
         return "NULL";
     }
 
-     uintmax_t    get_tag() const noexcept final {
+  uintmax_t get_tag() const noexcept final {
         return static_cast<uintmax_t>(asncpp::base::asn1_tag::Null);
     }
 };

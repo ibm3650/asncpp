@@ -30,7 +30,7 @@ TEST(object_descriptor_test, serialize) {
 
 template<class T>
 const T *get_children(const asncpp::base::asn1_basic *base, size_t index) {
-    return static_cast<T *>(base->get_children(index));
+    return static_cast<T *>(base->get_child(index));
 }
 
 TEST(object_descriptor_test, deserialize) {

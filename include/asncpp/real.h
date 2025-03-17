@@ -28,9 +28,9 @@ public:
 
     explicit real_t(value_type val) noexcept : _value{val} {}
 
-    [[nodiscard]] constexpr uintmax_t get_tag() const noexcept final {
-        return static_cast<uintmax_t>(asncpp::base::asn1_tag::REAL);
-    }
+    // [[nodiscard]] constexpr uintmax_t get_tag() const noexcept final {
+    //     return static_cast<uintmax_t>(asncpp::base::asn1_tag::REAL);
+    // }
 
     [[nodiscard]] value_type value() const noexcept {
         return _value;

@@ -10,6 +10,7 @@
 
 namespace views = std::ranges::views;
 
+
 void asncpp::base::asn1_basic::decode(std::span<const uint8_t> data) {
     if (data.size_bytes() < 2) {
         throw std::invalid_argument("Invalid ASN.1 data. Length is too short");
@@ -110,8 +111,8 @@ asncpp::base::dynamic_array_t asncpp::base::asn1_basic::encode_type() const {
                    }
                },
                _type);
-    const uint8_t base = (static_cast<uint8_t>(get_cls()) << 6U) |
-                         (static_cast<uint8_t>(is_constructed()) << 5U);
+    const uint8_t base = (static_cast<uint8_t>(get_class()) << 6U) |
+                         (static_cast<uint8_t>(constructed()) << 5U);
 
     if (raw_type == 0) {
         throw std::runtime_error("Tag is not set");

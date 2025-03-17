@@ -31,7 +31,7 @@ TEST(octet_string_test, deserialize) {
     };
     auto deserialized = asncpp::base::deserialize_v(encoded);
     const auto *ptr{dynamic_cast<octet_string_t *>(deserialized.get())};
-    auto childs{ptr->get_children(0)};
+    auto childs{ptr->get_child(0)};
     const auto ggg = std::vector<uint8_t>{0xA1, 0xB2, 0xC3};
-    EXPECT_EQ(childs->get_data(), ggg);
+    EXPECT_EQ(childs->data(), ggg);
 }
