@@ -2,6 +2,7 @@
 // Created by kandu on 20.12.2024.
 //
 #include <array>
+#include <asncpp/bit_string.h>
 #include <gtest/gtest.h>
 #include "asncpp/base/asn1_basic.h"
 
@@ -20,7 +21,6 @@ public:
                    : static_cast<uintmax_t>(std::get<asncpp::base::asn1_tag>(_type));
     }
 };
-
 
 
 TEST(asn_basic_test, encode_tag_empty) {
@@ -60,8 +60,6 @@ TEST(asn_basic_test, decode_long_tag) {
 }
 
 
-
-
 TEST(asn_basic_test, encode_short_length) {
     constexpr uint8_t length{127};
     const asncpp::base::dynamic_array_t encoded{asncpp::base::asn1_basic::encode_length(length)};
@@ -75,7 +73,6 @@ TEST(asn_basic_test, encode_long_length) {
     const asncpp::base::dynamic_array_t expected{0x82, 0x01, 0x2C};
     ASSERT_EQ(encoded, expected);
 }
-
 
 TEST(asn_basic_test, decode_short_length) {
     constexpr std::array<uint8_t, 1> buffer{0x7F};
@@ -96,11 +93,40 @@ TEST(asn_basic_test, decode_invalid_length) {
     ASSERT_THROW((void)asncpp::base::asn1_basic::extract_length(buffer), std::runtime_error);
 }
 
-// TEST(asn_basic_test, decode_invalid_type) {
-//     constexpr std::array<uint8_t, 3> buffer{0x1F, 0x80, 0x80};
-//     ASSERT_THROW(asncpp::base::asn1_basic::extract_type(buffer), std::runtime_error);
-// }
-//
-// TEST(asn_basic_test, decode_empty_buffer) {
-//     ASSERT_THROW(asncpp::base::asn1_basic::extract_type({}), std::runtime_error);
-// }
+
+TEST(asn_basic_test, decode_invalid_type) {
+    constexpr std::array<uint8_t, 3> buffer{0x1F, 0x80, 0x80};
+    ASSERT_THROW((void)TestASN1Basic::extract_type(buffer), std::runtime_error);
+}
+
+TEST(asn_basic_test, decode_empty_buffer) {
+    ASSERT_THROW((void)TestASN1Basic::extract_type({}), std::runtime_error);
+}
+
+
+TEST(ASN1BasicTest, AppendAndGetChild) {
+    const std::vector<uint8_t> encoded{
+        0x23, 15, // BIT STRING tag and length (13 bytes total)
+        0x23, 13, // Nested constructed BIT STRING
+        0x03, 0x03, 0x00, 0x11, 0x22, // Nested BIT STRING (0 unused bits, value: 0x1122)
+        0x03, 0x02, 0x01, 0xF0, // Nested BIT STRING (1 unused bit, value: 0xF0)
+        0x03, 0x02, 0x02, 0x0F // Nested BIT STRING (2 unused bits, value: 0x0F)
+    };
+
+    const auto deserialized = asncpp::base::deserialize_v(encoded);
+    EXPECT_EQ(deserialized->number_of_children(), 1);
+    EXPECT_EQ(deserialized->get_child(0)->number_of_children(), 3);
+    auto parent = deserialized->get_child(0)->get_child(0);
+    EXPECT_EQ(reinterpret_cast<asncpp::types::bit_string_t*>(parent.get())->value(),
+              (std::vector<uint8_t>{0x11, 0x22})
+    );
+    parent = deserialized->get_child(0)->get_child(1);
+    EXPECT_EQ(reinterpret_cast<asncpp::types::bit_string_t*>(parent.get())->value(),
+              (std::vector<uint8_t>{0xF0})
+    );
+
+    parent = deserialized->get_child(0)->get_child(2);
+    EXPECT_EQ(reinterpret_cast<asncpp::types::bit_string_t*>(parent.get())->value(),
+              (std::vector<uint8_t>{0x0F})
+    );
+}

@@ -50,7 +50,7 @@ asncpp::types::bit_string_t::bit_string_t(uint64_t data, size_t bit_length) : _b
 
 void asncpp::types::bit_string_t::decode(std::span<const uint8_t> data) {
     if (_data.empty()) {
-        if (!is_have_children()) {
+        if (is_have_children()) {
             return;
         }
         throw std::invalid_argument("Invalid BIT STRING: empty data");
