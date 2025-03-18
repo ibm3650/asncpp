@@ -7,13 +7,26 @@
 
 class TestASN1Basic final : public asncpp::base::asn1_basic {
 public:
-    [[nodiscard]] constexpr uintmax_t get_tag() const noexcept override {
-        return std::holds_alternative<uintmax_t>(_type) ?
-            std::get<uintmax_t>(_type) :
-        static_cast<uintmax_t>(std::get<asncpp::base::asn1_tag>(_type));
-    }
+    using asn1_basic::asn1_basic;
+    using asn1_basic::extract_type;
+    using asn1_basic::encode_type;
 
+    [[nodiscard]] constexpr uintmax_t get_tag() const noexcept override {
+        if (std::holds_alternative<std::monostate>(_type)) {
+            return 0;
+        }
+        return std::holds_alternative<uintmax_t>(_type)
+                   ? std::get<uintmax_t>(_type)
+                   : static_cast<uintmax_t>(std::get<asncpp::base::asn1_tag>(_type));
+    }
 };
+
+
+
+TEST(asn_basic_test, encode_tag_empty) {
+    TestASN1Basic const obj;
+    ASSERT_THROW((void)obj.encode_type(), std::runtime_error);
+}
 
 TEST(asn_basic_test, encode_short_tag) {
     TestASN1Basic obj;
@@ -31,21 +44,23 @@ TEST(asn_basic_test, encode_long_tag) {
     ASSERT_EQ(encoded, expected);
 }
 
-// TEST(asn_basic_test, decode_short_tag) {
-//     constexpr std::array<uint8_t, 1> buffer{0x02};
-//     auto [type, size] = asncpp::base::asn1_basic::extract_type(buffer);
-//     ASSERT_TRUE(std::holds_alternative<asncpp::base::asn1_tag>(type));
-//     ASSERT_EQ(std::get<asncpp::base::asn1_tag>(type), asncpp::base::asn1_tag::INTEGER);
-//     ASSERT_EQ(size, 1);
-// }
-//
-// TEST(asn_basic_test, decode_long_tag) {
-//     constexpr std::array<uint8_t, 3> buffer{0x9F, 0xA4, 0x34};
-//     auto [type, size] = asncpp::base::asn1_basic::extract_type(buffer);
-//     ASSERT_TRUE(std::holds_alternative<uintmax_t>(type));
-//     ASSERT_EQ(std::get<uintmax_t>(type), 0x1234);
-//     ASSERT_EQ(size, 3);
-// }
+TEST(asn_basic_test, decode_short_tag) {
+    constexpr std::array<uint8_t, 3> buffer{0x02, 0x01, 0x7F}; // INTEGER(127)
+    const auto [type, size] = TestASN1Basic::extract_type(buffer);
+    TestASN1Basic const obj(buffer);
+    EXPECT_EQ(std::get<asncpp::base::asn1_tag>(type), asncpp::base::asn1_tag::INTEGER);
+    EXPECT_EQ(size, 1);
+}
+
+TEST(asn_basic_test, decode_long_tag) {
+    constexpr std::array<uint8_t, 3> buffer{0x9F, 0xA4, 0x34};
+    const auto [type, size] = TestASN1Basic::extract_type(buffer);
+    ASSERT_EQ(std::get<uintmax_t>(type), 0x1234);
+    ASSERT_EQ(size, 3);
+}
+
+
+
 
 TEST(asn_basic_test, encode_short_length) {
     constexpr uint8_t length{127};
@@ -60,7 +75,6 @@ TEST(asn_basic_test, encode_long_length) {
     const asncpp::base::dynamic_array_t expected{0x82, 0x01, 0x2C};
     ASSERT_EQ(encoded, expected);
 }
-
 
 
 TEST(asn_basic_test, decode_short_length) {
@@ -90,6 +104,3 @@ TEST(asn_basic_test, decode_invalid_length) {
 // TEST(asn_basic_test, decode_empty_buffer) {
 //     ASSERT_THROW(asncpp::base::asn1_basic::extract_type({}), std::runtime_error);
 // }
-
-
-

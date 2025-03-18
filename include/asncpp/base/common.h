@@ -89,7 +89,7 @@ namespace asncpp::base {
      * @class asn1_basic
      * @brief Abstract base class for representing ASN.1 data types.
      *
-     * Provides a foundation for encoding, decoding, and managing ASN.1 data.
+     * Provides a foundation for encoding, base decoding, and managing ASN.1 data for next decoding by specified types.
      */
     class asn1_basic;
 
@@ -100,7 +100,7 @@ namespace asncpp::base {
      * @return A unique pointer to the deserialized ASN.1 object.
      * @throws std::runtime_error If the data cannot be parsed.
      */
-    std::unique_ptr<asn1_basic> deserialize_v(std::span<const uint8_t> data);
+    std::shared_ptr<asn1_basic> deserialize_v(std::span<const uint8_t> data);
 
     /**
      * @brief Serializes an ASN.1 object into a byte stream.

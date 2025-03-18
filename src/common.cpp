@@ -3,84 +3,89 @@
 //
 #include "asncpp/base/common.h"
 
-#include <iostream>
-
 #include "asncpp/types.h"
 
-std::unique_ptr<asncpp::base::asn1_basic> asncpp::base::deserialize_v(std::span<const uint8_t> data) {
+std::shared_ptr<asncpp::base::asn1_basic> asncpp::base::deserialize_v(std::span<const uint8_t> data) {
     asn1_basic base(data);
-    // const tag_t type = asn1_basic::extract_type(data).first;
+    //Проверка, что тип являются допустимым тегом для ASN.1-объекта
     if (!std::holds_alternative<asn1_tag>(base._type)) {
         throw std::runtime_error("Tag is not an ASN.1 tag");
-        // std::cerr << "Tag is not an ASN.1 tag. Current type state: ";
-        // if (std::holds_alternative<std::monostate>(type)) {
-        //     std::cerr << "std::monostate";
-        // } else if (std::holds_alternative<uintmax_t>(type)) {
-        //     std::cerr << "uintmax_t: " << std::get<uintmax_t>(type);
-        // }
-        // std::cerr << '\n';
-        // return nullptr;
     }
+    //Проверка, что объект конструктивный
     if (base.constructed()) {
+        /* Пока не кончатся данные извлекаются вложенные данные или просто коллекции, после каждого извлеченного объекта,
+         * данные удаляются из буфера его родителя, чтобы не было дублирования данных
+         */
         while (!base._data.empty()) {
+            //Рекурсия, так как объект конструктивный и может иметь несколько ступеней вложенности.
             auto child = deserialize_v(base._data);
             if (!child) {
                 throw std::runtime_error("Failed to deserialize child object");
             }
+            //Удаление данных из буфера родителя
             base.truncate_data(child->_raw_length);
+            //Добавление дочернего объекта в родительский
             base._children.emplace_back(std::move(child));
         }
     }
     const auto type = std::get<asn1_tag>(base._type);
-    auto create_object = [base = std::move(base)](const asn1_tag tag) mutable -> std::unique_ptr<asn1_basic> {
+    //Функция для создания объекта по тегу
+    //В списке захваливается base, так как он необходим для дальнейшего декодирования,
+    //он перемещается во избежания избыточного копирования
+    auto create_object = [base = std::move(base)](const asn1_tag tag) mutable -> std::shared_ptr<asn1_basic> {
         using enum asn1_tag;
         switch (tag) {
-            case BOOLEAN: return std::make_unique<types::boolean_t>(std::move(base));
-            case INTEGER: return std::make_unique<types::integer_t>(std::move(base));
-            case BIT_STRING: return std::make_unique<types::bit_string_t>(std::move(base));
-            case OCTET_STRING: return std::make_unique<octet_string_t>(std::move(base));
-            case OBJECT_IDENTIFIER: return std::make_unique<object_identifier_t>(std::move(base));
-            case OBJECT_DESCRIPTOR: return std::make_unique<object_descriptor_t>(std::move(base));
-            case ENUMERATED: return std::make_unique<enumerated_t>(std::move(base));
-            case RELATIVE_OID: return std::make_unique<relative_oid_t>(std::move(base));
-            case NUMERIC_STRING: return std::make_unique<numeric_string_t>(std::move(base));
-            case PRINTABLE_STRING: return std::make_unique<printable_string_t>(std::move(base));
-            case IA5_STRING: return std::make_unique<ia5_string_t>(std::move(base));
-            case VISIBLE_STRING: return std::make_unique<visible_string_t>(std::move(base));
-            case UNIVERSAL_STRING: return std::make_unique<universal_string_t>(std::move(base));
-            case BMP_STRING: return std::make_unique<bmp_string_t>(std::move(base));
-            case UTF8_STRING: return std::make_unique<utf8_string_t>(std::move(base));
-            case DATE: return std::make_unique<date_t>(std::move(base));
-            case DATE_TIME: return std::make_unique<date_time_t>(std::move(base));
-            case TIME_OF_DAY: return std::make_unique<time_of_day_t>(std::move(base));
-            case REAL: return std::make_unique<real_t>(std::move(base));
-            case UTC_TIME: return std::make_unique<utc_time_t>(std::move(base));
-            case GENERALIZED_TIME: return std::make_unique<generalized_time_t>(std::move(base));
-            case DURATION: return std::make_unique<duration_t>(std::move(base));
-            case Null: return std::make_unique<null_t>(std::move(base));
+            case BOOLEAN: return std::make_shared<types::boolean_t>(std::move(base));
+            case INTEGER: return std::make_shared<types::integer_t>(std::move(base));
+            case BIT_STRING: return std::make_shared<types::bit_string_t>(std::move(base));
+            case OCTET_STRING: return std::make_shared<octet_string_t>(std::move(base));
+            case OBJECT_IDENTIFIER: return std::make_shared<object_identifier_t>(std::move(base));
+            case OBJECT_DESCRIPTOR: return std::make_shared<object_descriptor_t>(std::move(base));
+            case ENUMERATED: return std::make_shared<enumerated_t>(std::move(base));
+            case RELATIVE_OID: return std::make_shared<relative_oid_t>(std::move(base));
+            case NUMERIC_STRING: return std::make_shared<numeric_string_t>(std::move(base));
+            case PRINTABLE_STRING: return std::make_shared<printable_string_t>(std::move(base));
+            case IA5_STRING: return std::make_shared<ia5_string_t>(std::move(base));
+            case VISIBLE_STRING: return std::make_shared<visible_string_t>(std::move(base));
+            case UNIVERSAL_STRING: return std::make_shared<universal_string_t>(std::move(base));
+            case BMP_STRING: return std::make_shared<bmp_string_t>(std::move(base));
+            case UTF8_STRING: return std::make_shared<utf8_string_t>(std::move(base));
+            case DATE: return std::make_shared<date_t>(std::move(base));
+            case DATE_TIME: return std::make_shared<date_time_t>(std::move(base));
+            case TIME_OF_DAY: return std::make_shared<time_of_day_t>(std::move(base));
+            case REAL: return std::make_shared<real_t>(std::move(base));
+            case UTC_TIME: return std::make_shared<utc_time_t>(std::move(base));
+            case GENERALIZED_TIME: return std::make_shared<generalized_time_t>(std::move(base));
+            case DURATION: return std::make_shared<duration_t>(std::move(base));
+            case Null: return std::make_shared<null_t>(std::move(base));
             //FIXME: SET_OF is have same type as SET. But we ned to check> is all types ov elements are same
-            case SET: return std::make_unique<set_t>(std::move(base));
-            case SEQUENCE: return std::make_unique<sequence_t>(std::move(base));
-           // case SET_OF: return std::make_unique<set_of_t>(std::move(base));
+            case SET: return std::make_shared<set_t>(std::move(base));
+            case SEQUENCE: return std::make_shared<sequence_t>(std::move(base));
+            // case SET_OF: return std::make_shared<set_of_t>(std::move(base));
             default: return nullptr;
         }
     };
     auto ptr = create_object(type);
-    //auto ptr = create_object(std::get<asn1_tag>(base._type));
     if (!ptr) {
         throw std::runtime_error("Unsupported ASN.1 tag type");
     }
-
-    //ptr->asn1_basic::decode(data);
+    //Разбор данных объекта, так как он уже создан, и фактические данные уже извлечены и теперь вызывается
+    //метод decode класса-наследника asn_basic1 для заполнения внутренних полей объекта.
     ptr->decode(data);
     return ptr;
 }
 
 
 std::vector<uint8_t> asncpp::base::serialize(asn1_basic *block) {
-    for (size_t i = 0; i < block->children_count(); ++i) {
-            block->_data.append_range(serialize(block->_children[i].get()));
+    /*
+     *Рекурсивно вызывается для всех дочерних объектов, если они есть.
+     *Функция применяется для кадого вложенного объекта изнутри-наружу.
+     */
+    for (size_t i = 0; i < block->number_of_children(); ++i) {
+        block->_data.append_range(serialize(block->_children[i].get()));
     }
+    //Кодирование объекта. Данный метод вызывается для каждого объекта.
     (void) block->encode();
+    //Кодирование в финальный TLV-блок. Данный метод вызывается для каждого объекта. Но в этот раз радительского класса
     return block->asn1_basic::encode();
 }

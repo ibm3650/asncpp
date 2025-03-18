@@ -26,10 +26,8 @@ class asn_basic_test_encode_invalid_tag_Test;
 class common_test_deserialize_Test;
 
 namespace asncpp::base {
-
     class asn1_basic {
         //TODO: Переосмыслить инкапсуляцию, чтобы не было необходимости в дружественных классах и чтобы обезопасить доступ к членам класса
-        //TODO: Навести порядок с указателями, заменить на shared_ptr
     public:
         /** @brief Конструктор TLV-объекта ASN.1 из буфера данных.
          *  @details Конструктор декодирует объект ASN.1 из буфера данных, разделяя его на тег, длину и данные.
@@ -39,10 +37,7 @@ namespace asncpp::base {
          * @param[in] data Буфер данных, содержащий закодированный объект ASN.1.
          * @throws std::invalid_argument Если буфер не содержит корректных данных ASN.1.
          */
-        asn1_basic(std::span<const uint8_t> data) {
-            //TODO: Is secure to use virtual of base class in base class method in constructor?
-            asn1_basic::decode(data);
-        }
+        asn1_basic(std::span<const uint8_t> data);
 
         /**
          * @brief Метод для получения информации о конструктивности объекта ASN.1.
@@ -50,10 +45,7 @@ namespace asncpp::base {
          * @retval true Объект ASN.1 конструктивный или составной (содержит дочерние объекты).
          * @retval false Объект ASN.1 примитивный.
          */
-        [[nodiscard]] constexpr bool constructed() const noexcept {
-            //FIXME: Переделать на проверку по тегу. Для типов-коллекций результат неверен. Они конструкционные по определнию.
-            return _constructed || is_have_children();
-        }
+        [[nodiscard]] constexpr bool constructed() const noexcept;
 
         /**
          * @brief Метод для получения класса тега ASN.1.
@@ -63,72 +55,85 @@ namespace asncpp::base {
          * @retval asn1_class::CONTEXT_SPECIFIC Контекстно-специфический класс тега.
          * @retval asn1_class::PRIVATE Частный класс тега.
          */
-        [[nodiscard]] constexpr asn1_class get_class() const noexcept {
-            return _cls;
-        }
+        [[nodiscard]] constexpr asn1_class get_class() const noexcept;
 
-        /**
-         * @brief Метод для получения длины закодированных данных объекта ASN.1.
-         * @return Длина закодированных данных уже без учёта тега и длины.
-         */
-        [[nodiscard]] constexpr size_t length() const noexcept {
-            return _length;
-        }
-
-        /**
-         * @brief Метод для получения данных объекта ASN.1.
-         * @return Константная ссылка на буфер данных объекта ASN.1. Уже без тега и длины.
-         */
-        [[nodiscard]] constexpr const dynamic_array_t &data() const noexcept {
-            return _data;
-        }
+        // /**
+        //  * @brief Метод для получения длины закодированных данных объекта ASN.1.
+        //  * @return Длина закодированных данных уже без учёта тега и длины.
+        //  */
+        // [[nodiscard]] constexpr size_t length() const noexcept {
+        //     return _length;
+        // }
+        //
+        // /**
+        //  * @brief Метод для получения данных объекта ASN.1.
+        //  * @return Константная ссылка на буфер данных объекта ASN.1. Уже без тега и длины.
+        //  */
+        // [[nodiscard]] constexpr const dynamic_array_t &data() const noexcept {
+        //     return _data;
+        // }
 
         /**
          * @brief Виртуальный метод для добавления дочернего объекта в составной объект ASN.1.
          * @details Метод виртуальный, так как каждый составной объект ASN.1 может иметь свои правила добавления дочерних объектов.
+         * Дочерний объект должен быть создан заранее и передан в метод в виде умного указателя @ref std::shared_ptr.
+         * @throws std::runtime_error Если объект не конструктивный. Объекты, не являющиеся конструктивными, не могут содержать дочерние объекты.
          * @param[in] child Умный указатель на дочерний объект ASN.1.
+         * @par Returns
+         *  None.
          */
-        virtual void append_child(std::unique_ptr<asn1_basic> child) {
-            //TODO: Переделать на shared_ptr?
-            //TODO: Кинуть  исключение, если объект не конструктивный
-            _children.emplace_back(std::move(child));
-        }
-
+        virtual void append_child(std::shared_ptr<asn1_basic> child);
 
         /**
          * @brief Метод для получения дочернего объекта по индексу.
          * @param[in] index Индекс дочернего объекта.
          * @return Указатель на дочерний объект ASN.1.
          * @throws std::out_of_range Если индекс выходит за пределы массива дочерних объектов.
+         * @throws std::runtime_error Если объект не конструктивный. Объекты, не являющиеся конструктивными, не могут содержать дочерние объекты.
          */
-        [[nodiscard]] auto get_child(size_t index) const {
-            //TODO: Переделать на shared_ptr?
-            //TODO: Может, стоит вернуть константную ссылку?
-            //TODO: Кинуть исключение, если индекс выходит за пределы массива?
-            //TODO: Кинуть исключение, если объект не конструктивный?
-            return _children.at(index).get();
-        }
+        [[nodiscard]] std::shared_ptr<asn1_basic> get_child(const size_t index) const;
 
         /**
          * @brief Метод возвращает значение тега объекта ASN.1.
          * @details Метод виртуальный, так как каждый объект ASN.1 может иметь свой тег. Каждый дочерний метод должен в обязательном порядке переопределить этот метод.
          * @return Значение тега объекта ASN.1 в виде числа.
-         * Какждый тип объекта ASN.1 имеет свой уникальный тег и возвращать его как обычное число, это важно для корректной сериализации и десериализации.
+         * Каждый тип объекта ASN.1 имеет свой уникальный тег и возвращать его как обычное число, это важно для корректной сериализации и десериализации.
          */
-        [[nodiscard]] constexpr virtual uintmax_t get_tag() const noexcept {
-            return static_cast<uintmax_t>(asn1_tag::Reserved);
-        }
+        [[nodiscard]] constexpr virtual uintmax_t get_tag() const noexcept;
 
-        //TODO: Инкапсулировать данную переменную от дочерних класов?
-        dynamic_array_t _data; /**< Внутренний буффер для хранения данных в сыром виде. Только данные. */
-        //TODO: Инкапсулировать данную переменную от дочерних класов?
-        std::vector<std::unique_ptr<asn1_basic> > _children; /**< Массив дочерних объектов для конструкционных типов или сотавных верий типов. */
+        /**
+         * @brief Метод для проверки наличия дочерних объектов.
+         * @return Наличие дочерних объектов.
+         * @retval true Объект ASN.1 имеет дочерние объекты.
+         * @retval false Объект ASN.1 не имеет дочерних объектов.
+         */
+        [[nodiscard]] bool is_have_children() const;
+
+        /**
+         * @brief Метод для получения количества дочерних объектов.
+         * @return Количество дочерних объектов.
+         */
+        [[nodiscard]] size_t number_of_children() const;
+
+
+        /**
+ * @brief Преобразует объект ASN.1 в строку.
+ * @details Метод виртуальный, так как каждый объект ASN.1 может иметь своё представление в виде строки.
+ * Рекомендуется в каждом классе-наследнике переопределить этот метод для корректного отображения объекта.
+ * @return A строковое представление объекта ASN.1.
+ */
+        [[nodiscard, maybe_unused]] virtual std::string to_string() const;
 
         asn1_basic() noexcept = default;
+
         asn1_basic(asn1_basic &&) = default;
+
         asn1_basic(const asn1_basic &) = default;
+
         asn1_basic &operator=(asn1_basic &&) = default;
+
         asn1_basic &operator=(const asn1_basic &) = default;
+
         virtual ~asn1_basic() = default;
 
         // template<class T>
@@ -151,58 +156,49 @@ namespace asncpp::base {
         // }
     protected:
         /**
-         * @brief Decodes an ASN.1 object from a byte buffer.
-         * @param data The buffer containing ASN.1 encoded data.
+         * @brief Разбирает байтовый поток в объект ASN.1.
+         * @details Метод виртуальный, так как каждый объект ASN.1 может иметь свои правила декодирования.
+         * Его переопределение обязательно для каждого класса-наследника.
+         * Подразумевается, что переопределённый метод будет разбирать данные из буфера и заполнять внутренние поля объекта.
+         * Крайне не рекомендуется его использовать без необходимости или в обход функций сериализации и десериализации.
+         * @param[in] data The buffer containing ASN.1 encoded data.
          * @throws std::invalid_argument If the buffer does not contain valid ASN.1 data.
          */
         virtual void decode(std::span<const uint8_t> data);
 
         /**
-         * @brief Encodes the ASN.1 object into a byte buffer.
-         * @return A byte array containing the encoded data.
+         * @brief Сериализует объект ASN.1 в байтовый массив.
+         * @details Метод виртуальный, так как каждый объект ASN.1 может иметь свои правила сериализации.
+         * Его пререопределение обязательно для каждого класса-наследника. Переопределенный метод кодировать данные специфическим образом
+         * для каждого типа объекта ASN.1. и заполнять внутренние поля объекта.
+         * Крайне не рекомендуется его использовать без необходимости или в обход функций сериализации и десериализации.
+         * @return Байтовый массив, представляющий сериализованный объект ASN.1. Полный TLV-блок.
          */
         virtual dynamic_array_t encode();
 
-        /**
-         * @brief Converts the ASN.1 object to a string representation.
-         * @return A string describing the ASN.1 object.
-         */
-        [[nodiscard, maybe_unused]] virtual std::string to_string() const {
-            return "ASN.1 basic";
-        }
 
-
-        [[nodiscard]] bool is_have_children() const {
-            return !_children.empty();
-        }
-
-        [[nodiscard]] size_t children_count() const {
-            return _children.size();
-        }
-
-        void truncate_data(size_t length) {
-            // _data.erase(_data.begin(), _data.begin() + length);
-            //size_t const n = 3;
-            if (length > _data.size()) {
-                throw std::invalid_argument("Length exceeds buffer size");
-            }
-
-
-            std::move(_data.begin() + length, _data.end(), _data.begin());
-            _data.resize(_data.size() - length);
-            //}
-        }
-
-        void append_data(std::span<const uint8_t> data) {
-            _data.insert(_data.end(), data.begin(), data.end());
-        }
-
+        dynamic_array_t _data; /**< Внутренний буфер для хранения данных в сыром виде. Только данные. */
     private:
         bool _constructed{}; /**< Флаг конструктивности объекта ASN.1. */
         asn1_class _cls{}; /**< Класс объекта ASN.1. */
         size_t _length{}; /**< Длинна исключительно данных */
         size_t _raw_length{}; /**< Длинна полного, сырого TLV-пакета */
-        tag_t _type; /**< Тип объекта ASN.1. Может быть как стандартным, так и пользовательским. Значение по умолчанию - std::monostate */
+        tag_t _type;
+        /**< Тип объекта ASN.1. Может быть как стандартным, так и пользовательским. Значение по умолчанию - std::monostate */
+        std::vector<std::shared_ptr<asn1_basic> > _children;
+        /**< Массив дочерних объектов для конструкционных типов или составных вариаций типов. */
+
+
+        /**
+         * @brief Применяется для вложенных или конструкционных типов. Используется исключительно с deserialize_v.
+        * @details Нужно для того, чтобы из родительского объекта удалять данные, скопированные во вложенные объекты. Вызывается до тех пор, пока все объекты не будут извлечены.
+         * @param[in] length Длина данных, которые необходимо удалить из исходного массива сырых данных.
+         * @throws std::invalid_argument Если длина превышает размер буфера.
+         * @par Returns
+         *  None.
+         */
+        void truncate_data(const size_t length);
+
 
         /**
          * @brief Сериализует объект ASN.1 в байтовый массив.
@@ -210,7 +206,7 @@ namespace asncpp::base {
          * @param[in, out] block Объект ASN.1 для сериализации. Сырой блок данны c базовым классом @ref asn1_basic.
          * @return Байтовый массив, представляющий сериализованный объект ASN.1. Полный TLV-блок.
          */
-        friend dynamic_array_t serialize(asn1_basic* block);
+        friend dynamic_array_t serialize(asn1_basic *block);
 
         /**
          * @brief Десериализует байтовый поток в объект ASN.1.
@@ -219,16 +215,16 @@ namespace asncpp::base {
          * @return Указатель на десериализованный объект ASN.1.
          * @throws std::runtime_error Если данные не могут быть разобраны.
          */
-        friend std::unique_ptr<asn1_basic> deserialize_v(std::span<const uint8_t> data);
+        friend std::shared_ptr<asn1_basic> deserialize_v(std::span<const uint8_t> data);
 
 
         /**
- * @brief Extracts the tag type from the given data buffer.
- * @param buffer The buffer containing ASN.1 encoded data.
- * @return A pair containing the tag type and the number of bytes used by the tag.
- * @throws std::runtime_error If the tag type cannot be determined from the buffer.
- */
-        static std::pair<tag_t, size_t> extract_type(std::span<const uint8_t> buffer);
+         * @brief Extracts the tag value from a byte buffer.
+         * @param[in] buffer The buffer containing ASN.1 encoded data.
+         * @return A pair containing the tag value and the number of bytes used by the tag.
+         * @throws std::runtime_error If the tag cannot be determined from the buffer.
+         */
+        [[nodiscard]] static std::pair<tag_t, size_t> extract_type(std::span<const uint8_t> buffer);
 
         /**
          * @brief Encodes the tag value of the ASN.1 object.
@@ -238,14 +234,14 @@ namespace asncpp::base {
 
         /**
          * @brief Encodes the length value of the ASN.1 object.
-         * @param length The length to encode.
+         * @param[in] length The length to encode.
          * @return A byte array representing the encoded length.
          */
         [[nodiscard]] static dynamic_array_t encode_length(size_t length);
 
         /**
          * @brief Extracts the length value from a byte buffer.
-         * @param buffer The buffer containing ASN.1 encoded data.
+         * @param[in] buffer The buffer containing ASN.1 encoded data.
          * @return A pair containing the length value and the number of bytes used by the length.
          * @throws std::runtime_error If the length cannot be determined from the buffer.
          */
@@ -265,7 +261,7 @@ namespace asncpp::base {
          */
         [[nodiscard]] constexpr static asn1_class extract_class(uint8_t tag) noexcept;
 
-        // Test friend declarations
+
         friend class TestASN1Basic;
         friend class asn_basic_test_encode_short_tag_Test;
         friend class asn_basic_test_encode_long_tag_Test;
