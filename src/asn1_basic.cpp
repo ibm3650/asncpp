@@ -14,7 +14,7 @@
 namespace views = std::ranges::views;
 
 
-asncpp::base::asn1_basic::asn1_basic(std::span<const uint8_t> data) {
+asncpp::base::asn1_basic::asn1_basic(const std::span<const uint8_t> data) {
     //Вызов виртуального метода decode для разбора данных в данном участке безопасен,
     //так как он должен вызывать реализацию именно этого класса, а не дочернего
     asn1_basic::decode(data);
@@ -52,20 +52,20 @@ void asncpp::base::asn1_basic::decode(std::span<const uint8_t> data) {
     _cls = extract_class(data[0]);
     _constructed = extract_is_constructed(data[0]);
     //Получение типа, длинны  и срез массива сырых данных. Тип/тег и длинна может занимать более одного байта
-    const auto type{extract_type(data)};
-    _type = type.first;
-    data = data.subspan(type.second);
-    const auto length{extract_length(data)};
-    data = data.subspan(length.second);
-    _length = length.first;
+    const auto [type, type_length]{extract_type(data)};
+    _type = type;
+    data = data.subspan(type_length);
+    const auto [length, length_length]{extract_length(data)};
+    data = data.subspan(length_length);
+    _length = length;
 
     //Проверка на то, что длинна не превышает фактический размер буфера
-    if (std::distance(data.cbegin() + static_cast<std::ptrdiff_t>(length.first), data.end()) < 0) {
+    if (std::distance(data.cbegin() + static_cast<std::ptrdiff_t>(length), data.end()) < 0) {
         throw std::invalid_argument("Invalid ASN.1 data. Length exceeds buffer size");
     }
-    _raw_length = type.second + length.second + length.first;
+    _raw_length = type_length + length_length + length;
     //Сохранение данных в буфере без тега и длинны
-    _data.assign(data.cbegin(), data.cbegin() + static_cast<std::ptrdiff_t>(length.first));
+    _data.assign(data.cbegin(), data.cbegin() + static_cast<std::ptrdiff_t>(length));
 }
 
 
@@ -110,7 +110,7 @@ std::pair<asncpp::base::tag_t, size_t> asncpp::base::asn1_basic::extract_type(st
     //Генератор для получения байтов типа. Пока байт имеет 0x80 в старшем бите, продолжаем считывать
     const auto type_view{
         buffer | views::drop(count) | views::take_while(
-            [](uint8_t byte) { return byte & 0x80U; })
+            [](const uint8_t byte) { return byte & 0x80U; })
     };
 
 
@@ -194,7 +194,7 @@ asncpp::base::dynamic_array_t asncpp::base::asn1_basic::encode_type() const {
 }
 
 
-std::pair<size_t, size_t> asncpp::base::asn1_basic::extract_length(std::span<const uint8_t> buffer) {
+std::pair<size_t, size_t> asncpp::base::asn1_basic::extract_length(const std::span<const uint8_t> buffer) {
     if (buffer.empty()) {
         throw std::runtime_error("Buffer is empty");
     }
@@ -248,10 +248,10 @@ constexpr uintmax_t asncpp::base::asn1_basic::get_tag() const noexcept {
     return static_cast<uintmax_t>(asn1_tag::Reserved);
 }
 
-constexpr bool asncpp::base::asn1_basic::extract_is_constructed(uint8_t tag) noexcept {
+constexpr bool asncpp::base::asn1_basic::extract_is_constructed(const uint8_t tag) noexcept {
     return (tag & 0x20U) >> 5U;
 }
 
-constexpr asncpp::base::asn1_class asncpp::base::asn1_basic::extract_class(uint8_t tag) noexcept {
+constexpr asncpp::base::asn1_class asncpp::base::asn1_basic::extract_class(const uint8_t tag) noexcept {
     return static_cast<asn1_class>((tag & 0xC0U) >> 6U);
 }
