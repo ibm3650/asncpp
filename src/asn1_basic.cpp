@@ -1,6 +1,9 @@
-//
-// Created by kandu on 17.12.2024.
-//
+/**
+* @file asn1_basic.cpp
+ * @brief Definition of the `asn1_basic` class.
+ * @author Nikita Kanduba
+ * @date 17.12.2024
+ */
 
 #include "asncpp/base/asn1_basic.h"
 
@@ -11,8 +14,9 @@
 namespace views = std::ranges::views;
 
 
-asncpp::base::asn1_basic::asn1_basic(std::span<const uint8_t> data)  {
-    //TODO: Is secure to use virtual of base class in base class method in constructor?
+asncpp::base::asn1_basic::asn1_basic(std::span<const uint8_t> data) {
+    //Вызов виртуального метода decode для разбора данных в данном участке безопасен,
+    //так как он должен вызывать реализацию именно этого класса, а не дочернего
     asn1_basic::decode(data);
 }
 
@@ -44,7 +48,7 @@ void asncpp::base::asn1_basic::decode(std::span<const uint8_t> data) {
         throw std::invalid_argument("Invalid ASN.1 data. Length is too short");
     }
 
-    //Класс  и конструкционность всегда находится в первом байте
+    //Класс  и конструктивность всегда находится в первом байте
     _cls = extract_class(data[0]);
     _constructed = extract_is_constructed(data[0]);
     //Получение типа, длинны  и срез массива сырых данных. Тип/тег и длинна может занимать более одного байта
@@ -77,7 +81,7 @@ std::string asncpp::base::asn1_basic::to_string() const {
 }
 
 
-void asncpp::base::asn1_basic::truncate_data(const size_t length){
+void asncpp::base::asn1_basic::truncate_data(const size_t length) {
     if (length > _data.size()) {
         throw std::invalid_argument("Length exceeds buffer size");
     }
@@ -110,7 +114,7 @@ std::pair<asncpp::base::tag_t, size_t> asncpp::base::asn1_basic::extract_type(st
     };
 
 
-    for (const uint8_t byte : type_view) {
+    for (const uint8_t byte: type_view) {
         //Добавление 7 младших битов к числу(тегу)
         type_decoded = (type_decoded << 7U) | (byte & 0x7FU);
         count++;
@@ -233,7 +237,6 @@ std::pair<size_t, size_t> asncpp::base::asn1_basic::extract_length(std::span<con
 }
 
 constexpr bool asncpp::base::asn1_basic::constructed() const noexcept {
-    //FIXME: Переделать на проверку по тегу. Для типов-коллекций результат неверен. Они конструкционные по определению.
     return _constructed || is_have_children();
 }
 

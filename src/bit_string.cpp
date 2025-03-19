@@ -4,6 +4,7 @@
 #include "asncpp/bit_string.h"
 #include <ranges>
 #include <numeric>
+#include <stdexcept>
 
 asncpp::types::bit_string_t::bit_string_t(const std::vector<bool> &data) : _bit_length{data.size()} {
     for (const auto &chunk: data | std::views::chunk(8)) {

@@ -1,10 +1,14 @@
-//
-// Created by kandu on 20.12.2024.
-//
+/**
+ * @file asn_basic_test.cpp
+ * @brief Test cases for the `asn1_basic` class.
+ * @author Nikita Kanduba
+ * @date 20.12.2024
+ */
 #include <array>
 #include <asncpp/bit_string.h>
 #include <gtest/gtest.h>
-#include "asncpp/base/asn1_basic.h"
+#include <ranges>
+#include <asncpp/base/asn1_basic.h>
 
 class TestASN1Basic final : public asncpp::base::asn1_basic {
 public:
@@ -22,89 +26,140 @@ public:
     }
 };
 
-
+/**
+ * @brief Проверка исключения метода encode_type при пустом теге/буфере данных.
+ */
 TEST(asn_basic_test, encode_tag_empty) {
     TestASN1Basic const obj;
     ASSERT_THROW((void)obj.encode_type(), std::runtime_error);
 }
 
+/**
+ * @brief Проверка метода encode_type при коротком теге.
+ */
 TEST(asn_basic_test, encode_short_tag) {
+    const asncpp::base::dynamic_array_t expected{0x02};
     TestASN1Basic obj;
-    obj._type = uintmax_t{0x02};
-    const auto encoded = obj.encode_type();
-    ASSERT_EQ(encoded, std::vector<uint8_t>{0x02});
+    obj._type = asncpp::base::asn1_tag::INTEGER;
+    ASSERT_EQ(obj.encode_type(), expected);
 }
 
+/**
+ * @brief Проверка метода encode_type при длинном теге.
+ */
 TEST(asn_basic_test, encode_long_tag) {
+    const asncpp::base::dynamic_array_t expected{0x9F, 0xA4, 0x34};
     TestASN1Basic obj;
     obj._type = uintmax_t{0x1234};
     obj._cls = asncpp::base::asn1_class::CONTEXT_SPECIFIC;
-    const asncpp::base::dynamic_array_t encoded = obj.encode_type();
-    const asncpp::base::dynamic_array_t expected = {0x9F, 0xA4, 0x34};
-    ASSERT_EQ(encoded, expected);
+    ASSERT_EQ(obj.encode_type(), expected);
 }
 
+
+/**
+ * @brief Проверка метода extract_type при коротком теге.
+ */
 TEST(asn_basic_test, decode_short_tag) {
-    constexpr std::array<uint8_t, 3> buffer{0x02, 0x01, 0x7F}; // INTEGER(127)
-    const auto [type, size] = TestASN1Basic::extract_type(buffer);
-    TestASN1Basic const obj(buffer);
-    EXPECT_EQ(std::get<asncpp::base::asn1_tag>(type), asncpp::base::asn1_tag::INTEGER);
-    EXPECT_EQ(size, 1);
+    constexpr auto type_expected{asncpp::base::asn1_tag::INTEGER};
+    constexpr size_t size_expected{1};
+    const auto [type, size] =
+            TestASN1Basic::extract_type(std::array<uint8_t, 3>{0x02, 0x01, 0x7F});
+    EXPECT_EQ(std::get<asncpp::base::asn1_tag>(type), type_expected);
+    EXPECT_EQ(size, size_expected);
 }
 
+
+/**
+ * @brief Проверка метода extract_type при длинном теге.
+ */
 TEST(asn_basic_test, decode_long_tag) {
-    constexpr std::array<uint8_t, 3> buffer{0x9F, 0xA4, 0x34};
-    const auto [type, size] = TestASN1Basic::extract_type(buffer);
-    ASSERT_EQ(std::get<uintmax_t>(type), 0x1234);
-    ASSERT_EQ(size, 3);
+    constexpr uintmax_t type_expected{0x1234};
+    constexpr size_t size_expected{3};
+    const auto [type, size] =
+            TestASN1Basic::extract_type(std::array<uint8_t, 3>{0x9F, 0xA4, 0x34});
+    ASSERT_EQ(std::get<uintmax_t>(type), type_expected);
+    ASSERT_EQ(size, size_expected);
 }
 
 
+/**
+ * @brief Проверка метода encode_length при короткой длине.
+ */
 TEST(asn_basic_test, encode_short_length) {
-    constexpr uint8_t length{127};
-    const asncpp::base::dynamic_array_t encoded{asncpp::base::asn1_basic::encode_length(length)};
     const asncpp::base::dynamic_array_t expected{0x7F};
+    const asncpp::base::dynamic_array_t encoded{asncpp::base::asn1_basic::encode_length(127)};
     ASSERT_EQ(encoded, expected);
 }
 
+/**
+ * @brief Проверка метода encode_length при длинной длине.
+ */
 TEST(asn_basic_test, encode_long_length) {
-    constexpr size_t length{300};
-    const asncpp::base::dynamic_array_t encoded{asncpp::base::asn1_basic::encode_length(length)};
     const asncpp::base::dynamic_array_t expected{0x82, 0x01, 0x2C};
+    const asncpp::base::dynamic_array_t encoded{asncpp::base::asn1_basic::encode_length(300)};
     ASSERT_EQ(encoded, expected);
 }
 
+
+/**
+ * @brief Проверка метода extract_length при короткой длине.
+ */
 TEST(asn_basic_test, decode_short_length) {
-    constexpr std::array<uint8_t, 1> buffer{0x7F};
-    auto [length, size] = asncpp::base::asn1_basic::extract_length(buffer);
-    ASSERT_EQ(length, 127);
-    ASSERT_EQ(size, 1);
+    constexpr size_t length_expected{127};
+    constexpr size_t size_expected{1};
+    auto [length, size] =
+            asncpp::base::asn1_basic::extract_length(std::array<uint8_t, 1>{0x7F});
+    ASSERT_EQ(length, length_expected);
+    ASSERT_EQ(size, size_expected);
 }
 
+
+/**
+ * @brief Проверка метода extract_length при длинной длине.
+ */
 TEST(asn_basic_test, decode_long_length) {
-    constexpr std::array<uint8_t, 3> buffer{0x82, 0x01, 0x2C};
-    auto [length, size] = asncpp::base::asn1_basic::extract_length(buffer);
-    ASSERT_EQ(length, 300);
-    ASSERT_EQ(size, 3);
+    constexpr size_t length_expected{300};
+    constexpr size_t size_expected{3};
+    auto [length, size] =
+            asncpp::base::asn1_basic::extract_length(std::array<uint8_t, 3>{0x82, 0x01, 0x2C});
+    ASSERT_EQ(length, length_expected);
+    ASSERT_EQ(size, size_expected);
 }
 
+
+/**
+ * @brief Проверка исключения метода extract_length при неверной длине.
+ */
 TEST(asn_basic_test, decode_invalid_length) {
-    constexpr std::array<uint8_t, 3> buffer{0x84, 0xFF, 0xFF};
-    ASSERT_THROW((void)asncpp::base::asn1_basic::extract_length(buffer), std::runtime_error);
+    ASSERT_THROW((void)asncpp::base::asn1_basic::extract_length(std::array<uint8_t, 3>{0x84, 0xFF, 0xFF}),
+                 std::runtime_error);
 }
 
 
+/**
+ * @brief Проверка исключения метода extract_type при неверном типе.
+ */
 TEST(asn_basic_test, decode_invalid_type) {
-    constexpr std::array<uint8_t, 3> buffer{0x1F, 0x80, 0x80};
-    ASSERT_THROW((void)TestASN1Basic::extract_type(buffer), std::runtime_error);
+    ASSERT_THROW((void)TestASN1Basic::extract_type(std::array<uint8_t, 3>{0x1F, 0x80, 0x80}), std::runtime_error);
 }
 
+/**
+ * @brief Проверка исключения метода extract_type при пустом буфере.
+ */
 TEST(asn_basic_test, decode_empty_buffer) {
     ASSERT_THROW((void)TestASN1Basic::extract_type({}), std::runtime_error);
 }
 
 
-TEST(ASN1BasicTest, AppendAndGetChild) {
+/**
+ * @brief Проверка методов get_child и number_of_children при десериализации конструкционного объекта.
+ */
+TEST(asn_basic_test, children_operations) {
+    const std::vector<std::vector<uint8_t> > expected{
+        {0x11, 0x22},
+        {0xF0},
+        {0x0F}
+    };
     const std::vector<uint8_t> encoded{
         0x23, 15, // BIT STRING tag and length (13 bytes total)
         0x23, 13, // Nested constructed BIT STRING
@@ -116,17 +171,8 @@ TEST(ASN1BasicTest, AppendAndGetChild) {
     const auto deserialized = asncpp::base::deserialize_v(encoded);
     EXPECT_EQ(deserialized->number_of_children(), 1);
     EXPECT_EQ(deserialized->get_child(0)->number_of_children(), 3);
-    auto parent = deserialized->get_child(0)->get_child(0);
-    EXPECT_EQ(reinterpret_cast<asncpp::types::bit_string_t*>(parent.get())->value(),
-              (std::vector<uint8_t>{0x11, 0x22})
-    );
-    parent = deserialized->get_child(0)->get_child(1);
-    EXPECT_EQ(reinterpret_cast<asncpp::types::bit_string_t*>(parent.get())->value(),
-              (std::vector<uint8_t>{0xF0})
-    );
-
-    parent = deserialized->get_child(0)->get_child(2);
-    EXPECT_EQ(reinterpret_cast<asncpp::types::bit_string_t*>(parent.get())->value(),
-              (std::vector<uint8_t>{0x0F})
-    );
+    for (auto [index, expected_value]: std::views::enumerate(expected)) {
+        const auto parent = deserialized->get_child(0)->get_child(index);
+        EXPECT_EQ(reinterpret_cast<asncpp::types::bit_string_t*>(parent.get())->value(), expected_value);
+    }
 }

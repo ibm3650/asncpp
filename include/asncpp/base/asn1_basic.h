@@ -1,11 +1,12 @@
-//
-// Created by kandu on 17.12.2024.
-//
-
+/**
+* @file asn1_basic.h
+ * @brief Declaration of the `asn1_basic` class.
+ * @author Nikita Kanduba
+ * @date 17.12.2024
+ */
 #ifndef ASN1_BASIC_H
 #define ASN1_BASIC_H
 
-#include <stdexcept>
 #include <string>
 #include "common.h"
 
@@ -27,7 +28,6 @@ class common_test_deserialize_Test;
 
 namespace asncpp::base {
     class asn1_basic {
-        //TODO: Переосмыслить инкапсуляцию, чтобы не было необходимости в дружественных классах и чтобы обезопасить доступ к членам класса
     public:
         /** @brief Конструктор TLV-объекта ASN.1 из буфера данных.
          *  @details Конструктор декодирует объект ASN.1 из буфера данных, разделяя его на тег, длину и данные.
@@ -44,6 +44,7 @@ namespace asncpp::base {
          * @return Конструктивный ли объект ASN.1.
          * @retval true Объект ASN.1 конструктивный или составной (содержит дочерние объекты).
          * @retval false Объект ASN.1 примитивный.
+         * @bug Метод вероятно дает ложный результат для типов-коллекций, особенно еслт они пустые.
          */
         [[nodiscard]] constexpr bool constructed() const noexcept;
 
@@ -57,21 +58,7 @@ namespace asncpp::base {
          */
         [[nodiscard]] constexpr asn1_class get_class() const noexcept;
 
-        // /**
-        //  * @brief Метод для получения длины закодированных данных объекта ASN.1.
-        //  * @return Длина закодированных данных уже без учёта тега и длины.
-        //  */
-        // [[nodiscard]] constexpr size_t length() const noexcept {
-        //     return _length;
-        // }
-        //
-        // /**
-        //  * @brief Метод для получения данных объекта ASN.1.
-        //  * @return Константная ссылка на буфер данных объекта ASN.1. Уже без тега и длины.
-        //  */
-        // [[nodiscard]] constexpr const dynamic_array_t &data() const noexcept {
-        //     return _data;
-        // }
+
 
         /**
          * @brief Виртуальный метод для добавления дочернего объекта в составной объект ASN.1.
@@ -136,24 +123,7 @@ namespace asncpp::base {
 
         virtual ~asn1_basic() = default;
 
-        // template<class T>
-        // T *get() {
-        //     uintmax_t raw_type{0};
-        //     std::visit([&](auto &&arg) {
-        //                    using T = std::decay_t<decltype(arg)>;
-        //                    if constexpr (std::is_same_v<T, std::monostate>) {
-        //                        raw_type = get_tag();
-        //                    } else if constexpr (std::is_same_v<T, asn1_tag>) {
-        //                        raw_type = static_cast<uintmax_t>(arg);
-        //                    } else if constexpr (std::is_same_v<T, uintmax_t>) {
-        //                        raw_type = arg;
-        //                    }
-        //                },
-        //                _type);
-        //     if (T().get_tag() != raw_type)
-        //         return nullptr;
-        //     return static_cast<T *>(this);
-        // }
+
     protected:
         /**
          * @brief Разбирает байтовый поток в объект ASN.1.
@@ -183,10 +153,8 @@ namespace asncpp::base {
         asn1_class _cls{}; /**< Класс объекта ASN.1. */
         size_t _length{}; /**< Длинна исключительно данных */
         size_t _raw_length{}; /**< Длинна полного, сырого TLV-пакета */
-        tag_t _type;
-        /**< Тип объекта ASN.1. Может быть как стандартным, так и пользовательским. Значение по умолчанию - std::monostate */
-        std::vector<std::shared_ptr<asn1_basic> > _children;
-        /**< Массив дочерних объектов для конструкционных типов или составных вариаций типов. */
+        tag_t _type; /**< Тип объекта ASN.1. Может быть как стандартным, так и пользовательским. Значение по умолчанию - std::monostate */
+        std::vector<std::shared_ptr<asn1_basic> > _children; /**< Массив дочерних объектов для конструкционных типов или составных вариаций типов. */
 
 
         /**
