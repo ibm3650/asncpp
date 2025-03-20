@@ -9,6 +9,7 @@
 
 #include <string>
 #include "common.h"
+#include "../export.h"
 
 /**
  * @brief Forward declarations for test classes.
@@ -27,7 +28,7 @@ class asn_basic_test_encode_invalid_tag_Test;
 class common_test_deserialize_Test;
 
 namespace asncpp::base {
-    class asn1_basic {
+    class ASNCPP_EXPORT asn1_basic {
     public:
         /** @brief Конструктор TLV-объекта ASN.1 из буфера данных.
          *  @details Конструктор декодирует объект ASN.1 из буфера данных, разделяя его на тег, длину и данные.
@@ -192,7 +193,7 @@ namespace asncpp::base {
          * @return A pair containing the tag value and the number of bytes used by the tag.
          * @throws std::runtime_error If the tag cannot be determined from the buffer.
          */
-        [[nodiscard]] static std::pair<tag_t, size_t> extract_type(std::span<const uint8_t> buffer);
+        [[nodiscard]] static ASNCPP_EXPORT std::pair<tag_t, size_t> extract_type(std::span<const uint8_t> buffer);
 
         /**
          * @brief Encodes the tag value of the ASN.1 object.
@@ -205,7 +206,7 @@ namespace asncpp::base {
          * @param[in] length The length to encode.
          * @return A byte array representing the encoded length.
          */
-        [[nodiscard]] static dynamic_array_t encode_length(size_t length);
+        [[nodiscard]] static ASNCPP_EXPORT dynamic_array_t encode_length(size_t length);
 
         /**
          * @brief Extracts the length value from a byte buffer.
@@ -213,21 +214,21 @@ namespace asncpp::base {
          * @return A pair containing the length value and the number of bytes used by the length.
          * @throws std::runtime_error If the length cannot be determined from the buffer.
          */
-        [[nodiscard]] static std::pair<size_t, size_t> extract_length(std::span<const uint8_t> buffer);
+        [[nodiscard]] static ASNCPP_EXPORT std::pair<size_t, size_t> extract_length(std::span<const uint8_t> buffer);
 
         /**
          * @brief Determines whether the ASN.1 object is constructed.
          * @param tag The tag byte.
          * @return `true` if the object is constructed, `false` otherwise.
          */
-        [[nodiscard]] constexpr static bool extract_is_constructed(uint8_t tag) noexcept;
+        [[nodiscard]] constexpr static ASNCPP_EXPORT bool extract_is_constructed(uint8_t tag) noexcept;
 
         /**
          * @brief Extracts the class of the ASN.1 object.
          * @param tag The tag byte.
          * @return The class of the ASN.1 object.
          */
-        [[nodiscard]] constexpr static asn1_class extract_class(uint8_t tag) noexcept;
+        [[nodiscard]] constexpr static ASNCPP_EXPORT asn1_class extract_class(uint8_t tag) noexcept;
 
 
         friend class TestASN1Basic;

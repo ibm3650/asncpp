@@ -12,6 +12,7 @@
 #include <span>
 #include <variant>
 #include <memory>
+#include "../export.h"
 
 namespace asncpp::base {
     /**
@@ -102,7 +103,7 @@ namespace asncpp::base {
      * @return A unique pointer to the deserialized ASN.1 object.
      * @throws std::runtime_error If the data cannot be parsed.
      */
-    std::shared_ptr<asn1_basic> deserialize_v(std::span<const uint8_t> data);
+    ASNCPP_EXPORT std::shared_ptr<asn1_basic> deserialize_v(std::span<const uint8_t> data);
 
     /**
      * @brief Serializes an ASN.1 object into a byte stream.
@@ -110,7 +111,7 @@ namespace asncpp::base {
      * @param block The ASN.1 object to serialize.
      * @return A byte stream representing the serialized ASN.1 object.
      */
-    dynamic_array_t serialize(asn1_basic *block);
+    ASNCPP_EXPORT dynamic_array_t serialize(asn1_basic *block);
 } // namespace asncpp::base
 
 #endif //ASNCPP_ASN_BASE_H
