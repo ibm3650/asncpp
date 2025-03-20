@@ -1,109 +1,177 @@
-
-#Что происходит?
-#target_include_directories() добавляет пути к заголовочным файлам (.h) для цели asncpp.
-#
-#Параметры
-#PUBLIC — Указывает, что эти include-директории будут видны:
-#При сборке текущей библиотеки.
-#При сборке проектов, которые будут использовать эту библиотеку.
-#Разбор путей
-#$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-#➔ Этот путь используется только во время сборки проекта.
-#🔹 Это полезно, чтобы проекты, включающие вашу библиотеку в виде исходников (например, через add_subdirectory()), видели правильный путь к заголовочным файлам.
-#
-#$<INSTALL_INTERFACE:include>
-#➔ Этот путь используется только после установки библиотеки.
-#🔹 Он указывает на путь, где заголовочные файлы окажутся после команды make install.
-#
-#${CMAKE_CURRENT_SOURCE_DIR}/types
-#➔ Этот путь добавляется всегда (и при сборке, и после установки).
-#🔹 Это уместно, если каталог types содержит внутренние заголовочные файлы, которые не переносятся при установке.
-#
-#Почему нужно использовать BUILD_INTERFACE и INSTALL_INTERFACE?
-#Без них можно столкнуться с проблемой, когда при установке библиотеки пути остаются жёстко привязанными к исходному каталогу.
-#Эта конструкция обеспечивает корректную установку и корректную работу как при локальной разработке, так и при установке библиотеки.
-
+# Минимальная версия CMake
 cmake_minimum_required(VERSION 3.29)
-project(asncpp VERSION 1.0.0)
 
-# Стандарты компиляции
+# Описание проекта
+project(asncpp
+        VERSION 0.1.0
+        DESCRIPTION "ASN.1 library for C++"
+        HOMEPAGE_URL "https://github.com/ibm3650/asncpp"
+        LANGUAGES CXX
+)
+
+# Подключение вспомогательных функций
+include(cmake/utils.cmake)
+include(GNUInstallDirs)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# Определение переменной is_top_level. Она равна true, если проект собирается в корневой директории
+string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}" is_top_level)
 
-# Предупреждения
-if(MSVC)
-    if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
-        string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-    else()
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
-    endif()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /utf-8")
-elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -pedantic")
-endif()
 
-# Добавляем библиотеку
-add_library(
-        asncpp
+# Опции сборки. По умолчанию тесты, документация, цели для установки в систему и примеры не собираются.
+option(ASNCPP_BUILD_TESTS "Build ASNCPP tests" OFF)
+option(ASNCPP_BUILD_EXAMPLES "Build ASNCPP examples" OFF)
+option(ASNCPP_BUILD_DOCS "Build ASNCPP documentation" OFF)
+option(ASNCPP_INSTALL "Generate target for installing ASNCPP" ${is_top_level})
+
+# Переменные для установки. По умолчанию устанавливаются в директорию lib/cmake/ASNCPP
+set_if_undefined(ASNCPP_INSTALL_CMAKEDIR "${CMAKE_INSTALL_LIBDIR}/cmake/ASNCPP" CACHE STRING
+        "Install path for ASNCPP package-related CMake files")
+
+
+# Переменные для установки. Собирать ли динамические библиотеки
+if (DEFINED ASNCPP_SHARED_LIBS)
+    set(BUILD_SHARED_LIBS ${ASNCPP_SHARED_LIBS})
+endif ()
+
+# Проверяем, не задан ли CMAKE_BUILD_TYPE (для Unix)
+# и CMAKE_CONFIGURATION_TYPES (для Visual Studio, Xcode)
+if (NOT DEFINED CMAKE_BUILD_TYPE AND NOT DEFINED CMAKE_CONFIGURATION_TYPES)
+    # Если CMAKE_BUILD_TYPE не задан, устанавливаем его в "Release" по умолчанию
+    # CACHE STRING — сохраняет значение в кэше CMake
+    # FORCE — перезаписывает значение в кэше, если оно уже было установлено
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+
+    # Указываем допустимые значения для CMAKE_BUILD_TYPE
+    # Это полезно при использовании CMake GUI (чтобы можно было выбрать из списка)
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+endif ()
+
+
+set_if_undefined(CMAKE_CXX_VISIBILITY_PRESET hidden)#?
+set_if_undefined(CMAKE_VISIBILITY_INLINES_HIDDEN ON)#?
+
+# Подключение библиотеки
+add_library(asncpp) # Определена ниже
+add_library(asncpp::asncpp ALIAS asncpp)#?
+
+include(GenerateExportHeader)#?
+set(export_file_name "export_shared.h")
+
+if (NOT BUILD_SHARED_LIBS)
+    set(export_file_name "export_static.h")
+endif ()
+
+generate_export_header(asncpp EXPORT_FILE_NAME include/asncpp/${export_file_name})
+
+set(sources
+        include/asncpp/export.h
+        include/asncpp/base/common.h
+        include/asncpp/base/asn1_basic.h
+        include/asncpp/base/integer_basic.h
+        include/asncpp/boolean.h
+        include/asncpp/bit_string.h
+
         src/common.cpp
         src/asn1_basic.cpp
         src/integer_basic.cpp
         src/boolean.cpp
         src/bit_string.cpp
-)
 
-# Пути к заголовочным файлам
+)
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${sources})
+
+
+include(CMakePackageConfigHelpers)
+
+target_sources(asncpp PRIVATE ${sources})
+target_compile_definitions(asncpp PUBLIC "$<$<NOT:$<BOOL:${BUILD_SHARED_LIBS}>>:ASNCPP_STATIC_DEFINE>")
+
 target_include_directories(asncpp
         PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:include>
-)
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>")
 
-# Поддержка установки и экспорта
-include(GNUInstallDirs)
+set_target_properties(asncpp PROPERTIES
+        SOVERSION ${PROJECT_VERSION_MAJOR}
+        VERSION ${PROJECT_VERSION})
 
-install(TARGETS asncpp
-        EXPORT asncppTargets
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-)
+if (ASNCPP_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
+    configure_package_config_file(cmake/asncpp_config.cmake.in asncpp_config.cmake
+            INSTALL_DESTINATION "${ASNCPP_INSTALL_CMAKEDIR}")
 
-# Установка заголовочных файлов
-install(
-        DIRECTORY include/
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-)
+    write_basic_package_version_file(asncpp_config_version.cmake
+            COMPATIBILITY SameMajorVersion)
 
-# Экспорт целей
-install(
-        EXPORT asncppTargets
-        NAMESPACE asncpp::
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/asncpp
-)
+    install(TARGETS asncpp EXPORT asncpp_export
+            RUNTIME COMPONENT asncpp
+            LIBRARY COMPONENT asncpp NAMELINK_COMPONENT asncpp-dev
+            ARCHIVE COMPONENT asncpp-dev
+            INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+    install(DIRECTORY include/
+            TYPE INCLUDE
+            COMPONENT asncpp-dev)
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/include/asncpp/${export_file_name}"
+            COMPONENT asncpp-dev
+            DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/asncpp")
 
-# Конфигурация пакета
-include(CMakePackageConfigHelpers)
-write_basic_package_version_file(
-        "${CMAKE_CURRENT_BINARY_DIR}/asncppConfigVersion.cmake"
-        COMPATIBILITY SameMajorVersion
-)
+    set(targets_file "asncpp-shared-targets.cmake")
 
-configure_file(
-        cmake/asncppConfig.cmake.in
-        "${CMAKE_CURRENT_BINARY_DIR}/asncppConfig.cmake"
-        @ONLY
-)
+    if (NOT BUILD_SHARED_LIBS)
+        set(targets_file "asncpp-static-targets.cmake")
+    endif ()
 
-install(
-        FILES
-        "${CMAKE_CURRENT_BINARY_DIR}/asncppConfig.cmake"
-        "${CMAKE_CURRENT_BINARY_DIR}/asncppConfigVersion.cmake"
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/asncpp
-)
+    install(EXPORT asncpp_export
+            COMPONENT asncpp-dev
+            FILE "${targets_file}"
+            DESTINATION "${ASNCPP_INSTALL_CMAKEDIR}"
+            NAMESPACE asncpp::)
 
-# Подключение тестов
-add_subdirectory(test)
+    install(FILES
+            "${CMAKE_CURRENT_BINARY_DIR}/asncpp_config.cmake"
+            "${CMAKE_CURRENT_BINARY_DIR}/asncpp_config_version.cmake"
+            COMPONENT asncpp-dev
+            DESTINATION "${ASNCPP_INSTALL_CMAKEDIR}")
+
+    if (MSVC)
+        set(pdb_file "")
+        set(pdb_file_destination "")
+
+        if (BUILD_SHARED_LIBS)
+            set(pdb_file "$<TARGET_PDB_FILE:asncpp>")
+            set(pdb_file_destination "${CMAKE_INSTALL_BINDIR}")
+        else ()
+            # TARGET_PDB_FILE does not work for pdb file generated for static library build, determining it manually
+            set(pdb_file "$<TARGET_FILE_DIR:asncpp>/$<TARGET_FILE_PREFIX:asncpp>$<TARGET_FILE_BASE_NAME:asncpp>.pdb")
+            set(pdb_file_destination "${CMAKE_INSTALL_LIBDIR}")
+        endif ()
+
+        install(FILES "${pdb_file}"
+                COMPONENT asncpp-dev
+                CONFIGURATIONS Debug RelWithDebInfo
+                DESTINATION "${pdb_file_destination}"
+                OPTIONAL)
+    endif ()
+endif ()
+
+#----------------------------------------------------------------------------------------------------------------------
+# other targets
+#----------------------------------------------------------------------------------------------------------------------
+
+#if (ASNCPP_BUILD_TESTS)
+enable_testing()
+add_subdirectory(tests)
+#endif ()
+
+#if (ASNCPP_BUILD_EXAMPLES)
+add_subdirectory(examples)
+#endif ()
+
+#if (ASNCPP_BUILD_DOCS)
+find_package(Doxygen REQUIRED)
+#set(DOXYGEN_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/docs")
+doxygen_add_docs(docs include)
+
+#endif ()
 
 
