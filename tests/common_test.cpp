@@ -4,7 +4,7 @@
 #include <array>
 #include <asncpp/integer.h>
 #include <gtest/gtest.h>
-#include "asncpp/base/asn1_basic.h"
+#include <asncpp/base/asn1_basic.h>
 
 TEST(common_test, deserialize) {
     const uint8_t encoded[] = {0x02, 0x01, 0x2A}; // INTEGER: 42

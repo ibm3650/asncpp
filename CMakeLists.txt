@@ -25,7 +25,7 @@ option(ASNCPP_BUILD_DOCS "Build ASNCPP documentation" OFF)
 option(ASNCPP_INSTALL "Generate target for installing ASNCPP" ${is_top_level})
 
 # Переменные для установки. По умолчанию устанавливаются в директорию lib/cmake/ASNCPP
-set_if_undefined(ASNCPP_INSTALL_CMAKEDIR "${CMAKE_INSTALL_LIBDIR}/cmake/ASNCPP" CACHE STRING
+set_if_undefined(ASNCPP_INSTALL_CMAKE_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/ASNCPP" CACHE STRING
         "Install path for ASNCPP package-related CMake files")
 
 
@@ -69,15 +69,15 @@ set(sources
         include/asncpp/base/common.h
         include/asncpp/base/asn1_basic.h
         include/asncpp/base/integer_basic.h
-        include/asncpp/boolean.h
+        include/asncpp/enumerated.h
+        include/asncpp/integer.h
         include/asncpp/bit_string.h
 
         src/common.cpp
         src/asn1_basic.cpp
         src/integer_basic.cpp
-        src/boolean.cpp
         src/bit_string.cpp
-
+        src/boolean.cpp
 )
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${sources})
 
@@ -98,7 +98,7 @@ set_target_properties(asncpp PROPERTIES
 
 if (ASNCPP_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
     configure_package_config_file(cmake/asncpp_config.cmake.in asncpp_config.cmake
-            INSTALL_DESTINATION "${ASNCPP_INSTALL_CMAKEDIR}")
+            INSTALL_DESTINATION "${ASNCPP_INSTALL_CMAKE_DIR}")
 
     write_basic_package_version_file(asncpp_config_version.cmake
             COMPATIBILITY SameMajorVersion)
@@ -124,14 +124,14 @@ if (ASNCPP_INSTALL AND NOT CMAKE_SKIP_INSTALL_RULES)
     install(EXPORT asncpp_export
             COMPONENT asncpp-dev
             FILE "${targets_file}"
-            DESTINATION "${ASNCPP_INSTALL_CMAKEDIR}"
+            DESTINATION "${ASNCPP_INSTALL_CMAKE_DIR}"
             NAMESPACE asncpp::)
 
     install(FILES
             "${CMAKE_CURRENT_BINARY_DIR}/asncpp_config.cmake"
             "${CMAKE_CURRENT_BINARY_DIR}/asncpp_config_version.cmake"
             COMPONENT asncpp-dev
-            DESTINATION "${ASNCPP_INSTALL_CMAKEDIR}")
+            DESTINATION "${ASNCPP_INSTALL_CMAKE_DIR}")
 
     if (MSVC)
         set(pdb_file "")

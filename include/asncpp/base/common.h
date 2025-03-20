@@ -1,7 +1,9 @@
-//
-// Created by kandu on 21.11.2024.
-//
-
+/**
+* @file common.h
+ * @brief Common definitions for the ASN.1 encoding and decoding library.
+ * @author Nikita Kanduba
+ * @date 21.11.2024
+ */
 #ifndef ASNCPP_ASN_BASE_H
 #define ASNCPP_ASN_BASE_H
 

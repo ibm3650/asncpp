@@ -1,9 +1,12 @@
-//
-// Created by kandu on 17.12.2024.
-//
-#include "asncpp/base/common.h"
+/**
+* @file common.cpp
+ * @brief Common declaration for the ASN.1 encoding and decoding library.
+ * @author Nikita Kanduba
+ * @date 17.12.2024
+ */
+#include <asncpp/base/common.h>
 
-#include "asncpp/types.h"
+#include <asncpp/types.h>
 
 std::shared_ptr<asncpp::base::asn1_basic> asncpp::base::deserialize_v(std::span<const uint8_t> data) {
     asn1_basic base(data);

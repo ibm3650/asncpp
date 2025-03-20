@@ -2,8 +2,8 @@
 // Created by kandu on 04.12.2024.
 //
 #include <gtest/gtest.h>
-#include "asncpp/base/common.h"
-#include "asncpp/integer.h"
+#include <asncpp/base/common.h>
+#include <asncpp/integer.h>
 
 static const std::vector<std::pair<std::vector<uint8_t>, int64_t>> test_cases{
         {{0x02, 0x01, 0x00},                   0},
