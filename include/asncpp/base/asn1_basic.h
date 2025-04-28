@@ -118,9 +118,9 @@ namespace asncpp::base {
 
         asn1_basic(const asn1_basic &) = default;
 
-        asn1_basic &operator=(asn1_basic &&) = default;
+        virtual asn1_basic &operator=(asn1_basic &&) = default;
 
-        asn1_basic &operator=(const asn1_basic &) = default;
+        virtual asn1_basic &operator=(const asn1_basic &) = default;
 
         virtual ~asn1_basic() = default;
 

@@ -6,7 +6,6 @@
 #define ASNCPP_INTEGER_H
 #include <cstdint>
 #include <string>
-#include <stdexcept>
 #include "asn1_basic.h"
 #include "common.h"
 
@@ -68,28 +67,28 @@ namespace asncpp::base {
          * @brief Конструктор перемещения по умолчанию.
          * @param[in] other Объект, данные которого будут перемещены в текущий объект.
          */
-        integer_basic(integer_basic &&) noexcept = default;
+        integer_basic(integer_basic && other) noexcept = default;
 
 
         /**
          * @brief Конструктор копирования по умолчанию.
          * @param[in] other Объект, данные которого будут скопированы в текущий объект.
          */
-        integer_basic(const integer_basic &) noexcept = default;
+        integer_basic(const integer_basic & other) noexcept = default;
 
         /**
          * @brief Оператор присваивания перемещения по умолчанию.
          * @param[in] other Объект, данные которого будут перемещены в текущий объект.
          * @return Ссылка на текущий объект.
          */
-        integer_basic &operator=(integer_basic &&) noexcept = default;
+        integer_basic &operator=(integer_basic && other) noexcept = default;
 
         /**
          * @brief Оператор копирования по умолчанию.
          * @param[in] other Объект, данные которого будут скопированы в текущий объект.
          * @return Ссылка на текущий объект.
          */
-        integer_basic &operator=(const integer_basic &) noexcept = default;
+        integer_basic &operator=(const integer_basic & other) noexcept = default;
 
 
         /**
@@ -104,7 +103,7 @@ namespace asncpp::base {
          * @param[in] val Целочисленное значение для присваивания.
          * @return Ссылка на текущий объект.
          */
-        integer_basic &operator=(const value_type val) noexcept {
+        integer_basic &operator=(const value_type val) noexcept override {
             _decoded = val;
             return *this;
         }
@@ -165,7 +164,7 @@ namespace asncpp::base {
          * @brief Converts the integer value to an integral type.
          * @return Converted integer value.
          */
-        operator value_type() const noexcept {
+        explicit operator value_type() const noexcept {
             return _decoded;
         }
 

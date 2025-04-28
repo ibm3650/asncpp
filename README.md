@@ -221,6 +221,14 @@ Copyright © 2025 Kanduba Nikita. All rights reversed.
 ## формат коммитов
 
 
+## Сепмантика версионирования
+
+
+## Cmake 
+ref https://github.com/grpc/grpc/tree/master/src/cpp#cmake
+ref https://github.com/grpc/grpc/tree/master/src/cpp#cmake
+
+
 
 
 
