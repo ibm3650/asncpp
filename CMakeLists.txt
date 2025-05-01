@@ -11,10 +11,14 @@ project(asncpp
 
 # Подключение вспомогательных функций
 include(cmake/utils.cmake)
+# Подключение функций для установки. Эта библиотека позволяет устанавливать проект в систему.
 include(GNUInstallDirs)
+#Установка переменной CMAKE_CXX_STANDARD в 23. Это означает, что компилятор будет использовать стандарт C++23.
 set(CMAKE_CXX_STANDARD 23)
+# Установка флага CMAKE_CXX_STANDARD_REQUIRED в ON. Это означает, что компилятор должен поддерживать указанный стандарт.
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Определение переменной is_top_level. Она равна true, если проект собирается в корневой директории
+# CMAKE_SOURCE_DIR == CMAKE_CURRENT_SOURCE_DIR ? true : false
 string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}" is_top_level)
 
 
